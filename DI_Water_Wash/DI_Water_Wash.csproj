@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{6AD5CCEB-F655-44FA-B94D-19DCD4635F16}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>DI_Water_Wash</RootNamespace>
+    <AssemblyName>DI_Water_Wash</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Cls_DBMsSQL.cs" />
+    <Compile Include="ControlASP\Cls_control.cs" />
+    <Compile Include="Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form1.Designer.cs">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmLoading.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmLoading.Designer.cs">
+      <DependentUpon>FrmLoading.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ParameterInitial\Frm_ChangePartNumber.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ParameterInitial\Frm_ChangePartNumber.Designer.cs">
+      <DependentUpon>Frm_ChangePartNumber.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ParameterInitial\UC_SelectPartNumber.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ParameterInitial\UC_SelectPartNumber.Designer.cs">
+      <DependentUpon>UC_SelectPartNumber.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StateCommon.cs" />
+    <Compile Include="Unit\ClsUnitManagercs.cs" />
+    <Compile Include="Unit\Cls_Unit.cs" />
+    <Compile Include="Unit\UC_DIWaterWash.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Unit\UC_DIWaterWash.Designer.cs">
+      <DependentUpon>UC_DIWaterWash.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Unit\UC_Drying.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Unit\UC_Drying.Designer.cs">
+      <DependentUpon>UC_Drying.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Unit\UC_HeLeakage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Unit\UC_HeLeakage.Designer.cs">
+      <DependentUpon>UC_HeLeakage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Unit\UC_PartNumberInfor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Unit\UC_PartNumberInfor.Designer.cs">
+      <DependentUpon>UC_PartNumberInfor.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmLoading.resx">
+      <DependentUpon>FrmLoading.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ParameterInitial\Frm_ChangePartNumber.resx">
+      <DependentUpon>Frm_ChangePartNumber.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ParameterInitial\UC_SelectPartNumber.resx">
+      <DependentUpon>UC_SelectPartNumber.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="Unit\UC_DIWaterWash.resx">
+      <DependentUpon>UC_DIWaterWash.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Unit\UC_Drying.resx">
+      <DependentUpon>UC_Drying.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Unit\UC_HeLeakage.resx">
+      <DependentUpon>UC_HeLeakage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Unit\UC_PartNumberInfor.resx">
+      <DependentUpon>UC_PartNumberInfor.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Capture.PNG" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\3643772-archive-archives-document-folder-open_113445.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
