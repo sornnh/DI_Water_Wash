@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DI_Water_Wash.Unit;
 using static DI_Water_Wash.UC_PartNumberInfor;
 
 namespace DI_Water_Wash
@@ -16,6 +17,7 @@ namespace DI_Water_Wash
         private UC_DIWaterWash uc_DIWaterWash;
         private UC_Drying uc_Drying;
         private UC_HeLeakage uc_HeLeakage;
+        private UC_PressureDecay uC_PressureDecay;
         private int _UnitIndex;
         private SecsionTest secsion;
         private Panel[] pl_UC = new Panel[4];
@@ -41,6 +43,7 @@ namespace DI_Water_Wash
             uc_DIWaterWash = new UC_DIWaterWash(_UnitIndex);
             uc_Drying = new UC_Drying(_UnitIndex);
             uc_HeLeakage = new UC_HeLeakage(_UnitIndex);
+            uC_PressureDecay = new UC_PressureDecay(_UnitIndex);
             _UnitIndex = _UnitIndex;
             uc_DIWaterWash.Dock = DockStyle.Fill;
             uc_Drying.Dock = DockStyle.Fill;
@@ -49,6 +52,7 @@ namespace DI_Water_Wash
             SafeAddToPanel(pl_UC[0], uc_DIWaterWash);
             SafeAddToPanel(pl_UC[1], uc_Drying);
             SafeAddToPanel(pl_UC[2], uc_HeLeakage);
+            SafeAddToPanel(pl_UC[3], uC_PressureDecay);
             //switch (secsion)
             //{
             //    case SecsionTest.DIWaterWash:

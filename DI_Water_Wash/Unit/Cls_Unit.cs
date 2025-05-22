@@ -92,6 +92,19 @@ namespace DI_Water_Wash
         public bool bUse_Nitrogen_to_Dry { get; private set; }
         public bool bCheck_Humidity { get; private set; }
         #endregion
+
+        #region PressureDecay
+        public int iDecayMaxHumidity { get; private set; }
+        public int iDecayStabilize_Time { get; private set; }
+        public int iDecayTest_Time { get; private set; }
+        public double iDecayPressure { get; private set; }
+        public double iDecayPressureTolerance { get; private set; }
+        public double iDecayMax_dP { get; private set; }
+        public bool bDecay_Pre_Drying { get; private set; }
+        public bool bN2Fill_to_Ship { get; private set; }
+        public double iN2FillPressure { get; private set; }
+        public double iN2FillPressureTolerance { get; private set; }
+        #endregion
         public Cls_Unit(int unitIndex, string assyPN)
         {
             _UnitIndex = unitIndex;
@@ -102,6 +115,7 @@ namespace DI_Water_Wash
             ProductionDB.Open();
             GenerateProcessTesting();
             GetLimitTesting();
+
             GetSNVerify();
         }
         private void GetLimitTesting()
@@ -111,7 +125,50 @@ namespace DI_Water_Wash
             GetLimit_DIWaterWash(dt);
             GetLimit_HeliumLeakageTest(dt);
             GetLimit_DryingTest(dt);
+            GetLimit_DecayTest(dt);
+        }
 
+        private void GetLimit_DecayTest(DataTable dt)
+        {
+            DataRow row = dt.Rows[dt.Rows.Count - 1];
+            foreach (DataColumn column in row.Table.Columns)
+            {
+                string columnName = column.ColumnName;
+
+                switch (columnName)
+                {
+                    case "PDc_Max_Humidity":
+                        iDecayMaxHumidity = Convert.ToInt32(row[column]);
+                        break;
+                    case "Stabilize_Time":
+                        iDecayStabilize_Time = Convert.ToInt32(row[column]);
+                        break;
+                    case "Decay_Time":
+                        iDecayTest_Time = Convert.ToInt32(row[column]);
+                        break;
+                    case "Pressure_Decay_Test":
+                        iDecayPressure = Convert.ToDouble(row[column]);
+                        break;
+                    case "P_Tolerance":
+                        iDecayPressureTolerance = Convert.ToDouble(row[column]);
+                        break;
+                    case "Max_dP":
+                        iDecayMax_dP = Convert.ToDouble(row[column]);
+                        break;
+                    case "Pre_Drying":
+                        bDecay_Pre_Drying = Convert.ToBoolean(row[column]);
+                        break;
+                    case "Fill_N2_to_Ship":
+                        bN2Fill_to_Ship = Convert.ToBoolean(row[column]);
+                        break;
+                    case "Fill_Pressure":
+                        iN2FillPressure = Convert.ToDouble(row[column]);
+                        break;
+                    case "FP_Tolerance":
+                        iN2FillPressureTolerance = Convert.ToDouble(row[column]);
+                        break;
+                }
+            }
         }
 
         private void GetLimit_DryingTest(DataTable dt)
