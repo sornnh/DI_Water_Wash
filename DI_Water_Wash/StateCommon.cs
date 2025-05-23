@@ -29,6 +29,14 @@ namespace DI_Water_Wash
                 richTextBox.ScrollToCaret();
             }
         }
+        public enum ProcessState
+        {
+            Idle,
+            Running,
+            CompletedPass,
+            CompletedFail,
+            Error
+        }
         public static bool CheckFileExists(string filePath)
         {
             return File.Exists(filePath);

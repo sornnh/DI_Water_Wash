@@ -9,12 +9,12 @@ namespace DI_Water_Wash
     public static class ClsUnitManagercs
     {
         public static Cls_Unit[] cls_Units;
-        public static void Initialize(string[] assyPN)
+        public static void Initialize(string[] assyPN, Cls_ASPcontrol cls_AS)
         {
             cls_Units = new Cls_Unit[assyPN.Length];
             for (int i = 0; i < assyPN.Length; i++)
             {
-                cls_Units[i] = new Cls_Unit(i, assyPN[i]);
+                cls_Units[i] = new Cls_Unit(i, assyPN[i] , cls_AS);
             }
         }
     }

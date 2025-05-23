@@ -26,6 +26,10 @@ namespace DI_Water_Wash
         public bool isConnected { get; private set; }
         public bool[] relayStates { get; private set; }
         private bool Asyncrelay = false;
+        public delegate void DelShow_addLog_Request(Cls_ASPcontrol sender);
+        public event DelShow_addLog_Request OnRequestAddLog;
+        public delegate void DelShow_UpdateRelayStatus_Request(Cls_ASPcontrol sender);
+        public event DelShow_UpdateRelayStatus_Request OnRequestUpdateRelayStatus;
         public Cls_ASPcontrol()
         {
             GetASPSerialPortInformation();
@@ -57,6 +61,7 @@ namespace DI_Water_Wash
                     MessageBox.Show("bit length incorrect.");
                 }
                 relayStates = result;
+                UpdaterelayStatus();
             }
             catch (Exception ex)
             {
@@ -66,18 +71,50 @@ namespace DI_Water_Wash
         }
         public async Task SetRelayONOFFAsync(int relay, int onOff)
         {
+            if (relayStates[relay] == (onOff == 1))
+            {
+                return;
+            }
             string cmd = onOff == 1 ? $"WR{relay:D3}1\n" : $"WR{relay:D3}0\n";
             try
             {
-                string response = await SendCommandAndWaitResponseAsync(cmd);
-                // Bạn có thể kiểm tra phản hồi nếu muốn
+                string response = await SendCommandAndWaitResponseAsync(cmd);    
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi gửi lệnh: {ex.Message}");
             }
         }
-        public void ConnectASPSerial()
+        public async Task<bool> SetRelayONOFFAsyncCheckResult(int relay, int onOff)
+        {
+            if (relayStates[relay] == (onOff == 1))
+            {
+                return true;
+            }
+            string cmd = onOff == 1 ? $"WR{relay:D3}1\n" : $"WR{relay:D3}0\n";
+            try
+            {
+                string response = await SendCommandAndWaitResponseAsync(cmd);
+
+                // Cập nhật trạng thái sau khi gửi lệnh
+                await GetAllRelay();
+                // Kiểm tra trạng thái relay có đúng như yêu cầu không
+                if (relayStates[relay] == (onOff == 1))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi gửi lệnh: {ex.Message}");
+                return false;
+            }
+        }
+        public async void ConnectASPSerial()
         {
             try
             {
@@ -87,6 +124,7 @@ namespace DI_Water_Wash
                 isConnected = true;
                 DateTime dt = DateTime.Now;
                 DataReceive = $"{dt.ToString("HH:mm:ss")}+ ASP Serial open";
+                await GetAllRelay();
                 AddLogText();
             }
             catch (Exception ex)
@@ -111,7 +149,7 @@ namespace DI_Water_Wash
                 MessageBox.Show($"Exception when disconnect to ASP Serial :" + ex.Message);
             }
         }
-        public void ASPSerialWriteCommand(string text)
+        public async void ASPSerialWriteCommand(string text)
         {
             if (!isConnected)
             {
@@ -130,10 +168,13 @@ namespace DI_Water_Wash
                 log.Error($"Exception when write to ASP Serial :" + ex.Message);
                 MessageBox.Show($"Exception when write to ASP Serial :" + ex.Message);
             }
+            await GetAllRelay();
         }
-        public delegate void DelShow_addLog_Request(Cls_ASPcontrol sender);
-        public event DelShow_addLog_Request OnRequestAddLog;
 
+        public void UpdaterelayStatus()
+        {
+            OnRequestUpdateRelayStatus?.Invoke(this);
+        }
         public void AddLogText()
         {
             OnRequestAddLog?.Invoke(this);

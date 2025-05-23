@@ -20,6 +20,8 @@ using System.Runtime.InteropServices;
 using DI_Water_Wash;
 using System.IO.Ports;
 using log4net;
+using DI_Water_Wash.Sequence;
+
 
 namespace DI_Water_Wash
 {
@@ -54,6 +56,9 @@ namespace DI_Water_Wash
         private StopBits[] stopBits = { StopBits.One, StopBits.None, StopBits.OnePointFive, StopBits.Two };
         private Label[] relayLabels = new Label[30];
         private bool UpdateRelayTB = true;
+        delegate void Deltact();
+        delegate void DelResource(); 
+        private bool AutoMode = false;
 
         NestMenu nestMenu = NestMenu.None;
         enum NestMenu
@@ -97,7 +102,7 @@ namespace DI_Water_Wash
             StateCommon.LoadingText += "Create DataBase Connection...\r\n";
             ParameterDB.Initialize("10.102.4.20", "Parameters_SZ", "sa", "nuventixleo");
             ParameterDB.Open();
-            ProductionDB.Initialize("10.102.4.20", "Parameters_SZ", "sa", "nuventixleo");
+            ProductionDB.Initialize("10.102.4.20", "Production_SZ", "sa", "nuventixleo");
             ProductionDB.Open();
             StateCommon.LoadingText += "Create DataBase Connection completed\r\n";
             StateCommon.LoadingValue = 20;
@@ -110,8 +115,27 @@ namespace DI_Water_Wash
             if (result == DialogResult.OK)
             {
                 StateCommon.LoadingText += "Setting Part Number completed\r\n";
+                StateCommon.LoadingText += "Config ASP Serial Port...\r\n";
+                StateCommon.LoadingText += "GenerateComPort Compeleted\r\n ";
+                ASP_ControlPort = new Cls_ASPcontrol();
+                ASP_ControlPort.OnRequestAddLog += (sender) =>
+                {
+                    if (InvokeRequired)
+                        BeginInvoke(new MethodInvoker(() => funAddLog_Auto(sender)));
+                    else
+                        funAddLog_Auto(sender);
+                };
+                ASP_ControlPort.OnRequestUpdateRelayStatus += (sender) =>
+                {
+                    if (InvokeRequired)
+                        BeginInvoke(new MethodInvoker(() => funUpdateRelayStatus_Auto(sender)));
+                    else
+                        funUpdateRelayStatus_Auto(sender);
+                };
+                StateCommon.LoadingText += "Config ASP Serial Port completed\r\n";
+                StateCommon.LoadingValue = 40;
                 StateCommon.LoadingText += "Config All unit for test...\r\n";
-                InitializeUnitManager();
+                InitializeUnitManager(ASP_ControlPort);
                 tabControl3.SelectedIndexChanged += TabControl3_SelectedIndexChanged;
                 tabControl3.SelectedIndex = 0;
                 txt_SN_Lenght.Text = ClsUnitManagercs.cls_Units[0].SN_Length.ToString();
@@ -119,25 +143,27 @@ namespace DI_Water_Wash
                 txt_Leght.Text = ClsUnitManagercs.cls_Units[0].Ctl_Str_Length.ToString();
                 txt_Offset.Text = ClsUnitManagercs.cls_Units[0].Ctl_Str_Offset.ToString();
                 StateCommon.LoadingText += "Config All unit for test completed\r\n";
-                StateCommon.LoadingValue = 40;
-                StateCommon.LoadingText += "Config ASP Serial Port...\r\n";
-               
-                StateCommon.LoadingText += "GenerateComPort Compeleted\r\n ";
-                ASP_ControlPort = new Cls_ASPcontrol();
-                ASP_ControlPort.OnRequestAddLog += (sender) =>
-                 {
-                     if (InvokeRequired)
-                         BeginInvoke(new MethodInvoker(() => funAddLog_Auto(sender)));
-                     else
-                         funAddLog_Auto(sender);
-                 };
-                StateCommon.LoadingText += "Config ASP Serial Port completed\r\n";
                 StateCommon.LoadingValue = 50;
                 StateCommon.LoadingText += "Initial Relay Control Board...\r\n";
                 InitRelayLabels();
                 StateCommon.LoadingText += "Initial Relay Control Board completed\r\n";
-                StateCommon.LoadingValue = 50;
-                StateCommon.LoadingText = "Complete\r\n";
+                StateCommon.LoadingValue = 60;
+                StateCommon.LoadingText += "Change all mode to Auto mode...\r\n";
+                for (int i = 0; i < ClsUnitManagercs.cls_Units.Length; i++)
+                {
+                    ClsUnitManagercs.cls_Units[i].cls_SequencyCommon.AutoMode = AutoMode;
+                    ClsUnitManagercs.cls_Units[i].cls_SequencyCommon.AutoMode = AutoMode;
+                }
+                if(AutoMode)
+                    btn_ChangeMode.Text = "AUTO";
+                else
+                    btn_ChangeMode.Text = "MANUAL";
+                StateCommon.LoadingText += "Change all mode to Auto mode completed\r\n";
+                StateCommon.LoadingValue = 60;
+                StateCommon.LoadingText += "Change nest selected to Nest1 ....\r\n";
+                MenuNest_Change(NestMenu.Nest1);
+                StateCommon.LoadingText += "Change nest selected to Nest1 completed\r\n";
+                StateCommon.LoadingText += "Complete\r\n";
                 StateCommon.LoadingValue = 100;
                 StateCommon.bLoading = false;
             }
@@ -188,7 +214,7 @@ namespace DI_Water_Wash
                 {
                     await ASP_ControlPort.SetRelayONOFFAsync(index + 1, newStatus ? 1 : 0);
                     await ASP_ControlPort.GetAllRelay(); // Chờ nhận xong dữ liệu
-                    UpdateRelayStatus(ASP_ControlPort.relayStates); // Sau đó mới cập nhật UI
+                    //UpdateRelayStatus(ASP_ControlPort.relayStates); // Sau đó mới cập nhật UI
                 }    
                 else
                     MessageBox.Show("SerialPort chưa mở!");
@@ -213,11 +239,10 @@ namespace DI_Water_Wash
                 Parity Parity = ASP_ControlPort.Parity;
                 StopBits StopBit = ASP_ControlPort.StopBit;
                 cbbComPort.SelectedItem = SerialCom;
-                cbbBaudrate.SelectedItem = Baudrate.ToString();
-                cbbDataBit.SelectedItem = DataBit.ToString();
-                cbbParity.SelectedItem = Parity.ToString();
-                string stop = StopBit.ToString();
-                cbbStopBit.SelectedItem = StopBit.ToString();
+                cbbBaudrate.SelectedItem = Baudrate;
+                cbbDataBit.SelectedItem = DataBit;
+                cbbParity.SelectedItem = Parity;
+                cbbStopBit.SelectedItem = StopBit;
             }
             catch (Exception ex )
             {
@@ -236,7 +261,7 @@ namespace DI_Water_Wash
             txt_Offset.Text = ClsUnitManagercs.cls_Units[selectedIndex].Ctl_Str_Offset.ToString();
         }
 
-        private void InitializeUnitManager()
+        private void InitializeUnitManager( Cls_ASPcontrol cls_AS)
         {
             string[] allLine = File.ReadAllLines(@"C:\Aavid_Test\Setup-ini\Flushing_Part_Numbers.txt");
             AssyPN = new string[allLine.Length-1];
@@ -245,7 +270,7 @@ namespace DI_Water_Wash
                 string[] line = allLine[i+1].Split(',');
                 AssyPN[i] = line[1].Trim();
             }
-            ClsUnitManagercs.Initialize(AssyPN);
+            ClsUnitManagercs.Initialize(AssyPN, cls_AS);
             GenerateProcess();
             Panel[]panel = new Panel[3];
             panel[0] = pl_PNInfor1;
@@ -257,6 +282,13 @@ namespace DI_Water_Wash
                 uC_PartNumberInfors[i].InitUI();
                 uC_PartNumberInfors[i].Dock = DockStyle.Fill;
                 panel[i].Controls.Add(uC_PartNumberInfors[i]);
+                ClsUnitManagercs.cls_Units[i].cls_SequencyCommon.OnRequestUpdateStage += (sender) =>
+                {
+                    if (InvokeRequired)
+                        BeginInvoke(new MethodInvoker(() => funUpdateStage_Auto(sender)));
+                    else
+                        funUpdateStage_Auto(sender);
+                };
             }
 
         }
@@ -286,8 +318,6 @@ namespace DI_Water_Wash
                     progressBar_CPU.BeginInvoke(a);
             }
         }
-        delegate void Deltact();
-        delegate void DelResource();
         private int GetMaxCore(int[] _iCPU)
         {
             int maxCore = 0;
@@ -355,6 +385,37 @@ namespace DI_Water_Wash
                 relayLabels[i].Text = $"R{i + 1}: {(relays[i] ? "ON" : "OFF")}";
                 relayLabels[i].BackColor = relays[i] ? Color.LimeGreen : Color.LightGray;
                 relayLabels[i].ForeColor = relays[i] ? Color.White : Color.Black;
+            }
+            void UpdateColor(Label label, Color color)
+            {
+                if (label.InvokeRequired)
+                    label.Invoke(new Action(() => label.BackColor = color));
+                else
+                    label.BackColor = color;
+            }
+
+            switch (nestMenu)
+            {
+                case NestMenu.Nest1:
+                    UpdateColor(lb_Red, relays[8] ? Color.Red : Color.Gray);
+                    UpdateColor(lb_Yellow, relays[9] ? Color.Yellow : Color.Gray);
+                    UpdateColor(lb_Green, relays[10] ? Color.Green : Color.Gray);
+                    UpdateColor(lb_Buzzer, relays[11] ? Color.Blue : Color.Gray);
+                    break;
+
+                case NestMenu.Nest2:
+                    UpdateColor(lb_Red, relays[12] ? Color.Red : Color.Gray);
+                    UpdateColor(lb_Yellow, relays[13] ? Color.Yellow : Color.Gray);
+                    UpdateColor(lb_Green, relays[14] ? Color.Green : Color.Gray);
+                    UpdateColor(lb_Buzzer, relays[15] ? Color.Blue : Color.Gray);
+                    break;
+
+                case NestMenu.Nest3:
+                    UpdateColor(lb_Red, relays[16] ? Color.Red : Color.Gray);
+                    UpdateColor(lb_Yellow, relays[17] ? Color.Yellow : Color.Gray);
+                    UpdateColor(lb_Green, relays[18] ? Color.Green : Color.Gray);
+                    UpdateColor(lb_Buzzer, relays[19] ? Color.Blue : Color.Gray);
+                    break;
             }
         }
         private void Form1_Load(object sender, EventArgs e)
@@ -453,11 +514,29 @@ namespace DI_Water_Wash
                 StateCommon.AddTextToRichTextBox(unit.DataReceive, rtb_ASPPortBuffer);
             }
         }
-
+        public void funUpdateRelayStatus_Auto(Cls_ASPcontrol unit)
+        {
+            UpdateRelayStatus(ASP_ControlPort.relayStates); // Sau đó mới cập nhật UI
+        }
+        public void funUpdateStage_Auto(Cls_SequencyCommon unit)
+        {
+            switch (nestMenu)
+            {
+                case NestMenu.Nest1:
+                    lb_StageStatus.Text = ClsUnitManagercs.cls_Units[0].cls_SequencyCommon.process.ToString();
+                    break;
+                case NestMenu.Nest2:
+                    lb_StageStatus.Text = ClsUnitManagercs.cls_Units[1].cls_SequencyCommon.process.ToString();
+                    break;
+                case NestMenu.Nest3:
+                    lb_StageStatus.Text = ClsUnitManagercs.cls_Units[2].cls_SequencyCommon.process.ToString();
+                    break;
+            }
+        }
         private async void button2_Click(object sender, EventArgs e)
         {
             await ASP_ControlPort.GetAllRelay(); // Chờ nhận xong dữ liệu
-            UpdateRelayStatus(ASP_ControlPort.relayStates); // Sau đó mới cập nhật UI
+            //UpdateRelayStatus(ASP_ControlPort.relayStates); // Sau đó mới cập nhật UI
         }
 
         private void tableLayoutPanel15_Paint(object sender, PaintEventArgs e)
@@ -474,19 +553,16 @@ namespace DI_Water_Wash
                 case NestMenu.Nest1:
                     RefeshAllNestlb();
                     UpdateLEDStatus();
-                    UpdateRelayStatus(ASP_ControlPort.relayStates); // Sau đó mới cập nhật UI
                     lb_Nest1.BackColor = Color.LimeGreen;
                     break;
                 case NestMenu.Nest2:
                     RefeshAllNestlb();
                     UpdateLEDStatus();
-                    UpdateRelayStatus(ASP_ControlPort.relayStates); // Sau đó mới cập nhật UI
                     lb_Nest2.BackColor = Color.LimeGreen;
                     break;
                 case NestMenu.Nest3:
                     RefeshAllNestlb();
                     UpdateLEDStatus();
-                    UpdateRelayStatus(ASP_ControlPort.relayStates); // Sau đó mới cập nhật UI
                     lb_Nest3.BackColor = Color.LimeGreen;
                     break;
             }
@@ -500,39 +576,6 @@ namespace DI_Water_Wash
         private async void UpdateLEDStatus()
         {
             await ASP_ControlPort.GetAllRelay(); // Chờ dữ liệu relay về
-            bool[] relays = ASP_ControlPort.relayStates;
-
-            void UpdateColor(Label label, Color color)
-            {
-                if (label.InvokeRequired)
-                    label.Invoke(new Action(() => label.BackColor = color));
-                else
-                    label.BackColor = color;
-            }
-
-            switch (nestMenu)
-            {
-                case NestMenu.Nest1:
-                    UpdateColor(lb_Red, relays[8] ? Color.Red : Color.Gray);
-                    UpdateColor(lb_Yellow, relays[9] ? Color.Yellow : Color.Gray);
-                    UpdateColor(lb_Green, relays[10] ? Color.Green : Color.Gray);
-                    UpdateColor(lb_Buzzer, relays[11] ? Color.Blue : Color.Gray);
-                    break;
-
-                case NestMenu.Nest2:
-                    UpdateColor(lb_Red, relays[12] ? Color.Red : Color.Gray);
-                    UpdateColor(lb_Yellow, relays[13] ? Color.Yellow : Color.Gray);
-                    UpdateColor(lb_Green, relays[14] ? Color.Green : Color.Gray);
-                    UpdateColor(lb_Buzzer, relays[15] ? Color.Blue : Color.Gray);
-                    break;
-
-                case NestMenu.Nest3:
-                    UpdateColor(lb_Red, relays[16] ? Color.Red : Color.Gray);
-                    UpdateColor(lb_Yellow, relays[17] ? Color.Yellow : Color.Gray);
-                    UpdateColor(lb_Green, relays[18] ? Color.Green : Color.Gray);
-                    UpdateColor(lb_Buzzer, relays[19] ? Color.Blue : Color.Gray);
-                    break;
-            }
         }
         private void lb_Nest1_Click(object sender, EventArgs e)
         {
@@ -561,25 +604,24 @@ namespace DI_Water_Wash
             {
                 case NestMenu.Nest1:
                     if(relays[8])
-                       await ASP_ControlPort.SetRelayONOFFAsync(9, 0);
+                       await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(9, 0);
                     else
-                       await ASP_ControlPort.SetRelayONOFFAsync(9, 1);
+                       await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(9, 1);
                     break;
                 case NestMenu.Nest2:
                     if (relays[12])
-                        await ASP_ControlPort.SetRelayONOFFAsync(13, 0);
+                        await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(13, 0);
                     else
-                        await ASP_ControlPort.SetRelayONOFFAsync(13, 1);
+                        await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(13, 1);
                     break;;
                 case NestMenu.Nest3:
                     if (relays[16])
-                        await ASP_ControlPort.SetRelayONOFFAsync(17, 0);
+                        await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(17, 0);
                     else
-                        await ASP_ControlPort.SetRelayONOFFAsync(17, 1);
+                        await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(17, 1);
                     break;
             }
-            UpdateLEDStatus();
-            UpdateRelayStatus(ASP_ControlPort.relayStates); // Sau đó mới cập nhật UI
+            //UpdateLEDStatus();
         }
 
         private async void lb_Yellow_Click(object sender, EventArgs e)
@@ -589,25 +631,25 @@ namespace DI_Water_Wash
             {
                 case NestMenu.Nest1:
                     if (relays[9])
-                        await ASP_ControlPort.SetRelayONOFFAsync(10, 0);
+                        await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(10, 0);
                     else
-                        await ASP_ControlPort.SetRelayONOFFAsync(10, 1);
+                        await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(10, 1);
                     break;
                 case NestMenu.Nest2:
                     if (relays[13])
-                        await ASP_ControlPort.SetRelayONOFFAsync(14, 0);
+                        await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(14, 0);
                     else
-                        await ASP_ControlPort.SetRelayONOFFAsync(14, 1);
+                        await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(14, 1);
                     break; ;
                 case NestMenu.Nest3:
                     if (relays[17])
-                        await ASP_ControlPort.SetRelayONOFFAsync(18, 0);
+                        await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(18, 0);
                     else
-                        await ASP_ControlPort.SetRelayONOFFAsync(18, 1);
+                        await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(18, 1);
                     break;
             }
-            UpdateLEDStatus();
-            UpdateRelayStatus(ASP_ControlPort.relayStates); // Sau đó mới cập nhật UI
+            //UpdateLEDStatus();
+            //UpdateRelayStatus(ASP_ControlPort.relayStates); // Sau đó mới cập nhật UI
         }
         private async void lb_Green_Click(object sender, EventArgs e)
         {
@@ -616,25 +658,25 @@ namespace DI_Water_Wash
             {
                 case NestMenu.Nest1:
                     if (relays[10])
-                        await ASP_ControlPort.SetRelayONOFFAsync(11, 0);
+                        await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(11, 0);
                     else
-                        await ASP_ControlPort.SetRelayONOFFAsync(11, 1);
+                        await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(11, 1);
                     break;
                 case NestMenu.Nest2:
                     if (relays[14])
-                        await ASP_ControlPort.SetRelayONOFFAsync(15, 0);
+                        await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(15, 0);
                     else
-                        await ASP_ControlPort.SetRelayONOFFAsync(15, 1);
+                        await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(15, 1);
                     break; 
                 case NestMenu.Nest3:
                     if (relays[18])
-                        await ASP_ControlPort.SetRelayONOFFAsync(19, 0);
+                        await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(19, 0);
                     else
-                        await ASP_ControlPort.SetRelayONOFFAsync(19, 1);
+                        await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(19, 1);
                     break;
             }
-            UpdateLEDStatus();
-            UpdateRelayStatus(ASP_ControlPort.relayStates); // Sau đó mới cập nhật UI
+            //UpdateLEDStatus();
+            //UpdateRelayStatus(ASP_ControlPort.relayStates); // Sau đó mới cập nhật UI
         }
         private async void lb_Buzzer_Click(object sender, EventArgs e)
         {
@@ -643,25 +685,99 @@ namespace DI_Water_Wash
             {
                 case NestMenu.Nest1:
                     if (relays[11])
-                        await ASP_ControlPort.SetRelayONOFFAsync(12, 0);
+                        await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(12, 0);
                     else
-                        await ASP_ControlPort.SetRelayONOFFAsync(12, 1);
+                        await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(12, 1);
                     break;
                 case NestMenu.Nest2:
                     if (relays[15])
-                        await ASP_ControlPort.SetRelayONOFFAsync(16, 0);
+                        await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(16, 0);
                     else
-                        await ASP_ControlPort.SetRelayONOFFAsync(16, 1);
+                        await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(16, 1);
                     break; ;
                 case NestMenu.Nest3:
                     if (relays[19])
-                        await ASP_ControlPort.SetRelayONOFFAsync(20, 0);
+                        await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(20, 0);
                     else
-                        await ASP_ControlPort.SetRelayONOFFAsync(20, 1);
+                        await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(20, 1);
                     break;
             }
-            UpdateLEDStatus();
-            UpdateRelayStatus(ASP_ControlPort.relayStates); // Sau đó mới cập nhật UI
+            //UpdateLEDStatus();
+            //UpdateRelayStatus(ASP_ControlPort.relayStates); // Sau đó mới cập nhật UI
+        }
+        
+        private void btn_ChangeMode_Click(object sender, EventArgs e)
+        {
+            if(!AutoMode)
+            {
+                AutoMode = true;
+                btn_ChangeMode.Text = "AUTO";
+                for (int i=0;i<ClsUnitManagercs.cls_Units.Length; i++)
+                {
+                    ClsUnitManagercs.cls_Units[i].cls_SequencyCommon.AutoMode = true;
+                    ClsUnitManagercs.cls_Units[i].cls_SequencyCommon.AutoMode = true;
+                }
+            }
+            else
+            {
+                AutoMode = false;
+                btn_ChangeMode.Text = "MANUAL";
+                for (int i = 0; i < ClsUnitManagercs.cls_Units.Length; i++)
+                {
+                    ClsUnitManagercs.cls_Units[i].cls_SequencyCommon.AutoMode = false;
+                    ClsUnitManagercs.cls_Units[i].cls_SequencyCommon.AutoMode = false;
+                }
+            }    
+        }
+
+        private void Tbtn_3Way_CheckedChanged(object sender, EventArgs e)
+        {
+            switch (nestMenu)
+            {
+                case NestMenu.Nest1:
+                    if (Tbtn_3Way.Checked)
+                        ClsUnitManagercs.cls_Units[0].cls_SequencyTest.SwitchRelay3Way_Air_Water(true);
+                    else
+                        ClsUnitManagercs.cls_Units[0].cls_SequencyTest.SwitchRelay3Way_Air_Water(false);
+                    break;
+                case NestMenu.Nest2:
+                    if (Tbtn_3Way.Checked)
+                        ClsUnitManagercs.cls_Units[1].cls_SequencyTest.SwitchRelay3Way_Air_Water(true);
+                    else
+                        ClsUnitManagercs.cls_Units[1].cls_SequencyTest.SwitchRelay3Way_Air_Water(false);
+                    break;
+                case NestMenu.Nest3:
+                    if (Tbtn_3Way.Checked)
+                        ClsUnitManagercs.cls_Units[2].cls_SequencyTest.SwitchRelay3Way_Air_Water(true);
+                    else
+                        ClsUnitManagercs.cls_Units[2].cls_SequencyTest.SwitchRelay3Way_Air_Water(false);
+                    break;
+            }
+        }
+
+        private void Tbtn_Pump_CheckedChanged(object sender, EventArgs e)
+        {
+            switch(nestMenu)
+            {
+                case NestMenu.Nest1:
+                    if (Tbtn_Pump.Checked)
+                        ClsUnitManagercs.cls_Units[0].cls_SequencyTest.SwitchRelayPump(true);
+                    else
+                        ClsUnitManagercs.cls_Units[0].cls_SequencyTest.SwitchRelayPump(false);
+                    break;
+                case NestMenu.Nest2:
+                    if (Tbtn_Pump.Checked)
+                        ClsUnitManagercs.cls_Units[1].cls_SequencyTest.SwitchRelayPump(true);
+                    else
+                        ClsUnitManagercs.cls_Units[1].cls_SequencyTest.SwitchRelayPump(false);
+                    break;
+                case NestMenu.Nest3:
+                    if (Tbtn_Pump.Checked)
+                        ClsUnitManagercs.cls_Units[2].cls_SequencyTest.SwitchRelayPump(true);
+                    else
+                        ClsUnitManagercs.cls_Units[2].cls_SequencyTest.SwitchRelayPump(false);
+                    break;
+            }
         }
     }
 }

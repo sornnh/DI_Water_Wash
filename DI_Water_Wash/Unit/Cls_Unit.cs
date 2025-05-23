@@ -4,8 +4,10 @@ using System.Data;
 using System.Drawing.Printing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DI_Water_Wash.Sequence;
 
 namespace DI_Water_Wash
 {
@@ -28,11 +30,16 @@ namespace DI_Water_Wash
         public bool Verify_Links_at_Thermal { get; private set; }
         public Cls_DBMsSQL ParameterDB = new Cls_DBMsSQL();
         public Cls_DBMsSQL ProductionDB = new Cls_DBMsSQL();
+        public Cls_ASPcontrol cls_ASPcontrol { get; private set; }
+        public Cls_SequencyCommon cls_SequencyCommon { get; private set; }
+        public Cls_SequencyTest cls_SequencyTest { get; private set; }
         private int _UnitIndex = 0;
         private string _AssyPN;
+       
         public int UnitIndex { get { return _UnitIndex; } }
         public string AssyPN {  get { return _AssyPN; } }
         public string[] verifyFlags { get; private set; }
+
         #region SNVerify
         public int SN_Length { get; private set; }
         public string PN_Ctl_String { get; private set; }
@@ -105,18 +112,46 @@ namespace DI_Water_Wash
         public double iN2FillPressure { get; private set; }
         public double iN2FillPressureTolerance { get; private set; }
         #endregion
-        public Cls_Unit(int unitIndex, string assyPN)
+        public Cls_Unit(int unitIndex, string assyPN , Cls_ASPcontrol cls_AS)
         {
-            _UnitIndex = unitIndex;
-            _AssyPN = assyPN; 
-            ParameterDB.Initialize("10.102.4.20", "Parameters_SZ", "sa", "nuventixleo");
-            ParameterDB.Open();
-            ProductionDB.Initialize("10.102.4.20", "Parameters_SZ", "sa", "nuventixleo");
-            ProductionDB.Open();
-            GenerateProcessTesting();
-            GetLimitTesting();
-
-            GetSNVerify();
+            int index = 0;
+            try
+            {
+                _UnitIndex = unitIndex;
+                _AssyPN = assyPN;
+                cls_ASPcontrol = cls_AS;
+                cls_SequencyCommon = new Cls_SequencyCommon(unitIndex, cls_ASPcontrol);
+                cls_SequencyTest = new Cls_SequencyTest(unitIndex, cls_ASPcontrol);
+                cls_SequencyCommon.AutoMode = true;
+                cls_SequencyCommon.process = StateCommon.ProcessState.Idle;
+                ParameterDB.Initialize("10.102.4.20", "Parameters_SZ", "sa", "nuventixleo");
+                ParameterDB.Open();
+                ProductionDB.Initialize("10.102.4.20", "Production_SZ", "sa", "nuventixleo");
+                ProductionDB.Open();
+                index++;
+                GenerateProcessTesting();
+                index++;
+                GetLimitTesting();
+                index++;
+                GetSNVerify();
+                Thread thrCommon = new Thread(funThreadCommon);
+                thrCommon.IsBackground = true;
+                thrCommon.Name = "ThreadCommon";
+                thrCommon.Start();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Initialize class Failed:{index} "+ex.Message);
+            }
+        }
+        private void funThreadCommon()
+        {
+            Thread.Sleep(5000);
+            while (true)
+            {
+                cls_SequencyCommon.LoopTowerLamp();
+                Thread.Sleep(500);
+            }
         }
         private void GetLimitTesting()
         {
@@ -352,6 +387,12 @@ namespace DI_Water_Wash
 
         public void LoadVerifyValues(DataTable dt)
         {
+            if(dt.Rows.Count == 0)
+            {
+                MessageBox.Show("No data found for the given Assy_PN.");
+                verifyFlags = new string[1] { "" };
+                return;
+            }
             DataRow row = dt.Rows[0];
             foreach (DataColumn col in dt.Columns)
             {
