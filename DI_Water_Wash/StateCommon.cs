@@ -37,6 +37,11 @@ namespace DI_Water_Wash
             CompletedFail,
             Error
         }
+        public enum InverterType
+        {
+            ASP,
+            RS485
+        }
         public static bool CheckFileExists(string filePath)
         {
             return File.Exists(filePath);

@@ -76,7 +76,8 @@ namespace DI_Water_Wash
             string query = $"SELECT \r\nDescription\r\nFROM [Parameters_SZ].[dbo].[Aavid_Part_Numbers]\r\nWHERE [ASSY_PN] = '{PN}' order by Date_Time";
             DataTable dt = ParameterDB.ExecuteQuery(query);
             txtPN.Text = PN;
-            txtDescription.Text = dt.Rows[dt.Rows.Count-1][0].ToString();
+            if (dt.Rows.Count == 0) txtDescription.Text = "";
+            else txtDescription.Text = dt.Rows[dt.Rows.Count-1][0].ToString();
             ParameterDB.Close();
         }
 

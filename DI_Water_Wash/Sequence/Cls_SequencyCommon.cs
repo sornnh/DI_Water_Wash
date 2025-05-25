@@ -18,6 +18,7 @@ namespace DI_Water_Wash.Sequence
         private bool _AutoMode = false;
         public delegate void DelShow_UpdateStageStatus_Request(Cls_SequencyCommon sender);
         public event DelShow_UpdateStageStatus_Request OnRequestUpdateStage;
+
         public bool AutoMode
         {
             get { return _AutoMode; }

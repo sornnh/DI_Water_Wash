@@ -13,13 +13,18 @@ namespace DI_Water_Wash
         private SqlConnection connection;
         private string connectionString;
         public bool IsConnected { get; private set; }
+        private bool bLocal = true;
         public void Initialize(string server, string database, string user, string password)
         {
+            if (bLocal)
+                return;
             connectionString = $"Server={server};Database={database};User Id={user};Password={password};";
             connection = new SqlConnection(connectionString);
         }
         public void Open()
         {
+            if (bLocal)
+                return;
             try
             {
                 if (connection.State != ConnectionState.Open)
@@ -41,13 +46,18 @@ namespace DI_Water_Wash
         }
         public void Close()
         {
+            if (bLocal)
+                return;
             if (!IsConnected)
                 connection.Close();
         }
         // Truy vấn dữ liệu (SELECT)
         public DataTable ExecuteQuery(string query)
         {
+            
             DataTable dt = new DataTable();
+            if (bLocal)
+                return dt;
             try
             {
                 Open();
@@ -70,6 +80,8 @@ namespace DI_Water_Wash
         // Thực thi lệnh INSERT, UPDATE, DELETE
         public bool ExecuteNonQuery(string commandText)
         {
+            if (bLocal)
+                return false;
             try
             {
                 Open();
@@ -93,6 +105,8 @@ namespace DI_Water_Wash
         // Truy vấn giá trị đơn (SELECT COUNT(*)...)
         public object ExecuteScalar(string commandText)
         {
+            if (bLocal)
+                return null;
             try
             {
                 Open();

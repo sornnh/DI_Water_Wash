@@ -23,13 +23,30 @@ namespace DI_Water_Wash
         public SerialPort SerialPort { get; private set; }
         public string DataReceive { get; private set; }
         public string AllDataReceive { get; private set; }
-        public bool isConnected { get; private set; }
         public bool[] relayStates { get; private set; }
         private bool Asyncrelay = false;
-        public delegate void DelShow_addLog_Request(Cls_ASPcontrol sender);
+        public delegate void DelShow_addLog_Request(string sender);
         public event DelShow_addLog_Request OnRequestAddLog;
         public delegate void DelShow_UpdateRelayStatus_Request(Cls_ASPcontrol sender);
         public event DelShow_UpdateRelayStatus_Request OnRequestUpdateRelayStatus;
+        public delegate void DelShow_UpdateADC_Request(Cls_ASPcontrol sender);
+        public event DelShow_UpdateADC_Request OnRequestUpdateADC;
+        private bool _isConnected = false;
+        private double[] _ADVs = new double[] { 0.0, 0.0, 0.0, 0.0 };
+        private double[] _ADIs = new double[] { 0.0, 0.0, 0.0, 0.0 };
+        public double[] ADVs
+        {
+            get { return _ADVs; }
+        }
+        public double[] ADIs
+        {
+            get { return _ADIs; }
+        }
+        public bool isConnected
+        {
+            get { return _isConnected; }
+            set { _isConnected = value; }
+        }
         public Cls_ASPcontrol()
         {
             GetASPSerialPortInformation();
@@ -58,7 +75,6 @@ namespace DI_Water_Wash
                 if (result.Length != 30)
                 {
                     log.Error("bit length incorrect: " + bitString.Length);
-                    MessageBox.Show("bit length incorrect.");
                 }
                 relayStates = result;
                 UpdaterelayStatus();
@@ -66,12 +82,11 @@ namespace DI_Water_Wash
             catch (Exception ex)
             {
                 log.Error("Error in GetAllRelay", ex);
-                MessageBox.Show("Failed to read relays: " + ex.Message);
             }
         }
         public async Task SetRelayONOFFAsync(int relay, int onOff)
         {
-            if (relayStates[relay] == (onOff == 1))
+            if (relayStates[relay-1] == (onOff == 1))
             {
                 return;
             }
@@ -82,12 +97,52 @@ namespace DI_Water_Wash
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi gửi lệnh: {ex.Message}");
+                log.Error($"Lỗi gửi lệnh: {ex.Message}");
             }
+        }
+        public async Task<double> GetADVAsync(int iFlowChannel)
+        {
+            string cmd =$"RADV{iFlowChannel}\n";
+            try
+            {
+                string response = await SendCommandAndWaitResponseAsync(cmd);
+                string subresponse = "";
+                if (response.Contains(cmd.Trim()))
+                {
+                    subresponse = response.Substring(cmd.Length-1);
+                }
+                _ADVs[iFlowChannel - 1] = double.Parse(subresponse) * 1000.0; 
+            }
+            catch (Exception ex)
+            {
+                log.Error($"Lỗi gửi lệnh: {ex.Message}");
+            }
+            UpdateADC();
+            return _ADVs[iFlowChannel - 1];
+        }
+        public async Task<double> GetADIAsync(int iFlowChannel)
+        {
+            string cmd = $"RADA{iFlowChannel}\n";
+            try
+            {
+                string response = await SendCommandAndWaitResponseAsync(cmd);
+                string subresponse = "";
+                if (response.Contains(cmd.Trim()))
+                {
+                    subresponse = response.Substring(cmd.Length-1);
+                }
+                _ADIs[iFlowChannel-1] = double.Parse(subresponse);
+            }
+            catch (Exception ex)
+            {
+                log.Error($"Lỗi gửi lệnh: {ex.Message}");
+            }
+            UpdateADC();
+            return _ADIs[iFlowChannel-1];
         }
         public async Task<bool> SetRelayONOFFAsyncCheckResult(int relay, int onOff)
         {
-            if (relayStates[relay] == (onOff == 1))
+            if (relayStates[relay-1] == (onOff == 1))
             {
                 return true;
             }
@@ -95,11 +150,10 @@ namespace DI_Water_Wash
             try
             {
                 string response = await SendCommandAndWaitResponseAsync(cmd);
-
                 // Cập nhật trạng thái sau khi gửi lệnh
                 await GetAllRelay();
                 // Kiểm tra trạng thái relay có đúng như yêu cầu không
-                if (relayStates[relay] == (onOff == 1))
+                if (relayStates[relay - 1] == (onOff == 1))
                 {
                     return true;
                 }
@@ -110,9 +164,10 @@ namespace DI_Water_Wash
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi gửi lệnh: {ex.Message}");
+                log.Error($"Lỗi gửi lệnh: {ex.Message}");
                 return false;
             }
+            
         }
         public async void ConnectASPSerial()
         {
@@ -121,86 +176,104 @@ namespace DI_Water_Wash
                 SerialPort = new SerialPort(SerialCom, Baudrate, Parity, DataBit, StopBit);
                 SerialPort.Open();
                 SerialPort.DataReceived += SerialPort_DataReceived;
-                isConnected = true;
+                _isConnected = true;
                 DateTime dt = DateTime.Now;
-                DataReceive = $"{dt.ToString("HH:mm:ss")}+ ASP Serial open";
                 await GetAllRelay();
-                AddLogText();
+                AddLogText($"{dt.ToString("HH:mm:ss")}+ ASP Serial open");
             }
             catch (Exception ex)
             {
                 log.Error($"Exception when connect to ASP Serial :" + ex.Message);
-                MessageBox.Show($"Exception when connect to ASP Serial :" + ex.Message);
             }
-        }
+         }
         public void DisconnectASPSerial()
         {
             try
             {
                 SerialPort.Close();
-                isConnected = false;
+                _isConnected = false;
                 DateTime dt = DateTime.Now;
-                DataReceive = $"{dt.ToString("HH:mm:ss")}+ ASP Serial closed";
-                AddLogText();
+                AddLogText($"{dt.ToString("HH:mm:ss")}+ ASP Serial closed");
             }
             catch (Exception ex)
             {
                 log.Error($"Exception when disconnect to ASP Serial :" + ex.Message);
-                MessageBox.Show($"Exception when disconnect to ASP Serial :" + ex.Message);
             }
         }
         public async void ASPSerialWriteCommand(string text)
         {
-            if (!isConnected)
+            if (!_isConnected)
             {
-                ConnectASPSerial();
+                SerialPort = new SerialPort(SerialCom, Baudrate, Parity, DataBit, StopBit);
+                SerialPort.Open();
+                SerialPort.DataReceived += SerialPort_DataReceived;
+                _isConnected = true;
+                DateTime dt = DateTime.Now;
+                AddLogText($"{dt.ToString("HH:mm:ss")}+ ASP Serial RE-open");
             }
             try
             {
                 DateTime dt = DateTime.Now;
-                DataReceive = "";
-                DataReceive = $"{dt.ToString("HH:mm:ss")}+ ASP Serial write: " + text;
-                AddLogText();
+                AddLogText($"{dt.ToString("HH:mm:ss")}+ ASP Serial write: " + text);
                 SerialPort.Write(text);
             }
             catch (Exception ex)
             {
                 log.Error($"Exception when write to ASP Serial :" + ex.Message);
-                MessageBox.Show($"Exception when write to ASP Serial :" + ex.Message);
             }
-            await GetAllRelay();
         }
-
+        public void UpdateADC()
+        {
+            OnRequestUpdateADC?.Invoke(this);
+        }
         public void UpdaterelayStatus()
         {
             OnRequestUpdateRelayStatus?.Invoke(this);
         }
-        public void AddLogText()
+        public void AddLogText(string _text)
         {
-            OnRequestAddLog?.Invoke(this);
+            OnRequestAddLog?.Invoke(_text);
         }
         private List<byte> _buffer = new List<byte>();
         // Replace the nullable reference type declaration with a non-nullable type
-        private TaskCompletionSource<string> _tcs;
+        private TaskCompletionSource<string> _tcs = new TaskCompletionSource<string>();
 
         public bool _isWaitingResponse { get; private set; } // trạng thái đang chờ phản hồi
-        public async Task<string> SendCommandAndWaitResponseAsync(string command, int timeoutMs = 1500)
+        public async Task<string> SendCommandAndWaitResponseAsync(string command, int timeoutResponse = 1500, int timeoutAwait = 3500)
         {
             if (SerialPort == null || !SerialPort.IsOpen)
-                throw new InvalidOperationException("Serial port not open.");
-            if (_isWaitingResponse)
-                throw new InvalidOperationException("A response is already being awaited.");
+            {
+                try
+                {
+                    SerialPort = new SerialPort(SerialCom, Baudrate, Parity, DataBit, StopBit);
+                    SerialPort.Open();
+                    SerialPort.DataReceived += SerialPort_DataReceived;
+                    _isConnected = true;
+                    DateTime dt = DateTime.Now;
+                    AddLogText($"{dt.ToString("HH:mm:ss")}+ ASP Serial Re-open");
+                }
+                catch (Exception)
+                {
+                    throw new InvalidOperationException("Serial port can not re-open.");
+                }
+            }    
+
+            await WaitUntilNoPendingResponse(timeoutAwait);
+
             _isWaitingResponse = true;
             _buffer.Clear();
             _tcs = new TaskCompletionSource<string>();
             try
             {
                 DateTime dt = DateTime.Now;
-                DataReceive = $"{dt:HH:mm:ss}+ ASP Serial write: {command}";
-                AddLogText();
+                AddLogText($"{dt:HH:mm:ss}+ ASP Serial write: {command}");
                 SerialPort.Write(command);
                 // Chờ dữ liệu trả về hoặc timeout
-                var completedTask = await Task.WhenAny(_tcs.Task, Task.Delay(timeoutMs));
+                var completedTask = await Task.WhenAny(_tcs.Task, Task.Delay(timeoutResponse));
+                if(_tcs==null)
+                {
+                    throw new InvalidOperationException("TaskCompletionSource is null.");
+                }
                 if (completedTask == _tcs.Task)
                 {
                     string result = await _tcs.Task;
@@ -217,8 +290,22 @@ namespace DI_Water_Wash
                 _tcs = null;
             }
         }
+
+        private async Task WaitUntilNoPendingResponse(int maxWaitMs = 5000, int pollIntervalMs = 50)
+        {
+            int waited = 0;
+            while (_isWaitingResponse)
+            {
+                await Task.Delay(pollIntervalMs);
+                waited += pollIntervalMs;
+                if (waited >= maxWaitMs)
+                    throw new TimeoutException("Timeout waiting for previous response to complete.");
+            }
+        }
+
         private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
+            DataReceive = "";
             try
             {
                 var sp = (SerialPort)sender;
@@ -230,10 +317,8 @@ namespace DI_Water_Wash
                     string fullData = Encoding.ASCII.GetString(_buffer.ToArray()).Trim();
                     _buffer.Clear();
                     _tcs?.TrySetResult(fullData);
-
                     DateTime dt = DateTime.Now;
-                    DataReceive = $"{dt:HH:mm:ss}+ ASP Serial read: {fullData}";
-                    AddLogText();
+                    AddLogText($"{dt:HH:mm:ss}+ ASP Serial read: {fullData}");
                 }
             }
             catch (Exception ex)
@@ -243,10 +328,10 @@ namespace DI_Water_Wash
         }
         private void GetASPSerialPortInformation()
         {
-            SerialCom = ClsIO.ReadValue("ASPSerialPort", "SerialCom", "COM1", @"C:\Aavid_Test\Setup-ini\ASPSerialPort.ini");
-            Baudrate = int.Parse(ClsIO.ReadValue("ASPSerialPort", "Baudrate", "9600", @"C:\Aavid_Test\Setup-ini\ASPSerialPort.ini"));
-            DataBit = int.Parse(ClsIO.ReadValue("ASPSerialPort", "DataBit", "8", @"C:\Aavid_Test\Setup-ini\ASPSerialPort.ini"));
-            string parityy = ClsIO.ReadValue("ASPSerialPort", "Parity", "None", @"C:\Aavid_Test\Setup-ini\ASPSerialPort.ini");
+            SerialCom = ClsIO.ReadValue("ASPSerialPort", "SerialCom", "COM1", @"C:\Aavid_Test\Setup-ini\SerialPort.ini");
+            Baudrate = int.Parse(ClsIO.ReadValue("ASPSerialPort", "Baudrate", "9600", @"C:\Aavid_Test\Setup-ini\SerialPort.ini"));
+            DataBit = int.Parse(ClsIO.ReadValue("ASPSerialPort", "DataBit", "8", @"C:\Aavid_Test\Setup-ini\SerialPort.ini"));
+            string parityy = ClsIO.ReadValue("ASPSerialPort", "Parity", "None", @"C:\Aavid_Test\Setup-ini\SerialPort.ini");
             switch (parityy)
             {
                 case "None":
@@ -259,7 +344,7 @@ namespace DI_Water_Wash
                     Parity = Parity.Even;
                     break;
             }
-            string stoppit = ClsIO.ReadValue("ASPSerialPort", "StopBit", "One", @"C:\Aavid_Test\Setup-ini\ASPSerialPort.ini");
+            string stoppit = ClsIO.ReadValue("ASPSerialPort", "StopBit", "One", @"C:\Aavid_Test\Setup-ini\SerialPort.ini");
             switch (stoppit)
             {
                 case "One":
@@ -275,11 +360,11 @@ namespace DI_Water_Wash
         }
         public void SaveASPSerialPortInformation()
         {
-            ClsIO.WriteValue("ASPSerialPort", "SerialCom", SerialCom, @"C:\Aavid_Test\Setup-ini\ASPSerialPort.ini");
-            ClsIO.WriteValue("ASPSerialPort", "Baudrate", Baudrate.ToString(), @"C:\Aavid_Test\Setup-ini\ASPSerialPort.ini");
-            ClsIO.WriteValue("ASPSerialPort", "DataBit", DataBit.ToString(), @"C:\Aavid_Test\Setup-ini\ASPSerialPort.ini");
-            ClsIO.WriteValue("ASPSerialPort", "Parity", Parity.ToString(), @"C:\Aavid_Test\Setup-ini\ASPSerialPort.ini");
-            ClsIO.WriteValue("ASPSerialPort", "StopBit", StopBit.ToString(), @"C:\Aavid_Test\Setup-ini\ASPSerialPort.ini");
+            ClsIO.WriteValue("ASPSerialPort", "SerialCom", SerialCom, @"C:\Aavid_Test\Setup-ini\SerialPort.ini");
+            ClsIO.WriteValue("ASPSerialPort", "Baudrate", Baudrate.ToString(), @"C:\Aavid_Test\Setup-ini\SerialPort.ini");
+            ClsIO.WriteValue("ASPSerialPort", "DataBit", DataBit.ToString(), @"C:\Aavid_Test\Setup-ini\SerialPort.ini");
+            ClsIO.WriteValue("ASPSerialPort", "Parity", Parity.ToString(), @"C:\Aavid_Test\Setup-ini\SerialPort.ini");
+            ClsIO.WriteValue("ASPSerialPort", "StopBit", StopBit.ToString(), @"C:\Aavid_Test\Setup-ini\SerialPort.ini");
         }
     }
 }

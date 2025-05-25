@@ -21,6 +21,8 @@ using DI_Water_Wash;
 using System.IO.Ports;
 using log4net;
 using DI_Water_Wash.Sequence;
+using System.Xml.Linq;
+using System.Windows.Forms.DataVisualization.Charting;
 
 
 namespace DI_Water_Wash
@@ -40,6 +42,7 @@ namespace DI_Water_Wash
         private int iHardDiskD = 0;
         private int iGDI = 0;
         Cls_ASPcontrol ASP_ControlPort;
+        ClsInverterModbus clsInverterModbus;
         private Font F = new Font("Arial", 9);
         private string sSetup_Folder = "C:\\Aavid_Test\\Setup-ini\\Flushing_Part_Numbers.txt";
         private string sFlushing_File = "";
@@ -59,7 +62,8 @@ namespace DI_Water_Wash
         delegate void Deltact();
         delegate void DelResource(); 
         private bool AutoMode = false;
-
+        private System.Windows.Forms.TextBox[] ADVShow = new System.Windows.Forms.TextBox[4];
+        private System.Windows.Forms.TextBox[] ADIShow = new System.Windows.Forms.TextBox[4];
         NestMenu nestMenu = NestMenu.None;
         enum NestMenu
         {
@@ -118,6 +122,12 @@ namespace DI_Water_Wash
                 StateCommon.LoadingText += "Config ASP Serial Port...\r\n";
                 StateCommon.LoadingText += "GenerateComPort Compeleted\r\n ";
                 ASP_ControlPort = new Cls_ASPcontrol();
+                clsInverterModbus = new ClsInverterModbus();
+                Thread ThrCheckPortAlive = new Thread(new ThreadStart(ThreadCheckASPPortAlive));
+                ThrCheckPortAlive.Name = "ThrCheckPortAlive";
+                ThrCheckPortAlive.IsBackground = true;
+                ThrCheckPortAlive.Start();
+                InitializeADCShow();
                 ASP_ControlPort.OnRequestAddLog += (sender) =>
                 {
                     if (InvokeRequired)
@@ -125,6 +135,7 @@ namespace DI_Water_Wash
                     else
                         funAddLog_Auto(sender);
                 };
+
                 ASP_ControlPort.OnRequestUpdateRelayStatus += (sender) =>
                 {
                     if (InvokeRequired)
@@ -132,16 +143,20 @@ namespace DI_Water_Wash
                     else
                         funUpdateRelayStatus_Auto(sender);
                 };
+                ASP_ControlPort.OnRequestUpdateADC += (sender) =>
+                {
+                    if (InvokeRequired)
+                        BeginInvoke(new MethodInvoker(() => funUpdateADC_Auto(sender)));
+                    else
+                        funUpdateADC_Auto(sender);
+                };
                 StateCommon.LoadingText += "Config ASP Serial Port completed\r\n";
                 StateCommon.LoadingValue = 40;
                 StateCommon.LoadingText += "Config All unit for test...\r\n";
                 InitializeUnitManager(ASP_ControlPort);
                 tabControl3.SelectedIndexChanged += TabControl3_SelectedIndexChanged;
                 tabControl3.SelectedIndex = 0;
-                txt_SN_Lenght.Text = ClsUnitManagercs.cls_Units[0].SN_Length.ToString();
-                txt_ControlString.Text = ClsUnitManagercs.cls_Units[0].PN_Ctl_String;
-                txt_Leght.Text = ClsUnitManagercs.cls_Units[0].Ctl_Str_Length.ToString();
-                txt_Offset.Text = ClsUnitManagercs.cls_Units[0].Ctl_Str_Offset.ToString();
+                TrysetSNVerifyShow();
                 StateCommon.LoadingText += "Config All unit for test completed\r\n";
                 StateCommon.LoadingValue = 50;
                 StateCommon.LoadingText += "Initial Relay Control Board...\r\n";
@@ -170,6 +185,163 @@ namespace DI_Water_Wash
             else
             {
                 System.Windows.Forms.Application.Exit();
+            }
+        }
+
+        private void InitializeADCShow()
+        {
+            ADVShow[0]= txt_ADV1;
+            ADVShow[1] = txt_ADV2;
+            ADVShow[2] = txt_ADV3;
+            ADVShow[3] = txt_ADV4;
+            ADIShow[0] = txt_ADI1;
+            ADIShow[1] = txt_ADI2;
+            ADIShow[2] = txt_ADI3;
+            ADIShow[3] = txt_ADI4;
+        }
+
+        private void funUpdateADC_Auto(Cls_ASPcontrol sender)
+        {
+            for(int i = 0; i < ADVShow.Length; i++)
+            {
+                if (!ADIShow[i].Created || !ADVShow[i].Created)
+                    return;
+                if (ADVShow[i].InvokeRequired)
+                {
+                    ADVShow[i].BeginInvoke(new Action(() => ADVShow[i].Text = sender.ADVs[i].ToString()));
+                    ADIShow[i].BeginInvoke(new Action(() => ADIShow[i].Text = sender.ADIs[i].ToString("0.00")));
+                }
+                else
+                {
+                    ADVShow[i].Text = sender.ADVs[i].ToString();
+                    ADIShow[i].Text = sender.ADIs[i].ToString("0.00");
+                }
+            }
+            InitializeChartSeries(2);
+            if (chart_Flow.InvokeRequired)
+            {
+                chart_Flow.BeginInvoke(new Action(() =>
+                {
+                    UpdateChartDataWithDateTime(ASP_ControlPort);
+                }));
+            }
+            else
+            {
+                UpdateChartDataWithDateTime(ASP_ControlPort);
+            }
+
+        }
+        private void InitializeChartSeries(int adiCount)
+        {
+            if (chart_Flow.Series.Count == adiCount)
+                return; // Đã khởi tạo rồi
+
+            chart_Flow.Series.Clear();
+            var s = new System.Windows.Forms.DataVisualization.Charting.Series($"PV");
+            s.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            s.BorderWidth = 2;
+            chart_Flow.Series.Add(s);
+            s = new System.Windows.Forms.DataVisualization.Charting.Series($"SV");
+            s.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            s.BorderWidth = 2;
+            chart_Flow.Series.Add(s);
+        }
+        private readonly object chartLock = new object();
+        private void UpdateChartDataWithDateTime(Cls_ASPcontrol sender)
+        {
+
+            DateTime now = DateTime.Now;
+            int maxPoints = 100;
+            var chartArea = chart_Flow.ChartAreas[0];
+            // Cấu hình trục X hiển thị giờ:phút:giây
+            chartArea.AxisX.LabelStyle.Format = "HH:mm:ss";
+            chartArea.AxisX.MajorGrid.LineColor = Color.LightGray;
+            chartArea.AxisX.IntervalType = DateTimeIntervalType.Seconds; // Tick cách nhau từng giây
+            chartArea.AxisX.Interval = 1;  // Mỗi 5 giây một tick (bạn có thể chỉnh)
+            chartArea.AxisY.LabelStyle.Font = new Font("Arial", 10);
+            chartArea.AxisY.Title = "Lưu lượng (L/min)";
+            chartArea.AxisY.TitleFont = new Font("Arial", 10, FontStyle.Bold);
+            chartArea.AxisY.Interval = 10;  
+            // Đặt phạm vi hiển thị của trục Y từ 0 đến 200
+            chartArea.AxisY.Minimum = 0;
+            chartArea.AxisY.Maximum = 200;
+            switch (nestMenu)
+            {
+                case NestMenu.Nest1:
+                    chart_Flow.Series[$"PV"].Points.AddXY(now, GetFlowrate(sender.ADIs[0]));
+                    chart_Flow.Series[$"SV"].Points.AddXY(now, double.Parse(txt_SVFlow.Text));
+                    break;
+                case NestMenu.Nest2:
+                    chart_Flow.Series[$"PV"].Points.AddXY(now, GetFlowrate(sender.ADIs[1]));
+                    chart_Flow.Series[$"SV"].Points.AddXY(now, double.Parse(txt_SVFlow.Text));
+                    break;
+                case NestMenu.Nest3:
+                    chart_Flow.Series[$"PV"].Points.AddXY(now, GetFlowrate(sender.ADIs[2]));
+                    chart_Flow.Series[$"SV"].Points.AddXY(now, double.Parse(txt_SVFlow.Text));
+                    break;
+            }
+            // Giữ tối đa maxPoints điểm trong mỗi series
+            foreach (var series in chart_Flow.Series)
+            {
+                while (series.Points.Count > maxPoints)
+                    series.Points.RemoveAt(0);
+            }
+            // Điều chỉnh lại vùng trục X để luôn hiển thị maxPoints điểm mới nhất
+            if (chart_Flow.Series.Count > 0 && chart_Flow.Series[0].Points.Count > 0)
+            {
+                var firstXValue = chart_Flow.Series[0].Points[0].XValue;
+                var lastXValue = chart_Flow.Series[0].Points[chart_Flow.Series[0].Points.Count - 1].XValue;
+
+                chartArea.AxisX.Minimum = firstXValue;
+                chartArea.AxisX.Maximum = lastXValue;
+            }
+        }
+        private double GetFlowrate(double mA)
+        {
+            double flowRate = 0;
+            if (mA < 4 || mA>20) return flowRate;
+            else
+            {
+                flowRate = ((mA - 4) / 16) * 200;
+            }
+            return flowRate;
+        }
+        private void ThreadCheckASPPortAlive()
+        {
+            Thread.Sleep(5000);
+            while(true)
+            {
+                if (ASP_ControlPort.isConnected)
+                {
+                    try
+                    {
+                        string[] PortAlive = SerialPort.GetPortNames();
+                        if (!PortAlive.Contains(ASP_ControlPort.SerialCom))   
+                        {
+                            ASP_ControlPort.isConnected = false;
+                        }
+                    }
+                    catch { }
+                }
+                Thread.Sleep(100);
+            }    
+        }
+        private void TrysetSNVerifyShow()
+        {
+            try
+            {
+                txt_SN_Lenght.Text = ClsUnitManagercs.cls_Units[0].SN_Length.ToString();
+                txt_ControlString.Text = ClsUnitManagercs.cls_Units[0].PN_Ctl_String;
+                txt_Leght.Text = ClsUnitManagercs.cls_Units[0].Ctl_Str_Length.ToString();
+                txt_Offset.Text = ClsUnitManagercs.cls_Units[0].Ctl_Str_Offset.ToString();
+            }
+            catch
+            {
+                MessageBox.Show("Error when set SN verify string");
+                txt_SN_Lenght.Text = "";
+                txt_ControlString.Text = "";
+                txt_Leght.Text = "";
+                txt_Offset.Text = "";
             }
         }
         private void InitRelayLabels()
@@ -206,18 +378,11 @@ namespace DI_Water_Wash
         }
         private async void ToggleRelay(int index)
         {
-            bool currentStatus = relayLabels[index].BackColor == Color.LimeGreen;
+            bool currentStatus = ASP_ControlPort.relayStates[index];
             bool newStatus = !currentStatus;
             try
             {
-                if (ASP_ControlPort.isConnected)
-                {
-                    await ASP_ControlPort.SetRelayONOFFAsync(index + 1, newStatus ? 1 : 0);
-                    await ASP_ControlPort.GetAllRelay(); // Chờ nhận xong dữ liệu
-                    //UpdateRelayStatus(ASP_ControlPort.relayStates); // Sau đó mới cập nhật UI
-                }    
-                else
-                    MessageBox.Show("SerialPort chưa mở!");
+                await ASP_ControlPort.SetRelayONOFFAsyncCheckResult(index + 1, newStatus ? 1 : 0);
             }
             catch (Exception ex)
             {
@@ -228,21 +393,36 @@ namespace DI_Water_Wash
         {
             try
             {
-                this.cbbComPort.Items.AddRange(SerialPort.GetPortNames());
-                this.cbbBaudrate.Items.AddRange(Baudrates.Cast<object>().ToArray());
-                this.cbbDataBit.Items.AddRange(DataBits.Cast<object>().ToArray());
-                this.cbbParity.Items.AddRange(Paritys.Cast<object>().ToArray());
-                this.cbbStopBit.Items.AddRange(stopBits.Cast<object>().ToArray());
+                this.cbbASPComPort.Items.AddRange(SerialPort.GetPortNames());
+                this.cbbASPBaudrate.Items.AddRange(Baudrates.Cast<object>().ToArray());
+                this.cbbASPDataBit.Items.AddRange(DataBits.Cast<object>().ToArray());
+                this.cbbASPParity.Items.AddRange(Paritys.Cast<object>().ToArray());
+                this.cbbASPStopBit.Items.AddRange(stopBits.Cast<object>().ToArray());
+                this.cbb_InverterComPort.Items.AddRange(SerialPort.GetPortNames());
+                this.cbb_InverterBaudrate.Items.AddRange(Baudrates.Cast<object>().ToArray());
+                this.cbb_InverterDatabit.Items.AddRange(DataBits.Cast<object>().ToArray());
+                this.cbb_InverterParity.Items.AddRange(Paritys.Cast<object>().ToArray());
+                this.cbb_InverterStopbit.Items.AddRange(stopBits.Cast<object>().ToArray());
                 string SerialCom = ASP_ControlPort.SerialCom;
                 int Baudrate = ASP_ControlPort.Baudrate;
                 int DataBit = ASP_ControlPort.DataBit;
                 Parity Parity = ASP_ControlPort.Parity;
                 StopBits StopBit = ASP_ControlPort.StopBit;
-                cbbComPort.SelectedItem = SerialCom;
-                cbbBaudrate.SelectedItem = Baudrate;
-                cbbDataBit.SelectedItem = DataBit;
-                cbbParity.SelectedItem = Parity;
-                cbbStopBit.SelectedItem = StopBit;
+                cbbASPComPort.SelectedItem = SerialCom;
+                cbbASPBaudrate.SelectedItem = Baudrate;
+                cbbASPDataBit.SelectedItem = DataBit;
+                cbbASPParity.SelectedItem = Parity;
+                cbbASPStopBit.SelectedItem = StopBit;
+                SerialCom = clsInverterModbus.SerialCom;
+                Baudrate = clsInverterModbus.Baudrate;
+                DataBit = clsInverterModbus.DataBit;
+                Parity = clsInverterModbus.Parity;
+                StopBit = clsInverterModbus.StopBit;
+                cbb_InverterComPort.SelectedItem = SerialCom;
+                cbb_InverterBaudrate.SelectedItem = Baudrate;
+                cbb_InverterDatabit.SelectedItem = DataBit;
+                cbb_InverterParity.SelectedItem = Parity;
+                cbb_InverterStopbit.SelectedItem = StopBit;
             }
             catch (Exception ex )
             {
@@ -380,6 +560,8 @@ namespace DI_Water_Wash
         }
         private void UpdateRelayStatus(bool[] relays)
         {
+            bool hasNull = relayLabels != null && relayLabels.Any(label => label == null);
+            if (hasNull) return;
             for (int i = 0; i < 30; i++)
             {
                 relayLabels[i].Text = $"R{i + 1}: {(relays[i] ? "ON" : "OFF")}";
@@ -401,6 +583,9 @@ namespace DI_Water_Wash
                     UpdateColor(lb_Yellow, relays[9] ? Color.Yellow : Color.Gray);
                     UpdateColor(lb_Green, relays[10] ? Color.Green : Color.Gray);
                     UpdateColor(lb_Buzzer, relays[11] ? Color.Blue : Color.Gray);
+                    Tbtn_Pump.Checked = relays[ClsUnitManagercs.cls_Units[0].cls_SequencyTest.iRelayPump - 1];
+                    Tbtn_3WaySwitch.Checked = relays[ClsUnitManagercs.cls_Units[0].cls_SequencyTest.iRelay3Way_Air_Water - 1];
+                    Tbtn_ReverserFlow.Checked = relays[ClsUnitManagercs.cls_Units[0].cls_SequencyTest.iRelay3Way_Reverse - 1];
                     break;
 
                 case NestMenu.Nest2:
@@ -408,6 +593,9 @@ namespace DI_Water_Wash
                     UpdateColor(lb_Yellow, relays[13] ? Color.Yellow : Color.Gray);
                     UpdateColor(lb_Green, relays[14] ? Color.Green : Color.Gray);
                     UpdateColor(lb_Buzzer, relays[15] ? Color.Blue : Color.Gray);
+                    Tbtn_Pump.Checked = relays[ClsUnitManagercs.cls_Units[1].cls_SequencyTest.iRelayPump - 1];
+                    Tbtn_3WaySwitch.Checked = relays[ClsUnitManagercs.cls_Units[1].cls_SequencyTest.iRelay3Way_Air_Water - 1];
+                    Tbtn_ReverserFlow.Checked = relays[ClsUnitManagercs.cls_Units[1].cls_SequencyTest.iRelay3Way_Reverse - 1];
                     break;
 
                 case NestMenu.Nest3:
@@ -415,6 +603,9 @@ namespace DI_Water_Wash
                     UpdateColor(lb_Yellow, relays[17] ? Color.Yellow : Color.Gray);
                     UpdateColor(lb_Green, relays[18] ? Color.Green : Color.Gray);
                     UpdateColor(lb_Buzzer, relays[19] ? Color.Blue : Color.Gray);
+                    Tbtn_Pump.Checked = relays[ClsUnitManagercs.cls_Units[2].cls_SequencyTest.iRelayPump - 1];
+                    Tbtn_3WaySwitch.Checked = relays[ClsUnitManagercs.cls_Units[2].cls_SequencyTest.iRelay3Way_Air_Water - 1];
+                    Tbtn_ReverserFlow.Checked = relays[ClsUnitManagercs.cls_Units[2].cls_SequencyTest.iRelay3Way_Reverse - 1];
                     break;
             }
         }
@@ -422,7 +613,6 @@ namespace DI_Water_Wash
         {
             string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             lb_Ver.Text = "Ver: "+version;
-
         }
         private void GenerateProcess()
         {
@@ -481,11 +671,11 @@ namespace DI_Water_Wash
             DialogResult dr = MessageBox.Show("Do you want to save configuration for ASP control Serial Port?","Notification", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (dr == DialogResult.Yes)
             {
-                ASP_ControlPort.SerialCom = cbbComPort.Text;
-                ASP_ControlPort.Baudrate = int.Parse(cbbBaudrate.Text);
-                ASP_ControlPort.DataBit = int.Parse(cbbDataBit.Text);
-                ASP_ControlPort.Parity = (Parity)Enum.Parse(typeof(Parity), cbbParity.Text);
-                ASP_ControlPort.StopBit = (StopBits)Enum.Parse(typeof(StopBits), cbbStopBit.Text);
+                ASP_ControlPort.SerialCom = cbbASPComPort.Text;
+                ASP_ControlPort.Baudrate = int.Parse(cbbASPBaudrate.Text);
+                ASP_ControlPort.DataBit = int.Parse(cbbASPDataBit.Text);
+                ASP_ControlPort.Parity = (Parity)Enum.Parse(typeof(Parity), cbbASPParity.Text);
+                ASP_ControlPort.StopBit = (StopBits)Enum.Parse(typeof(StopBits), cbbASPStopBit.Text);
                 ASP_ControlPort.SaveASPSerialPortInformation();
                 log.Error($"Save ASP Serial Port Information: {ASP_ControlPort.SerialCom} {ASP_ControlPort.Baudrate} {ASP_ControlPort.DataBit} {ASP_ControlPort.Parity} {ASP_ControlPort.StopBit}");
                 ASP_ControlPort.DisconnectASPSerial();
@@ -495,32 +685,33 @@ namespace DI_Water_Wash
 
         private void button1_Click(object sender, EventArgs e)
         {
-            string cmd = txtx_Command.Text + "\n";
+            string cmd = txt_Command.Text + "\n";
             ASP_ControlPort.ASPSerialWriteCommand(cmd);
         }
-        public void funAddLog_Auto(Cls_ASPcontrol unit)
+        public void funAddLog_Auto(string _text)
         {
-            // Lấy UC_Show tương ứng
-            // Hiển thị ảnh lên PictureBox (Image_box)
+            if (!rtb_ASPPortBuffer.Created) return;
             if (rtb_ASPPortBuffer.InvokeRequired)
             {
-                rtb_ASPPortBuffer.BeginInvoke(new MethodInvoker(() =>
-                {
-                    StateCommon.AddTextToRichTextBox(unit.DataReceive,rtb_ASPPortBuffer);
+                rtb_ASPPortBuffer.BeginInvoke(new MethodInvoker(delegate {
+                    rtb_ASPPortBuffer.AppendText(_text + "\n");
+                    rtb_ASPPortBuffer.ScrollToCaret();
                 }));
             }
             else
             {
-                StateCommon.AddTextToRichTextBox(unit.DataReceive, rtb_ASPPortBuffer);
+                rtb_ASPPortBuffer.AppendText(_text + "\n");
+                rtb_ASPPortBuffer.ScrollToCaret();
             }
         }
+
         public void funUpdateRelayStatus_Auto(Cls_ASPcontrol unit)
         {
             UpdateRelayStatus(ASP_ControlPort.relayStates); // Sau đó mới cập nhật UI
         }
         public void funUpdateStage_Auto(Cls_SequencyCommon unit)
         {
-            switch (nestMenu)
+            switch (nestMenu) 
             {
                 case NestMenu.Nest1:
                     lb_StageStatus.Text = ClsUnitManagercs.cls_Units[0].cls_SequencyCommon.process.ToString();
@@ -536,7 +727,6 @@ namespace DI_Water_Wash
         private async void button2_Click(object sender, EventArgs e)
         {
             await ASP_ControlPort.GetAllRelay(); // Chờ nhận xong dữ liệu
-            //UpdateRelayStatus(ASP_ControlPort.relayStates); // Sau đó mới cập nhật UI
         }
 
         private void tableLayoutPanel15_Paint(object sender, PaintEventArgs e)
@@ -552,30 +742,24 @@ namespace DI_Water_Wash
             {
                 case NestMenu.Nest1:
                     RefeshAllNestlb();
-                    UpdateLEDStatus();
                     lb_Nest1.BackColor = Color.LimeGreen;
                     break;
                 case NestMenu.Nest2:
                     RefeshAllNestlb();
-                    UpdateLEDStatus();
                     lb_Nest2.BackColor = Color.LimeGreen;
                     break;
                 case NestMenu.Nest3:
                     RefeshAllNestlb();
-                    UpdateLEDStatus();
                     lb_Nest3.BackColor = Color.LimeGreen;
                     break;
             }
+            ASP_ControlPort.GetAllRelay();
         }
         private void RefeshAllNestlb()
         {
             lb_Nest1.BackColor = Color.Gray;
             lb_Nest2.BackColor = Color.Gray;
             lb_Nest3.BackColor = Color.Gray;
-        }
-        private async void UpdateLEDStatus()
-        {
-            await ASP_ControlPort.GetAllRelay(); // Chờ dữ liệu relay về
         }
         private void lb_Nest1_Click(object sender, EventArgs e)
         {
@@ -705,12 +889,44 @@ namespace DI_Water_Wash
             //UpdateLEDStatus();
             //UpdateRelayStatus(ASP_ControlPort.relayStates); // Sau đó mới cập nhật UI
         }
-        
+        private void DisableAllControl()
+        {
+            tbl_RelayControl.Enabled = false;
+            tableLayoutPanel15.Enabled = false;
+            Tbtn_3WaySwitch.Enabled = false;
+            Tbtn_Pump.Enabled = false;
+            Tbtn_ReverserFlow.Enabled = false;
+            btn_SetFlow.Enabled = false;
+            btn_AdjustFlow.Enabled = false;
+            txt_PVFlow.Enabled = false;
+            txt_SVFlow.Enabled = false;
+            lb_Buzzer.Enabled = false;
+            lb_Green.Enabled = false;
+            lb_Yellow.Enabled = false;
+            lb_Red.Enabled = false;
+        }
+        private void EnableAllControl()
+        {
+            tbl_RelayControl.Enabled = true;
+            tableLayoutPanel15.Enabled = true;
+            Tbtn_3WaySwitch.Enabled = true;
+            Tbtn_Pump.Enabled = true;
+            Tbtn_ReverserFlow.Enabled = true;
+            btn_SetFlow.Enabled = true;
+            btn_AdjustFlow.Enabled = true;
+            txt_PVFlow.Enabled = true;
+            txt_SVFlow.Enabled = true;
+            lb_Buzzer.Enabled = true;
+            lb_Green.Enabled = true;
+            lb_Yellow.Enabled = true;
+            lb_Red.Enabled = true;
+        }
         private void btn_ChangeMode_Click(object sender, EventArgs e)
         {
             if(!AutoMode)
             {
                 AutoMode = true;
+                DisableAllControl();
                 btn_ChangeMode.Text = "AUTO";
                 for (int i=0;i<ClsUnitManagercs.cls_Units.Length; i++)
                 {
@@ -721,6 +937,7 @@ namespace DI_Water_Wash
             else
             {
                 AutoMode = false;
+                EnableAllControl();
                 btn_ChangeMode.Text = "MANUAL";
                 for (int i = 0; i < ClsUnitManagercs.cls_Units.Length; i++)
                 {
@@ -729,32 +946,6 @@ namespace DI_Water_Wash
                 }
             }    
         }
-
-        private void Tbtn_3Way_CheckedChanged(object sender, EventArgs e)
-        {
-            switch (nestMenu)
-            {
-                case NestMenu.Nest1:
-                    if (Tbtn_3Way.Checked)
-                        ClsUnitManagercs.cls_Units[0].cls_SequencyTest.SwitchRelay3Way_Air_Water(true);
-                    else
-                        ClsUnitManagercs.cls_Units[0].cls_SequencyTest.SwitchRelay3Way_Air_Water(false);
-                    break;
-                case NestMenu.Nest2:
-                    if (Tbtn_3Way.Checked)
-                        ClsUnitManagercs.cls_Units[1].cls_SequencyTest.SwitchRelay3Way_Air_Water(true);
-                    else
-                        ClsUnitManagercs.cls_Units[1].cls_SequencyTest.SwitchRelay3Way_Air_Water(false);
-                    break;
-                case NestMenu.Nest3:
-                    if (Tbtn_3Way.Checked)
-                        ClsUnitManagercs.cls_Units[2].cls_SequencyTest.SwitchRelay3Way_Air_Water(true);
-                    else
-                        ClsUnitManagercs.cls_Units[2].cls_SequencyTest.SwitchRelay3Way_Air_Water(false);
-                    break;
-            }
-        }
-
         private void Tbtn_Pump_CheckedChanged(object sender, EventArgs e)
         {
             switch(nestMenu)
@@ -777,6 +968,83 @@ namespace DI_Water_Wash
                     else
                         ClsUnitManagercs.cls_Units[2].cls_SequencyTest.SwitchRelayPump(false);
                     break;
+            }
+        }
+
+        private void Tbtn_3WaySwitch_CheckedChanged(object sender, EventArgs e)
+        {
+            switch (nestMenu)
+            {
+                case NestMenu.Nest1:
+                    if (Tbtn_3WaySwitch.Checked)
+                        ClsUnitManagercs.cls_Units[0].cls_SequencyTest.SwitchRelay3Way_Air_Water(true);
+                    else
+                        ClsUnitManagercs.cls_Units[0].cls_SequencyTest.SwitchRelay3Way_Air_Water(false);
+                    break;
+                case NestMenu.Nest2:
+                    if (Tbtn_3WaySwitch.Checked)
+                        ClsUnitManagercs.cls_Units[1].cls_SequencyTest.SwitchRelay3Way_Air_Water(true);
+                    else
+                        ClsUnitManagercs.cls_Units[1].cls_SequencyTest.SwitchRelay3Way_Air_Water(false);
+                    break;
+                case NestMenu.Nest3:
+                    if (Tbtn_3WaySwitch.Checked)
+                        ClsUnitManagercs.cls_Units[2].cls_SequencyTest.SwitchRelay3Way_Air_Water(true);
+                    else
+                        ClsUnitManagercs.cls_Units[2].cls_SequencyTest.SwitchRelay3Way_Air_Water(false);
+                    break;
+            }
+        }
+
+        private void Tbtn_ReverserFlow_CheckedChanged(object sender, EventArgs e)
+        {
+            switch (nestMenu)
+            {
+                case NestMenu.Nest1:
+                    if (Tbtn_ReverserFlow.Checked)
+                        ClsUnitManagercs.cls_Units[0].cls_SequencyTest.SwitchRelay3Way_Reverse(true);
+                    else
+                        ClsUnitManagercs.cls_Units[0].cls_SequencyTest.SwitchRelay3Way_Reverse(false);
+                    break;
+                case NestMenu.Nest2:
+                    if (Tbtn_ReverserFlow.Checked)
+                        ClsUnitManagercs.cls_Units[1].cls_SequencyTest.SwitchRelay3Way_Reverse(true);
+                    else
+                        ClsUnitManagercs.cls_Units[1].cls_SequencyTest.SwitchRelay3Way_Reverse(false);
+                    break;
+                case NestMenu.Nest3:
+                    if (Tbtn_ReverserFlow.Checked)
+                        ClsUnitManagercs.cls_Units[2].cls_SequencyTest.SwitchRelay3Way_Reverse(true);
+                    else
+                        ClsUnitManagercs.cls_Units[2].cls_SequencyTest.SwitchRelay3Way_Reverse(false);
+                    break;
+            }
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                ASP_ControlPort.GetADIAsync(i + 1);
+                ASP_ControlPort.GetADVAsync(i + 1);
+            }
+            
+        }
+
+        private void btn_InverterSave_Click(object sender, EventArgs e)
+        {
+            DialogResult dr = MessageBox.Show("Do you want to save configuration for Inverter control Serial Port?", "Notification", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (dr == DialogResult.Yes)
+            {
+                clsInverterModbus.SerialCom = cbb_InverterComPort.Text;
+                clsInverterModbus.Baudrate = int.Parse(cbb_InverterBaudrate.Text);
+                clsInverterModbus.DataBit = int.Parse(cbb_InverterDatabit.Text);
+                clsInverterModbus.Parity = (Parity)Enum.Parse(typeof(Parity), cbb_InverterParity.Text);
+                clsInverterModbus.StopBit = (StopBits)Enum.Parse(typeof(StopBits), cbb_InverterStopbit.Text);
+                clsInverterModbus.SaveInverterSerialPortInformation();
+                log.Error($"Save Inverter Serial Port Information: {clsInverterModbus.SerialCom} {clsInverterModbus.Baudrate} {clsInverterModbus.DataBit} {clsInverterModbus.Parity} {clsInverterModbus.StopBit}");
+                clsInverterModbus.Close();
+                clsInverterModbus.Open();
             }
         }
     }

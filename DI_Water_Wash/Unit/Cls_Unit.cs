@@ -114,12 +114,15 @@ namespace DI_Water_Wash
         #endregion
         public Cls_Unit(int unitIndex, string assyPN , Cls_ASPcontrol cls_AS)
         {
-            int index = 0;
             try
             {
                 _UnitIndex = unitIndex;
                 _AssyPN = assyPN;
                 cls_ASPcontrol = cls_AS;
+                Thread thrCommon = new Thread(funThreadCommon);
+                thrCommon.IsBackground = true;
+                thrCommon.Name = "ThreadCommon";
+                thrCommon.Start();
                 cls_SequencyCommon = new Cls_SequencyCommon(unitIndex, cls_ASPcontrol);
                 cls_SequencyTest = new Cls_SequencyTest(unitIndex, cls_ASPcontrol);
                 cls_SequencyCommon.AutoMode = true;
@@ -128,26 +131,19 @@ namespace DI_Water_Wash
                 ParameterDB.Open();
                 ProductionDB.Initialize("10.102.4.20", "Production_SZ", "sa", "nuventixleo");
                 ProductionDB.Open();
-                index++;
                 GenerateProcessTesting();
-                index++;
                 GetLimitTesting();
-                index++;
                 GetSNVerify();
-                Thread thrCommon = new Thread(funThreadCommon);
-                thrCommon.IsBackground = true;
-                thrCommon.Name = "ThreadCommon";
-                thrCommon.Start();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Initialize class Failed:{index} "+ex.Message);
+                MessageBox.Show($"Initialize class Failed: "+ex.Message);
             }
         }
         private void funThreadCommon()
         {
             Thread.Sleep(5000);
-            while (true)
+              while (true)
             {
                 cls_SequencyCommon.LoopTowerLamp();
                 Thread.Sleep(500);
