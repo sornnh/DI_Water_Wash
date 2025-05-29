@@ -23,6 +23,8 @@ using log4net;
 using DI_Water_Wash.Sequence;
 using System.Xml.Linq;
 using System.Windows.Forms.DataVisualization.Charting;
+using DI_Water_Wash.DataSummary;
+using DI_Water_Wash.Unit;
 
 
 namespace DI_Water_Wash
@@ -50,9 +52,14 @@ namespace DI_Water_Wash
         public Cls_DBMsSQL ParameterDB = new Cls_DBMsSQL();
         public Cls_DBMsSQL ProductionDB = new Cls_DBMsSQL();
         public string[] AssyPN;
+        public string[] WorkOder;
         Dictionary<string, string> myDict = new Dictionary<string, string>();
         private UC_PartNumberInfor[] uC_PartNumberInfors = new UC_PartNumberInfor[3];
         private UC_PartNumberInfor.SecsionTest SecsionTest = UC_PartNumberInfor.SecsionTest.DIWaterWash;
+        private UC_DataSummary uC_DataSummary;
+        private UC_SerialNumberHistory uC_SerialNumberHistory;
+        private UC_MaintTest [] uC_MaintTests = new UC_MaintTest[3];
+        private string[] Testmodes = new string[4] { "Production Test", "Production Retest", "Engineering Test", "Golden Sample Test" };
         private int[] Baudrates = { 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, 115200 };
         private int[] DataBits = { 5, 6, 7, 8 };
         private Parity[] Paritys = { Parity.None, Parity.Odd, Parity.Even };
@@ -61,7 +68,7 @@ namespace DI_Water_Wash
         private bool UpdateRelayTB = true;
         delegate void Deltact();
         delegate void DelResource(); 
-        private bool AutoMode = false;
+        private bool AutoMode = true;
         private System.Windows.Forms.TextBox[] ADVShow = new System.Windows.Forms.TextBox[4];
         private System.Windows.Forms.TextBox[] ADIShow = new System.Windows.Forms.TextBox[4];
         NestMenu nestMenu = NestMenu.None;
@@ -168,6 +175,20 @@ namespace DI_Water_Wash
                 {
                     ClsUnitManagercs.cls_Units[i].cls_SequencyCommon.AutoMode = AutoMode;
                     ClsUnitManagercs.cls_Units[i].cls_SequencyCommon.AutoMode = AutoMode;
+                    ClsUnitManagercs.cls_Units[i].cls_SequencyTest.OnRequestUpdateFlowRate += delegate (Cls_SequencyTest sender)
+                    {
+                        if (base.InvokeRequired)
+                        {
+                            BeginInvoke((MethodInvoker)delegate
+                            {
+                                funUpdateFlowrate_Auto(sender);
+                            });
+                        }
+                        else
+                        {
+                            funUpdateFlowrate_Auto(sender);
+                        }
+                    };
                 }
                 if(AutoMode)
                     btn_ChangeMode.Text = "AUTO";
@@ -178,6 +199,21 @@ namespace DI_Water_Wash
                 StateCommon.LoadingText += "Change nest selected to Nest1 ....\r\n";
                 MenuNest_Change(NestMenu.Nest1);
                 StateCommon.LoadingText += "Change nest selected to Nest1 completed\r\n";
+                StateCommon.LoadingValue = 70;
+                StateCommon.LoadingText += "Create Data Summary Table ....\r\n";
+                uC_DataSummary = new UC_DataSummary(ClsUnitManagercs.cls_Units[0].AssyPN, "DI Water Wash");
+                uC_DataSummary.Dock = DockStyle.Fill;
+                pl_Report.Controls.Clear();
+                pl_Report.Controls.Add(uC_DataSummary);
+                StateCommon.LoadingText += "Create Data Summary Table completed\r\n";
+                StateCommon.LoadingValue = 80;
+                StateCommon.LoadingText += "Create Data History Query ....\r\n";
+                uC_SerialNumberHistory = new UC_SerialNumberHistory(ClsUnitManagercs.cls_Units[0].AssyPN);
+                uC_SerialNumberHistory.Dock = DockStyle.Fill;
+                pl_SNHistory.Controls.Clear();
+                pl_SNHistory.Controls.Add(uC_SerialNumberHistory);
+                StateCommon.LoadingText += "Create Data History Query completed\r\n";
+                StateCommon.LoadingValue = 80;
                 StateCommon.LoadingText += "Complete\r\n";
                 StateCommon.LoadingValue = 100;
                 StateCommon.bLoading = false;
@@ -217,19 +253,21 @@ namespace DI_Water_Wash
                     ADIShow[i].Text = sender.ADIs[i].ToString("0.00");
                 }
             }
+        }
+        private void funUpdateFlowrate_Auto(Cls_SequencyTest sender)
+        {
             InitializeChartSeries(2);
             if (chart_Flow.InvokeRequired)
             {
-                chart_Flow.BeginInvoke(new Action(() =>
+                chart_Flow.BeginInvoke((Action)delegate
                 {
-                    UpdateChartDataWithDateTime(ASP_ControlPort);
-                }));
+                    UpdateChartDataWithDateTime(sender);
+                });
             }
             else
             {
-                UpdateChartDataWithDateTime(ASP_ControlPort);
+                UpdateChartDataWithDateTime(sender);
             }
-
         }
         private void InitializeChartSeries(int adiCount)
         {
@@ -247,53 +285,52 @@ namespace DI_Water_Wash
             chart_Flow.Series.Add(s);
         }
         private readonly object chartLock = new object();
-        private void UpdateChartDataWithDateTime(Cls_ASPcontrol sender)
+        private void UpdateChartDataWithDateTime(Cls_SequencyTest sender)
         {
-
             DateTime now = DateTime.Now;
-            int maxPoints = 100;
-            var chartArea = chart_Flow.ChartAreas[0];
-            // Cấu hình trục X hiển thị giờ:phút:giây
+            int num = 20;
+            ChartArea chartArea = chart_Flow.ChartAreas[0];
             chartArea.AxisX.LabelStyle.Format = "HH:mm:ss";
             chartArea.AxisX.MajorGrid.LineColor = Color.LightGray;
-            chartArea.AxisX.IntervalType = DateTimeIntervalType.Seconds; // Tick cách nhau từng giây
-            chartArea.AxisX.Interval = 1;  // Mỗi 5 giây một tick (bạn có thể chỉnh)
-            chartArea.AxisY.LabelStyle.Font = new Font("Arial", 10);
+            chartArea.AxisX.IntervalType = DateTimeIntervalType.Seconds;
+            chartArea.AxisX.Interval = 1.0;
+            chartArea.AxisY.LabelStyle.Font = new Font("Arial", 10f);
             chartArea.AxisY.Title = "Lưu lượng (L/min)";
-            chartArea.AxisY.TitleFont = new Font("Arial", 10, FontStyle.Bold);
-            chartArea.AxisY.Interval = 10;  
-            // Đặt phạm vi hiển thị của trục Y từ 0 đến 200
-            chartArea.AxisY.Minimum = 0;
-            chartArea.AxisY.Maximum = 200;
+            chartArea.AxisY.TitleFont = new Font("Arial", 10f, FontStyle.Bold);
+            chartArea.AxisY.Interval = 10.0;
+            chartArea.AxisY.Minimum = 0.0;
+            chartArea.AxisY.Maximum = 20.0;
             switch (nestMenu)
             {
                 case NestMenu.Nest1:
-                    chart_Flow.Series[$"PV"].Points.AddXY(now, GetFlowrate(sender.ADIs[0]));
-                    chart_Flow.Series[$"SV"].Points.AddXY(now, double.Parse(txt_SVFlow.Text));
+                    chart_Flow.Series["PV"].Points.AddXY(now, GetFlowrate(ClsUnitManagercs.cls_Units[0].cls_SequencyTest.FlowRate));
+                    chart_Flow.Series["SV"].Points.AddXY(now, (double)nm_SV.Value);
+                    txt_PVFlow.Text = GetFlowrate(ClsUnitManagercs.cls_Units[0].cls_SequencyTest.FlowRate).ToString("0.00");
                     break;
                 case NestMenu.Nest2:
-                    chart_Flow.Series[$"PV"].Points.AddXY(now, GetFlowrate(sender.ADIs[1]));
-                    chart_Flow.Series[$"SV"].Points.AddXY(now, double.Parse(txt_SVFlow.Text));
+                    chart_Flow.Series["PV"].Points.AddXY(now, GetFlowrate(ClsUnitManagercs.cls_Units[1].cls_SequencyTest.FlowRate));
+                    chart_Flow.Series["SV"].Points.AddXY(now, (double)nm_SV.Value);
+                    txt_PVFlow.Text = GetFlowrate(ClsUnitManagercs.cls_Units[1].cls_SequencyTest.FlowRate).ToString("0.00");
                     break;
                 case NestMenu.Nest3:
-                    chart_Flow.Series[$"PV"].Points.AddXY(now, GetFlowrate(sender.ADIs[2]));
-                    chart_Flow.Series[$"SV"].Points.AddXY(now, double.Parse(txt_SVFlow.Text));
+                    chart_Flow.Series["PV"].Points.AddXY(now, GetFlowrate(ClsUnitManagercs.cls_Units[2].cls_SequencyTest.FlowRate));
+                    chart_Flow.Series["SV"].Points.AddXY(now, (double)nm_SV.Value);
+                    txt_PVFlow.Text = GetFlowrate(ClsUnitManagercs.cls_Units[2].cls_SequencyTest.FlowRate).ToString("0.00");
                     break;
             }
-            // Giữ tối đa maxPoints điểm trong mỗi series
-            foreach (var series in chart_Flow.Series)
+            foreach (Series item in chart_Flow.Series)
             {
-                while (series.Points.Count > maxPoints)
-                    series.Points.RemoveAt(0);
+                while (item.Points.Count > num)
+                {
+                    item.Points.RemoveAt(0);
+                }
             }
-            // Điều chỉnh lại vùng trục X để luôn hiển thị maxPoints điểm mới nhất
             if (chart_Flow.Series.Count > 0 && chart_Flow.Series[0].Points.Count > 0)
             {
-                var firstXValue = chart_Flow.Series[0].Points[0].XValue;
-                var lastXValue = chart_Flow.Series[0].Points[chart_Flow.Series[0].Points.Count - 1].XValue;
-
-                chartArea.AxisX.Minimum = firstXValue;
-                chartArea.AxisX.Maximum = lastXValue;
+                double xValue = chart_Flow.Series[0].Points[0].XValue;
+                double xValue2 = chart_Flow.Series[0].Points[chart_Flow.Series[0].Points.Count - 1].XValue;
+                chartArea.AxisX.Minimum = xValue;
+                chartArea.AxisX.Maximum = xValue2;
             }
         }
         private double GetFlowrate(double mA)
@@ -393,6 +430,7 @@ namespace DI_Water_Wash
         {
             try
             {
+                this.cbb_TestMode.Items.AddRange(Testmodes);
                 this.cbbASPComPort.Items.AddRange(SerialPort.GetPortNames());
                 this.cbbASPBaudrate.Items.AddRange(Baudrates.Cast<object>().ToArray());
                 this.cbbASPDataBit.Items.AddRange(DataBits.Cast<object>().ToArray());
@@ -423,15 +461,14 @@ namespace DI_Water_Wash
                 cbb_InverterDatabit.SelectedItem = DataBit;
                 cbb_InverterParity.SelectedItem = Parity;
                 cbb_InverterStopbit.SelectedItem = StopBit;
+                cbb_TestMode.SelectedItem = 0;
             }
             catch (Exception ex )
             {
                 log.Error( ex );
                 MessageBox.Show("Error when generate Com Port: " + ex.Message);
             }
-            
         }
-
         private void TabControl3_SelectedIndexChanged(object sender, EventArgs e)
         {
             int selectedIndex = tabControl3.SelectedIndex;
@@ -443,34 +480,60 @@ namespace DI_Water_Wash
 
         private void InitializeUnitManager( Cls_ASPcontrol cls_AS)
         {
-            string[] allLine = File.ReadAllLines(@"C:\Aavid_Test\Setup-ini\Flushing_Part_Numbers.txt");
-            AssyPN = new string[allLine.Length-1];
+            string[] array = File.ReadAllLines("C:\\Aavid_Test\\Setup-ini\\Flushing_Part_Numbers.txt");
+            AssyPN = new string[array.Length - 1];
+            WorkOder = new string[array.Length - 1];
             for (int i = 0; i < AssyPN.Length; i++)
             {
-                string[] line = allLine[i+1].Split(',');
-                AssyPN[i] = line[1].Trim();
+                string[] array2 = array[i + 1].Split(',');
+                AssyPN[i] = array2[1].Trim();
+                WorkOder[i]= array2[2].Trim();
             }
-            ClsUnitManagercs.Initialize(AssyPN, cls_AS);
+            ClsUnitManagercs.Initialize(AssyPN, WorkOder, cls_AS, clsInverterModbus);
             GenerateProcess();
-            Panel[]panel = new Panel[3];
-            panel[0] = pl_PNInfor1;
-            panel[1] = pl_PNInfor2;
-            panel[2] = pl_PNInfor3;
-            for (int i = 0; i < ClsUnitManagercs.cls_Units.Length; i++)
+            Panel[] array3 = new Panel[3] { pl_PNInfor1, pl_PNInfor2, pl_PNInfor3 };
+            Panel[] pl_main = new Panel[3] { pl_Main1, pl_Main2, pl_Main3 };
+            for (int i = 0; i < pl_main.Length; i++)
             {
-                uC_PartNumberInfors[i] = new UC_PartNumberInfor(i, SecsionTest);
-                uC_PartNumberInfors[i].InitUI();
-                uC_PartNumberInfors[i].Dock = DockStyle.Fill;
-                panel[i].Controls.Add(uC_PartNumberInfors[i]);
-                ClsUnitManagercs.cls_Units[i].cls_SequencyCommon.OnRequestUpdateStage += (sender) =>
+                uC_MaintTests[i] = new UC_MaintTest(i);
+                uC_MaintTests[i].Dock = DockStyle.Fill;
+                pl_main[i].Controls.Add(uC_MaintTests[i]);
+            }
+            for (int j = 0; j < ClsUnitManagercs.cls_Units.Length; j++)
+            {
+                uC_PartNumberInfors[j] = new UC_PartNumberInfor(j, SecsionTest);
+                uC_PartNumberInfors[j].InitUI();
+                uC_PartNumberInfors[j].Dock = DockStyle.Fill;
+                array3[j].Controls.Add(uC_PartNumberInfors[j]);
+                ClsUnitManagercs.cls_Units[j].cls_SequencyCommon.AutoMode = true;
+                ClsUnitManagercs.cls_Units[j].cls_SequencyCommon.OnRequestUpdateStage += delegate (Cls_SequencyCommon sender)
                 {
-                    if (InvokeRequired)
-                        BeginInvoke(new MethodInvoker(() => funUpdateStage_Auto(sender)));
+                    if (base.InvokeRequired)
+                    {
+                        BeginInvoke((MethodInvoker)delegate
+                        {
+                            funUpdateStage_Auto(sender);
+                        });
+                    }
                     else
+                    {
                         funUpdateStage_Auto(sender);
+                    }
+                };
+                ClsUnitManagercs.cls_Units[j].cls_SequencyTest.TestType = cbb_TestMode.Text;
+
+                ClsUnitManagercs.cls_Units[j].cls_SequencyTest.OnRequestAddProcessLogTest += (s, e) =>
+                {
+                    int fromUnit = e.UnitIndex;
+                    DataTable data = e.LogData;
+                    UpdateChildData(fromUnit, data);
                 };
             }
-
+        }
+        public void UpdateChildData(int index, DataTable dt)
+        {
+            if (!uC_MaintTests[index].Created) return;
+            uC_MaintTests[index].UpdateData(dt);
         }
         public void getSystemResouce()
         {
@@ -556,7 +619,6 @@ namespace DI_Water_Wash
         {
             DateTime dtNow = DateTime.Now;
             this.lb_Date.Text = dtNow.ToString("yyyy-MM-dd HH:mm:ss");
-            
         }
         private void UpdateRelayStatus(bool[] relays)
         {
@@ -724,6 +786,7 @@ namespace DI_Water_Wash
                     break;
             }
         }
+
         private async void button2_Click(object sender, EventArgs e)
         {
             await ASP_ControlPort.GetAllRelay(); // Chờ nhận xong dữ liệu
@@ -899,7 +962,7 @@ namespace DI_Water_Wash
             btn_SetFlow.Enabled = false;
             btn_AdjustFlow.Enabled = false;
             txt_PVFlow.Enabled = false;
-            txt_SVFlow.Enabled = false;
+            nm_SV.Enabled = false;
             lb_Buzzer.Enabled = false;
             lb_Green.Enabled = false;
             lb_Yellow.Enabled = false;
@@ -915,7 +978,7 @@ namespace DI_Water_Wash
             btn_SetFlow.Enabled = true;
             btn_AdjustFlow.Enabled = true;
             txt_PVFlow.Enabled = true;
-            txt_SVFlow.Enabled = true;
+            nm_SV.Enabled = true;
             lb_Buzzer.Enabled = true;
             lb_Green.Enabled = true;
             lb_Yellow.Enabled = true;
@@ -1023,14 +1086,19 @@ namespace DI_Water_Wash
 
         private void button3_Click(object sender, EventArgs e)
         {
-            for (int i = 0; i < 4; i++)
+            switch (nestMenu)
             {
-                ASP_ControlPort.GetADIAsync(i + 1);
-                ASP_ControlPort.GetADVAsync(i + 1);
+                case NestMenu.Nest1:
+                    ClsUnitManagercs.cls_Units[0].cls_SequencyTest.bGetFlowRate = !ClsUnitManagercs.cls_Units[0].cls_SequencyTest.bGetFlowRate;
+                    break;
+                case NestMenu.Nest2:
+                    ClsUnitManagercs.cls_Units[1].cls_SequencyTest.bGetFlowRate = !ClsUnitManagercs.cls_Units[1].cls_SequencyTest.bGetFlowRate;
+                    break;
+                case NestMenu.Nest3:
+                    ClsUnitManagercs.cls_Units[2].cls_SequencyTest.bGetFlowRate = !ClsUnitManagercs.cls_Units[2].cls_SequencyTest.bGetFlowRate;
+                    break;
             }
-            
         }
-
         private void btn_InverterSave_Click(object sender, EventArgs e)
         {
             DialogResult dr = MessageBox.Show("Do you want to save configuration for Inverter control Serial Port?", "Notification", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -1046,6 +1114,56 @@ namespace DI_Water_Wash
                 clsInverterModbus.Close();
                 clsInverterModbus.Open();
             }
+        }
+
+        private void txt_Fixture_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                string text = txt_Fixture.Text;
+
+                if (!string.IsNullOrEmpty(text))
+                {
+                    char lastChar = text[text.Length - 1];
+
+                    // Chuyển thành chuỗi để dùng TryParse
+                    if (int.TryParse(lastChar.ToString(), out int number))
+                    {
+                        if (number > 3)
+                        {
+                            log.Error("Fixture number must be less than or equal to 3");
+                            return;
+                        }
+                        if((ClsUnitManagercs.cls_Units[number - 1].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.WAIT||
+                           ClsUnitManagercs.cls_Units[number - 1].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.SN_INSERT)
+                           && ClsUnitManagercs.cls_Units[number - 1].cls_SequencyTest.testSeq != Cls_SequencyTest.TestSeq.ERROR)
+                        {
+                            uC_MaintTests[number - 1].SetSNForTest();
+                            ClsUnitManagercs.cls_Units[number - 1].cls_SequencyTest.testSeq = Cls_SequencyTest.TestSeq.SN_INSERT;
+                        }    
+                    }
+                    else
+                    {
+                        log.Error("Ký tự cuối không phải là số nguyên");
+                    }
+                }
+                txt_Fixture.Text= ""; // Xóa nội dung TextBox sau khi xử lý
+            }
+        }
+
+        private void cbb_TestMode_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            ASP_ControlPort.SetAllRelayOFF();
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            ASP_ControlPort.SetAllRelayOFF();
         }
     }
 }

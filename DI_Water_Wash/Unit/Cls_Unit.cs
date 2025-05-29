@@ -13,118 +13,179 @@ namespace DI_Water_Wash
 {
     public class Cls_Unit
     {
-        public bool Verify_Serial_No { get; private set; }
-        public bool Verify_Thermal_Test { get; private set; }
-        public bool Verify_Fans_Test { get; private set; }
-        public bool Verify_Flatness { get; private set; }
-        public bool Verify_Leak_Test { get; private set; }
-        public bool Verify_Pressure_Dwell { get; private set; }
-        public bool Verify_DeltaT_Test { get; private set; }
-        public bool Verify_Bubble_Test { get; private set; }
-        public bool Verify_PartN_Revisions { get; private set; }
-        public bool Verify_High_Pressure { get; private set; }
-        public bool Verify_Flow_Test { get; private set; }
-        public bool Verify_Humidity { get; private set; }
-        public bool Verify_Final_Inspection { get; private set; }
-        public bool Verify_QuickQ_Test { get; private set; }
-        public bool Verify_Links_at_Thermal { get; private set; }
         public Cls_DBMsSQL ParameterDB = new Cls_DBMsSQL();
+
         public Cls_DBMsSQL ProductionDB = new Cls_DBMsSQL();
-        public Cls_ASPcontrol cls_ASPcontrol { get; private set; }
-        public Cls_SequencyCommon cls_SequencyCommon { get; private set; }
-        public Cls_SequencyTest cls_SequencyTest { get; private set; }
+
         private int _UnitIndex = 0;
+
         private string _AssyPN;
-       
-        public int UnitIndex { get { return _UnitIndex; } }
-        public string AssyPN {  get { return _AssyPN; } }
+        private string _WO;
+        public bool Verify_Serial_No { get; private set; }
+
+        public bool Verify_Thermal_Test { get; private set; }
+
+        public bool Verify_Fans_Test { get; private set; }
+
+        public bool Verify_Flatness { get; private set; }
+
+        public bool Verify_Leak_Test { get; private set; }
+
+        public bool Verify_Pressure_Dwell { get; private set; }
+
+        public bool Verify_DeltaT_Test { get; private set; }
+
+        public bool Verify_Bubble_Test { get; private set; }
+
+        public bool Verify_PartN_Revisions { get; private set; }
+
+        public bool Verify_High_Pressure { get; private set; }
+
+        public bool Verify_Flow_Test { get; private set; }
+
+        public bool Verify_Humidity { get; private set; }
+
+        public bool Verify_Final_Inspection { get; private set; }
+
+        public bool Verify_QuickQ_Test { get; private set; }
+
+        public bool Verify_Links_at_Thermal { get; private set; }
+
+        public Cls_ASPcontrol cls_ASPcontrol { get; private set; }
+
+        public ClsInverterModbus Cls_InverterModbus { get; private set; }
+
+        public Cls_SequencyCommon cls_SequencyCommon { get; private set; }
+
+        public Cls_SequencyTest cls_SequencyTest { get; private set; }
+
+        public int UnitIndex => _UnitIndex;
+
+        public string AssyPN => _AssyPN;
+        public string WO => _WO;
         public string[] verifyFlags { get; private set; }
 
-        #region SNVerify
         public int SN_Length { get; private set; }
+
         public string PN_Ctl_String { get; private set; }
+
         public int Ctl_Str_Length { get; private set; }
+
         public int Ctl_Str_Offset { get; private set; }
-        #endregion
 
-
-        #region DIWaterWash
         public int iWash_Cycle { get; private set; }
 
         public int iPre_Washing_Time { get; private set; }
+
         public int iWashing_Time { get; private set; }
 
         public bool bReverse_Washing_Flow { get; private set; }
+
         public int iDI_Reverse_Washing_Time { get; set; }
-        
+
         public bool bReverse_DI_Flushing_Flow { get; private set; }
+
         public int iDI_Drying_Time { get; set; }
+
         public int iReverse_DI_Drying_Time { get; set; }
+
         public int iDi_Flow_Rate { get; private set; }
+
         public bool bCheck_DI_Huminity { get; private set; }
+
         public int iDI_Max_Huminity { get; private set; }
-        #endregion
 
-
-        #region HeliumLeakage
         public int iPre_Vacuum { get; private set; }
+
         public int iRoughing_Time_On { get; private set; }
+
         public int iGross_Leak_Pressure { get; private set; }
+
         public int iHelium_Valve_Open_Time { get; private set; }
+
         public int iNormal_pressure { get; private set; }
+
         public int iOpeningDelay { get; private set; }
+
         public int iVentTime { get; private set; }
+
         public int iLeak_Test_Time { get; private set; }
+
         public float iMin { get; private set; }
+
         public float iMax { get; private set; }
+
         public bool bPre_Vacuum { get; private set; }
+
         public bool bRoughing_Time_On { get; private set; }
+
         public bool bVent_Valve_Control { get; private set; }
 
-        #endregion
-
-
-        #region Drying
         public int iNumber_of_Drying_Clycle { get; private set; }
-        public int iHot_Air_Flushing_Time { get; private set; }
-        public int iHot_Air_Reverse_Flow_Time { get; private set; }
-        public int iMax_Drying_Humidity { get; private set; }
-        public int iN2_Pressure { get; private set; }
-        public int iN2_Drying_Time { get; private set; }
-        public int iVacuum_Pressure { get; private set; }
-        public int iVac_Baking_Temp { get; private set; }
-        public int iVac_Max_Humidity { get; private set; }
-        public int iBaking_Time { get; private set; }
-        public bool bReverse_Hot_Air_Flushing_Flow { get; private set; }
-        public bool bUse_Nitrogen_to_Dry { get; private set; }
-        public bool bCheck_Humidity { get; private set; }
-        #endregion
 
-        #region PressureDecay
+        public int iHot_Air_Flushing_Time { get; private set; }
+
+        public int iHot_Air_Reverse_Flow_Time { get; private set; }
+
+        public int iMax_Drying_Humidity { get; private set; }
+
+        public int iN2_Pressure { get; private set; }
+
+        public int iN2_Drying_Time { get; private set; }
+
+        public int iVacuum_Pressure { get; private set; }
+
+        public int iVac_Baking_Temp { get; private set; }
+
+        public int iVac_Max_Humidity { get; private set; }
+
+        public int iBaking_Time { get; private set; }
+
+        public bool bReverse_Hot_Air_Flushing_Flow { get; private set; }
+
+        public bool bUse_Nitrogen_to_Dry { get; private set; }
+
+        public bool bCheck_Humidity { get; private set; }
+
         public int iDecayMaxHumidity { get; private set; }
+
         public int iDecayStabilize_Time { get; private set; }
+
         public int iDecayTest_Time { get; private set; }
+
         public double iDecayPressure { get; private set; }
+
         public double iDecayPressureTolerance { get; private set; }
+
         public double iDecayMax_dP { get; private set; }
+
         public bool bDecay_Pre_Drying { get; private set; }
+
         public bool bN2Fill_to_Ship { get; private set; }
+
         public double iN2FillPressure { get; private set; }
+
         public double iN2FillPressureTolerance { get; private set; }
-        #endregion
-        public Cls_Unit(int unitIndex, string assyPN , Cls_ASPcontrol cls_AS)
+
+        public Cls_Unit(int unitIndex, string assyPN,string Workoder , Cls_ASPcontrol cls_AS, ClsInverterModbus clsInverter)
         {
             try
             {
                 _UnitIndex = unitIndex;
                 _AssyPN = assyPN;
+                _WO = Workoder;
                 cls_ASPcontrol = cls_AS;
-                Thread thrCommon = new Thread(funThreadCommon);
-                thrCommon.IsBackground = true;
-                thrCommon.Name = "ThreadCommon";
-                thrCommon.Start();
+                Cls_InverterModbus = clsInverter;
                 cls_SequencyCommon = new Cls_SequencyCommon(unitIndex, cls_ASPcontrol);
-                cls_SequencyTest = new Cls_SequencyTest(unitIndex, cls_ASPcontrol);
+                Thread thrcommon = new Thread(funThreadCommon);
+                thrcommon.IsBackground = true;
+                thrcommon.Name = "ThreadCommon";
+                thrcommon.Start();
+                cls_SequencyTest = new Cls_SequencyTest(unitIndex, cls_ASPcontrol, Cls_InverterModbus, StateCommon.InverterType.ASP);
+                Thread thrTest = new Thread(funThreadTest);
+                thrTest.IsBackground = true;
+                thrTest.Name = "ThreadCommon";
+                thrTest.Start();
                 cls_SequencyCommon.AutoMode = true;
                 cls_SequencyCommon.process = StateCommon.ProcessState.Idle;
                 ParameterDB.Initialize("10.102.4.20", "Parameters_SZ", "sa", "nuventixleo");
@@ -137,21 +198,32 @@ namespace DI_Water_Wash
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Initialize class Failed: "+ex.Message);
+                MessageBox.Show("Initialize class Failed: " + ex.Message);
             }
         }
+
         private void funThreadCommon()
         {
             Thread.Sleep(5000);
-              while (true)
+            while (true)
             {
                 cls_SequencyCommon.LoopTowerLamp();
                 Thread.Sleep(500);
             }
         }
+        private void funThreadTest()
+        {
+            Thread.Sleep(1000);
+            while (true)
+            {
+                cls_SequencyTest.LoopTest();
+                Thread.Sleep(500);
+            }
+        }
+
         private void GetLimitTesting()
         {
-            string query = $"SELECT *FROM dbo.Leak_Test_Limits Where Assy_PN ='{_AssyPN}' order by Date_Time";
+            string query = "SELECT *FROM dbo.Leak_Test_Limits Where Assy_PN ='" + _AssyPN + "' order by Date_Time";
             DataTable dt = ParameterDB.ExecuteQuery(query);
             GetLimit_DIWaterWash(dt);
             GetLimit_HeliumLeakageTest(dt);
@@ -161,42 +233,40 @@ namespace DI_Water_Wash
 
         private void GetLimit_DecayTest(DataTable dt)
         {
-            DataRow row = dt.Rows[dt.Rows.Count - 1];
-            foreach (DataColumn column in row.Table.Columns)
+            DataRow dataRow = dt.Rows[dt.Rows.Count - 1];
+            foreach (DataColumn column in dataRow.Table.Columns)
             {
-                string columnName = column.ColumnName;
-
-                switch (columnName)
+                switch (column.ColumnName)
                 {
                     case "PDc_Max_Humidity":
-                        iDecayMaxHumidity = Convert.ToInt32(row[column]);
+                        iDecayMaxHumidity = Convert.ToInt32(dataRow[column]);
                         break;
                     case "Stabilize_Time":
-                        iDecayStabilize_Time = Convert.ToInt32(row[column]);
+                        iDecayStabilize_Time = Convert.ToInt32(dataRow[column]);
                         break;
                     case "Decay_Time":
-                        iDecayTest_Time = Convert.ToInt32(row[column]);
+                        iDecayTest_Time = Convert.ToInt32(dataRow[column]);
                         break;
                     case "Pressure_Decay_Test":
-                        iDecayPressure = Convert.ToDouble(row[column]);
+                        iDecayPressure = Convert.ToDouble(dataRow[column]);
                         break;
                     case "P_Tolerance":
-                        iDecayPressureTolerance = Convert.ToDouble(row[column]);
+                        iDecayPressureTolerance = Convert.ToDouble(dataRow[column]);
                         break;
                     case "Max_dP":
-                        iDecayMax_dP = Convert.ToDouble(row[column]);
+                        iDecayMax_dP = Convert.ToDouble(dataRow[column]);
                         break;
                     case "Pre_Drying":
-                        bDecay_Pre_Drying = Convert.ToBoolean(row[column]);
+                        bDecay_Pre_Drying = Convert.ToBoolean(dataRow[column]);
                         break;
                     case "Fill_N2_to_Ship":
-                        bN2Fill_to_Ship = Convert.ToBoolean(row[column]);
+                        bN2Fill_to_Ship = Convert.ToBoolean(dataRow[column]);
                         break;
                     case "Fill_Pressure":
-                        iN2FillPressure = Convert.ToDouble(row[column]);
+                        iN2FillPressure = Convert.ToDouble(dataRow[column]);
                         break;
                     case "FP_Tolerance":
-                        iN2FillPressureTolerance = Convert.ToDouble(row[column]);
+                        iN2FillPressureTolerance = Convert.ToDouble(dataRow[column]);
                         break;
                 }
             }
@@ -204,49 +274,49 @@ namespace DI_Water_Wash
 
         private void GetLimit_DryingTest(DataTable dt)
         {
-            DataRow row = dt.Rows[dt.Rows.Count - 1];
-            foreach (DataColumn col in row.Table.Columns)
+            DataRow dataRow = dt.Rows[dt.Rows.Count - 1];
+            foreach (DataColumn column in dataRow.Table.Columns)
             {
-                switch (col.ColumnName)
+                switch (column.ColumnName)
                 {
                     case "Number_of_Drying_cycles":
-                        iNumber_of_Drying_Clycle = Convert.ToInt32(row[col]);
+                        iNumber_of_Drying_Clycle = Convert.ToInt32(dataRow[column]);
                         break;
                     case "Hot_Air_Flushing_Time":
-                        iHot_Air_Flushing_Time = Convert.ToInt32(row[col]);
+                        iHot_Air_Flushing_Time = Convert.ToInt32(dataRow[column]);
                         break;
                     case "Hot_Air_Reverse_Flow_Time":
-                        iHot_Air_Reverse_Flow_Time = Convert.ToInt32(row[col]);
+                        iHot_Air_Reverse_Flow_Time = Convert.ToInt32(dataRow[column]);
                         break;
                     case "Max_Humidity":
-                        iMax_Drying_Humidity = Convert.ToInt32(row[col]);
+                        iMax_Drying_Humidity = Convert.ToInt32(dataRow[column]);
                         break;
                     case "N2_Pressure":
-                        iN2_Pressure = Convert.ToInt32(row[col]);
+                        iN2_Pressure = Convert.ToInt32(dataRow[column]);
                         break;
-                    case "Drying_Time": // nếu có cột riêng "N2_Drying_Time" thì đổi lại tên
-                        iN2_Drying_Time = Convert.ToInt32(row[col]);
+                    case "Drying_Time":
+                        iN2_Drying_Time = Convert.ToInt32(dataRow[column]);
                         break;
                     case "Vacuum_Pressure":
-                        iVacuum_Pressure = Convert.ToInt32(row[col]);
+                        iVacuum_Pressure = Convert.ToInt32(dataRow[column]);
                         break;
                     case "Vac_Baking_Temp":
-                        iVac_Baking_Temp = Convert.ToInt32(row[col]);
+                        iVac_Baking_Temp = Convert.ToInt32(dataRow[column]);
                         break;
                     case "Vac_Max_Humidity":
-                        iVac_Max_Humidity = Convert.ToInt32(row[col]);
+                        iVac_Max_Humidity = Convert.ToInt32(dataRow[column]);
                         break;
                     case "Baking_Time":
-                        iBaking_Time = Convert.ToInt32(row[col]);
+                        iBaking_Time = Convert.ToInt32(dataRow[column]);
                         break;
                     case "Reverse_Hot_Flushing_Flow":
-                        bReverse_Hot_Air_Flushing_Flow = Convert.ToInt32(row[col]) == 1;
+                        bReverse_Hot_Air_Flushing_Flow = Convert.ToInt32(dataRow[column]) == 1;
                         break;
                     case "Use_Nitrogen_to_Dry":
-                        bUse_Nitrogen_to_Dry = Convert.ToInt32(row[col]) == 1;
+                        bUse_Nitrogen_to_Dry = Convert.ToInt32(dataRow[column]) == 1;
                         break;
-                    case "Check_Humidity": // hoặc "Check_Humidity" nếu cột tên khác
-                        bCheck_Humidity = Convert.ToInt32(row[col]) == 1;
+                    case "Check_Humidity":
+                        bCheck_Humidity = Convert.ToInt32(dataRow[column]) == 1;
                         break;
                 }
             }
@@ -254,184 +324,168 @@ namespace DI_Water_Wash
 
         private void GetLimit_HeliumLeakageTest(DataTable dt)
         {
-            DataRow row = dt.Rows[dt.Rows.Count - 1];
-            foreach (DataColumn column in row.Table.Columns)
+            DataRow dataRow = dt.Rows[dt.Rows.Count - 1];
+            foreach (DataColumn column in dataRow.Table.Columns)
             {
-                string columnName = column.ColumnName;
-
-                switch (columnName)
+                switch (column.ColumnName)
                 {
                     case "Pre_Vacuum":
-                        bPre_Vacuum = Convert.ToInt32(row[column]) == 1;
+                        bPre_Vacuum = Convert.ToInt32(dataRow[column]) == 1;
                         break;
-
                     case "Roughing_Time_On":
-                        bRoughing_Time_On = Convert.ToInt32(row[column]) == 1;
+                        bRoughing_Time_On = Convert.ToInt32(dataRow[column]) == 1;
                         break;
-
                     case "Vent_Valve_Control":
-                        bVent_Valve_Control = Convert.ToInt32(row[column]) == 1;
+                        bVent_Valve_Control = Convert.ToInt32(dataRow[column]) == 1;
                         break;
-                    case "Vacuum_Time": // nếu là số thay vì bool
-                        iPre_Vacuum = Convert.ToInt32(row[column]);
+                    case "Vacuum_Time":
+                        iPre_Vacuum = Convert.ToInt32(dataRow[column]);
                         break;
-
                     case "Roughing_Time":
-                        iRoughing_Time_On = Convert.ToInt32(row[column]);
+                        iRoughing_Time_On = Convert.ToInt32(dataRow[column]);
                         break;
-
                     case "Gross_Leak_Pressure":
-                        iGross_Leak_Pressure = Convert.ToInt32(row[column]);
+                        iGross_Leak_Pressure = Convert.ToInt32(dataRow[column]);
                         break;
-
                     case "Helium_Valve_Open_Time":
-                        iHelium_Valve_Open_Time = Convert.ToInt32(row[column]);
+                        iHelium_Valve_Open_Time = Convert.ToInt32(dataRow[column]);
                         break;
-
                     case "Normal_Pressure":
-                        iNormal_pressure = Convert.ToInt32(row[column]);
+                        iNormal_pressure = Convert.ToInt32(dataRow[column]);
                         break;
-
                     case "Opening_Delay":
-                        iOpeningDelay = Convert.ToInt32(row[column]);
+                        iOpeningDelay = Convert.ToInt32(dataRow[column]);
                         break;
-
                     case "Vent_Minutes":
                     case "Vent_Seconds":
-                        int minutes = row.Table.Columns.Contains("Vent_Minutes") ? Convert.ToInt32(row["Vent_Minutes"]) : 0;
-                        int seconds = row.Table.Columns.Contains("Vent_Seconds") ? Convert.ToInt32(row["Vent_Seconds"]) : 0;
-                        iVentTime = minutes * 60 + seconds;
-                        break;
-
+                        {
+                            int num = (dataRow.Table.Columns.Contains("Vent_Minutes") ? Convert.ToInt32(dataRow["Vent_Minutes"]) : 0);
+                            int num2 = (dataRow.Table.Columns.Contains("Vent_Seconds") ? Convert.ToInt32(dataRow["Vent_Seconds"]) : 0);
+                            iVentTime = num * 60 + num2;
+                            break;
+                        }
                     case "Leak_Test_Time":
-                        iLeak_Test_Time = Convert.ToInt32(row[column]);
+                        iLeak_Test_Time = Convert.ToInt32(dataRow[column]);
                         break;
-
                     case "Reject_Threshold":
-                        if (float.TryParse(row[column]?.ToString(), out float maxThres))
-                            iMax = maxThres;
-                        break;
+                        {
+                            if (float.TryParse(dataRow[column]?.ToString(), out var result2))
+                            {
+                                iMax = result2;
+                            }
+                            break;
+                        }
                     case "Min_Threshold":
-                        if (float.TryParse(row[column]?.ToString(), out float minThres))
-                            iMin = minThres;
-                        break;
+                        {
+                            if (float.TryParse(dataRow[column]?.ToString(), out var result))
+                            {
+                                iMin = result;
+                            }
+                            break;
+                        }
                 }
             }
         }
+
         private void GetLimit_DIWaterWash(DataTable dt)
         {
-            DataRow row = dt.Rows[dt.Rows.Count-1];
-            foreach (DataColumn column in row.Table.Columns)
+            DataRow dataRow = dt.Rows[dt.Rows.Count - 1];
+            foreach (DataColumn column in dataRow.Table.Columns)
             {
-                string columnName = column.ColumnName;
-
-                switch (columnName)
+                switch (column.ColumnName)
                 {
                     case "Number_of_Wash_cycles":
-                        iWash_Cycle = Convert.ToInt32(row[column]);
+                        iWash_Cycle = Convert.ToInt32(dataRow[column]);
                         break;
-
                     case "DI_Pre_Wash_Time":
-                        iPre_Washing_Time = Convert.ToInt32(row[column]);
+                        iPre_Washing_Time = Convert.ToInt32(dataRow[column]);
                         break;
-
                     case "DI_Washing_Time":
-                        iWashing_Time = Convert.ToInt32(row[column]);
+                        iWashing_Time = Convert.ToInt32(dataRow[column]);
                         break;
-
                     case "Reverse_Washing_Flow":
-                        bReverse_Washing_Flow = Convert.ToInt32(row[column]) == 1;
+                        bReverse_Washing_Flow = Convert.ToInt32(dataRow[column]) == 1;
                         break;
-
                     case "DI_Reverse_Washing_Time":
-                        iDI_Reverse_Washing_Time = Convert.ToInt32(row[column]);
+                        iDI_Reverse_Washing_Time = Convert.ToInt32(dataRow[column]);
                         break;
-
                     case "Reverse_DI_Flushing_Flow":
-                        bReverse_DI_Flushing_Flow = Convert.ToInt32(row[column]) == 1;
+                        bReverse_DI_Flushing_Flow = Convert.ToInt32(dataRow[column]) == 1;
                         break;
-
                     case "DI_Drying_Time":
-                        iDI_Drying_Time = Convert.ToInt32(row[column]);
+                        iDI_Drying_Time = Convert.ToInt32(dataRow[column]);
                         break;
-
                     case "Reversed_DI_Drying_Time":
-                        iReverse_DI_Drying_Time = Convert.ToInt32(row[column]);
+                        iReverse_DI_Drying_Time = Convert.ToInt32(dataRow[column]);
                         break;
-
                     case "DI_Flow_Rate":
-                        iDi_Flow_Rate = Convert.ToInt32(row[column]);
+                        iDi_Flow_Rate = Convert.ToInt32(dataRow[column]);
                         break;
-
                     case "Check_DI_Humidity":
-                        bCheck_DI_Huminity = Convert.ToInt32(row[column]) == 1;
+                        bCheck_DI_Huminity = Convert.ToInt32(dataRow[column]) == 1;
                         break;
-
                     case "DI_Max_Humidity":
-                        iDI_Max_Huminity = Convert.ToInt32(row[column]);
+                        iDI_Max_Huminity = Convert.ToInt32(dataRow[column]);
                         break;
                 }
             }
         }
+
         private void GenerateProcessTesting()
         {
-            string query = $"SELECT * FROM Process_Flow_for_Part_Numbers WHERE Assy_PN = '{_AssyPN}' order by Date_Time";
-            //MessageBox.Show(query);
+            string query = "SELECT * FROM Process_Flow_for_Part_Numbers WHERE Assy_PN = '" + _AssyPN + "' order by Date_Time";
             DataTable dt = ParameterDB.ExecuteQuery(query);
             LoadVerifyValues(dt);
         }
 
         public void LoadVerifyValues(DataTable dt)
         {
-            if(dt.Rows.Count == 0)
+            if (dt.Rows.Count == 0)
             {
                 MessageBox.Show("No data found for the given Assy_PN.");
                 verifyFlags = new string[1] { "" };
                 return;
             }
-            DataRow row = dt.Rows[0];
-            foreach (DataColumn col in dt.Columns)
+            DataRow dataRow = dt.Rows[0];
+            foreach (DataColumn column in dt.Columns)
             {
-                string key = col.ColumnName;
-                if (key == "Process_List")
+                string columnName = column.ColumnName;
+                if (columnName == "Process_List")
                 {
-                    string[] processList = row[key].ToString().Split(',');
-                    verifyFlags = new string[processList.Length];
-                    for (int i = 0; i < processList.Length; i++)
+                    string[] array = dataRow[columnName].ToString().Split(',');
+                    verifyFlags = new string[array.Length];
+                    for (int i = 0; i < array.Length; i++)
                     {
-                        verifyFlags[i] = processList[i].Trim();
+                        verifyFlags[i] = array[i].Trim();
                     }
                 }
             }
         }
 
-
         public void GetSNVerify()
         {
-            string query = $"SELECT \r\nSN_Length,\r\nPN_Ctl_String,\r\nCtl_Str_Length,\r\nCtl_Str_Offset\r\nFROM [Parameters_SZ].[dbo].[Aavid_Part_Numbers]\r\nWHERE [ASSY_PN] = '{AssyPN}' order by Date_Time";
-            DataTable dt = ParameterDB.ExecuteQuery(query);
-            //GeneratePNVerify
-            DataRow row = dt.Rows[dt.Rows.Count - 1];
-            foreach (DataColumn column in row.Table.Columns)
+            string query = "SELECT \r\nSN_Length,\r\nPN_Ctl_String,\r\nCtl_Str_Length,\r\nCtl_Str_Offset\r\nFROM [Parameters_SZ].[dbo].[Aavid_Part_Numbers]\r\nWHERE [ASSY_PN] = '" + AssyPN + "' order by Date_Time";
+            DataTable dataTable = ParameterDB.ExecuteQuery(query);
+            DataRow dataRow = dataTable.Rows[dataTable.Rows.Count - 1];
+            foreach (DataColumn column in dataRow.Table.Columns)
             {
-                string columnName = column.ColumnName;
-
-                switch (columnName)
+                switch (column.ColumnName)
                 {
                     case "SN_Length":
-                        SN_Length = Convert.ToInt32(row[column]);
+                        SN_Length = Convert.ToInt32(dataRow[column]);
                         break;
                     case "PN_Ctl_String":
-                        PN_Ctl_String = row[column].ToString();
+                        PN_Ctl_String = dataRow[column].ToString();
                         break;
                     case "Ctl_Str_Length":
-                        Ctl_Str_Length = Convert.ToInt32(row[column]);
+                        Ctl_Str_Length = Convert.ToInt32(dataRow[column]);
                         break;
                     case "Ctl_Str_Offset":
-                        Ctl_Str_Offset = Convert.ToInt32(row[column]);
+                        Ctl_Str_Offset = Convert.ToInt32(dataRow[column]);
                         break;
                 }
             }
         }
     }
+
 }

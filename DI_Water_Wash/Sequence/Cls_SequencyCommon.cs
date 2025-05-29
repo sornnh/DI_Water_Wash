@@ -140,11 +140,12 @@ namespace DI_Water_Wash.Sequence
                     {
                         await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayBuzzer + 1, 0);
                     }
+                    int _irelayG = iRelayGreen+1;
                     for (int  i = 0; i < 5; i++)
                     {
-                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayGreen + 1, 1);
+                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(_irelayG, 1);
                         await Task.Delay(1000);
-                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayGreen + 1, 0);
+                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(_irelayG, 0);
                         await Task.Delay(1000);
                     }
                     _process = StateCommon.ProcessState.Idle;
@@ -166,11 +167,12 @@ namespace DI_Water_Wash.Sequence
                     {
                         await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayBuzzer + 1, 0);
                     }
+                    int _irelayR = iRelayRed + 1;
                     for (int i = 0; i < 5; i++)
                     {
-                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayRed + 1, 1);
+                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(_irelayR, 1);
                         await Task.Delay(1000);
-                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayRed + 1, 0);
+                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(_irelayR, 0);
                         await Task.Delay(1000);
                     }
                     _process = StateCommon.ProcessState.Idle;

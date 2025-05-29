@@ -1,0 +1,195 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Xml.Serialization;
+using DI_Water_Wash.Sequence;
+
+namespace DI_Water_Wash.Unit
+{
+    public partial class UC_MaintTest : UserControl
+    {
+        public int UnitIndex { get; private set; }
+        public UC_MaintTest(int index)
+        {
+            InitializeComponent();
+            UnitIndex = index;
+            lb_Fixture.Text = $"Fixture {index + 1}";
+            lb_PN.Text = ClsUnitManagercs.cls_Units[UnitIndex].AssyPN;
+            lb_Status.Text= "Ready for test";
+            lb_TotalCycle.Text= ClsUnitManagercs.cls_Units[UnitIndex].iWash_Cycle.ToString();
+            timer1.Start();
+        }
+        public void SetSNForTest()
+        {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action(() => SetSNForTest()));
+                return;
+            }
+            txt_SN.Enabled = true;
+            txt_SN.Text = "";
+        }
+        public void UpdateData(DataTable dt)
+        {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action(() => UpdateData(dt)));
+                return;
+            }
+            else
+            {
+                dgv_process.SuspendLayout(); // Tạm ngừng layout để tránh flicker
+                dgv_process.ReadOnly = true; // Không cho sửa
+                dgv_process.AllowUserToAddRows = false; // Không cho thêm dòng trống cuối
+                dgv_process.AllowUserToDeleteRows = false; // Không cho xoá
+                dgv_process.AutoGenerateColumns = true; // Tự tạo cột theo DataTable
+                dgv_process.Columns.Clear(); // Xoá cột dư nếu có
+                dgv_process.DataSource = dt;   // Gán nguồn dữ liệu mới
+                // ❌ Không cho sort
+                foreach (DataGridViewColumn col in dgv_process.Columns)
+                {
+                    col.SortMode = DataGridViewColumnSortMode.NotSortable;
+                }
+            }     
+        }
+        private void txt_SN_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                if (txt_SN.Text.Length == 0)
+                {
+                    MessageBox.Show("Please input the serial number.");
+                    return;
+                }
+                // Assuming there's a method to handle the test with the provided serial number
+                ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.SN = txt_SN.Text.Trim();
+                txt_SN.Enabled = false;
+            }
+        }
+        private void Updatelabel(string value,Label label)
+        {
+            try
+            {
+                if (this.InvokeRequired)
+                {
+                    this.BeginInvoke(new Action(() => Updatelabel(value, label)));
+                    return;
+                }
+                else
+                {
+                    label.Text = value;
+                    try
+                    {
+                        if (label == lb_CurrentTime && int.TryParse(lb_CurrentTime.Text, out int currentTime) && int.TryParse(lb_TimeStep.Text, out int timeStep) && timeStep > 0)
+                        {
+                            int percen = currentTime * 100 / timeStep;
+                            UpdatePercent(percen + 1);
+                        }
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+        }
+        private void UpdatePercent(int value)
+        {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action(() => UpdatePercent(value)));
+                return;
+            }
+            else
+                progressBar1.Value = value;
+        }
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            switch(ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.testSeq)
+            {
+                case Cls_SequencyTest.TestSeq.WAIT:
+                    txt_SN.Enabled = false;
+                    Updatelabel("Ready for test", lb_Status);
+                    break;
+                case Cls_SequencyTest.TestSeq.SN_INSERT:
+                    txt_SN.Enabled = true;
+                    txt_SN.Focus();
+                    Updatelabel("Wait for insert SN", lb_Status);
+                    break;
+                case Cls_SequencyTest.TestSeq.SN_CHECK_ROUTER:
+                    txt_SN.Enabled = false;
+                    Updatelabel("Checking Router", lb_Status);
+                    break;
+                case Cls_SequencyTest.TestSeq.SN_CHECK_ROUTER_OK:
+                    txt_SN.Enabled = false;
+                    Updatelabel("Start test",lb_Status);
+                    break;
+                case Cls_SequencyTest.TestSeq.ERROR:
+                    txt_SN.Enabled=false;
+                    Updatelabel("ERROR", lb_Status);
+                    break;
+                case Cls_SequencyTest.TestSeq.PRE_WASHING:
+                    Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.StepTesting+1).ToString(), lb_CurentCycle);
+                    Updatelabel("Pre Washing", lb_CycleTest);
+                    Updatelabel(ClsUnitManagercs.cls_Units[UnitIndex].iPre_Washing_Time.ToString(), lb_TimeStep);
+                    Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.sw_prewash.ElapsedMilliseconds / 1000).ToString("0"), lb_CurrentTime);
+                    break;
+                case Cls_SequencyTest.TestSeq.FLUSHING_WASHING:
+                    Updatelabel("Washing", lb_CycleTest);
+                    Updatelabel(ClsUnitManagercs.cls_Units[UnitIndex].iWashing_Time.ToString(), lb_TimeStep);
+                    Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.sw_flush.ElapsedMilliseconds / 1000).ToString("0"), lb_CurrentTime);
+                    break;
+                case Cls_SequencyTest.TestSeq.REVERSE_WASHING:
+                    Updatelabel("Reverse Washing", lb_CycleTest);
+                    Updatelabel(ClsUnitManagercs.cls_Units[UnitIndex].iWashing_Time.ToString(), lb_TimeStep);
+                    Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.sw_reverse.ElapsedMilliseconds / 1000).ToString("0"), lb_CurrentTime);
+                    break;
+                case Cls_SequencyTest.TestSeq.DRYING:
+                    Updatelabel("Drying", lb_CycleTest);
+                    Updatelabel(ClsUnitManagercs.cls_Units[UnitIndex].iDI_Drying_Time.ToString(), lb_TimeStep);
+                    Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.sw_drying.ElapsedMilliseconds / 1000).ToString("0"), lb_CurrentTime);
+                    break;
+                case Cls_SequencyTest.TestSeq.REVERSE_DRYING:
+                    Updatelabel("Reverse Drying", lb_CycleTest);
+                    Updatelabel(ClsUnitManagercs.cls_Units[UnitIndex].iReverse_DI_Drying_Time.ToString(), lb_TimeStep);
+                    Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.sw_reverse_drying.ElapsedMilliseconds / 1000).ToString("0"), lb_CurrentTime);
+                    break;
+                default:
+                    txt_SN.Enabled = false;
+                    Updatelabel("Testing", lb_Status);
+                    break;
+            }
+            switch (ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyCommon.process)
+            {
+                case StateCommon.ProcessState.Idle:
+                    Updatelabel("Idle", lb_StatusMachine);
+                    lb_StatusMachine.BackColor =Color.DarkOrange;
+                    break;
+                case StateCommon.ProcessState.Running:
+                    Updatelabel("Running", lb_StatusMachine);
+                    lb_StatusMachine.BackColor = Color.Yellow;
+                    break;
+                case StateCommon.ProcessState.CompletedPass:
+                    Updatelabel("Pass", lb_StatusMachine);
+                    lb_StatusMachine.BackColor = Color.Green;
+                    Updatelabel("Pass", lb_Result);
+                    lb_Result.BackColor = Color.Green;
+                    break;
+                case StateCommon.ProcessState.CompletedFail:
+                    Updatelabel("Fail", lb_StatusMachine);
+                    lb_StatusMachine.BackColor = Color.Red;
+                    Updatelabel("Fail", lb_Result);
+                    lb_Result.BackColor = Color.Red;
+                    break;
+                case StateCommon.ProcessState.Error:
+                    Updatelabel("Error", lb_StatusMachine);
+                    lb_StatusMachine.BackColor = Color.Red;
+                    break;
+            }
+        }
+    }
+}

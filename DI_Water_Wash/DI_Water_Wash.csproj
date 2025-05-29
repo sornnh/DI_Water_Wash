@@ -36,6 +36,10 @@
     <Reference Include="log4net, Version=3.1.0.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.3.1.0\lib\net462\log4net.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Office.Interop.Excel.15.0.4795.1001\lib\net20\Microsoft.Office.Interop.Excel.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
     <Reference Include="NModbus4, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\NModbus4.2.1.0\lib\net40\NModbus4.dll</HintPath>
     </Reference>
@@ -89,6 +93,24 @@
     <Compile Include="Sequence\Cls_SequencyCommon.cs" />
     <Compile Include="Sequence\Cls_SequencyTest.cs" />
     <Compile Include="StateCommon.cs" />
+    <Compile Include="UC_DataSummary.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UC_DataSummary.Designer.cs">
+      <DependentUpon>UC_DataSummary.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UC_MaintTest.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UC_MaintTest.Designer.cs">
+      <DependentUpon>UC_MaintTest.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UC_SerialNumberHistory.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UC_SerialNumberHistory.Designer.cs">
+      <DependentUpon>UC_SerialNumberHistory.cs</DependentUpon>
+    </Compile>
     <Compile Include="UISource\RJToggleButton.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -149,6 +171,15 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="UC_DataSummary.resx">
+      <DependentUpon>UC_DataSummary.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UC_MaintTest.resx">
+      <DependentUpon>UC_MaintTest.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UC_SerialNumberHistory.resx">
+      <DependentUpon>UC_SerialNumberHistory.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Unit\UC_DIWaterWash.resx">
       <DependentUpon>UC_DIWaterWash.cs</DependentUpon>
     </EmbeddedResource>

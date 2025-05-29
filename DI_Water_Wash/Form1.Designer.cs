@@ -30,13 +30,23 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.TestLog = new System.Windows.Forms.TabPage();
+            this.tbl_Main = new System.Windows.Forms.TableLayoutPanel();
+            this.pl_Main1 = new System.Windows.Forms.Panel();
+            this.pl_Main2 = new System.Windows.Forms.Panel();
+            this.pl_Main3 = new System.Windows.Forms.Panel();
+            this.txt_Fixture = new System.Windows.Forms.TextBox();
+            this.tableLayoutPanel24 = new System.Windows.Forms.TableLayoutPanel();
+            this.label43 = new System.Windows.Forms.Label();
+            this.cbb_TestMode = new System.Windows.Forms.ComboBox();
             this.SerialHistory = new System.Windows.Forms.TabPage();
+            this.pl_Report = new System.Windows.Forms.Panel();
             this.Report = new System.Windows.Forms.TabPage();
+            this.pl_SNHistory = new System.Windows.Forms.Panel();
             this.PNInfor = new System.Windows.Forms.TabPage();
             this.tabControl2 = new System.Windows.Forms.TabControl();
             this.PartNumberInfor = new System.Windows.Forms.TabPage();
@@ -145,7 +155,6 @@
             this.textBox3 = new System.Windows.Forms.TextBox();
             this.label21 = new System.Windows.Forms.Label();
             this.txt_PVFlow = new System.Windows.Forms.TextBox();
-            this.txt_SVFlow = new System.Windows.Forms.TextBox();
             this.label19 = new System.Windows.Forms.Label();
             this.btn_AdjustFlow = new System.Windows.Forms.Button();
             this.label20 = new System.Windows.Forms.Label();
@@ -168,6 +177,7 @@
             this.txt_ADI3 = new System.Windows.Forms.TextBox();
             this.txt_ADI4 = new System.Windows.Forms.TextBox();
             this.btn_ChangeMode = new System.Windows.Forms.Button();
+            this.nm_SV = new System.Windows.Forms.NumericUpDown();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
@@ -188,6 +198,11 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.tableLayoutPanel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
+            this.TestLog.SuspendLayout();
+            this.tbl_Main.SuspendLayout();
+            this.tableLayoutPanel24.SuspendLayout();
+            this.SerialHistory.SuspendLayout();
+            this.Report.SuspendLayout();
             this.PNInfor.SuspendLayout();
             this.tabControl2.SuspendLayout();
             this.PartNumberInfor.SuspendLayout();
@@ -223,6 +238,7 @@
             this.tableLayoutPanel19.SuspendLayout();
             this.tableLayoutPanel22.SuspendLayout();
             this.tableLayoutPanel23.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nm_SV)).BeginInit();
             this.tableLayoutPanel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tableLayoutPanel3.SuspendLayout();
@@ -262,6 +278,7 @@
             // 
             // TestLog
             // 
+            this.TestLog.Controls.Add(this.tbl_Main);
             this.TestLog.Location = new System.Drawing.Point(4, 26);
             this.TestLog.Name = "TestLog";
             this.TestLog.Padding = new System.Windows.Forms.Padding(3);
@@ -270,8 +287,103 @@
             this.TestLog.Text = "Test Log";
             this.TestLog.UseVisualStyleBackColor = true;
             // 
+            // tbl_Main
+            // 
+            this.tbl_Main.ColumnCount = 3;
+            this.tbl_Main.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tbl_Main.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33334F));
+            this.tbl_Main.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33334F));
+            this.tbl_Main.Controls.Add(this.pl_Main1, 0, 0);
+            this.tbl_Main.Controls.Add(this.pl_Main2, 1, 0);
+            this.tbl_Main.Controls.Add(this.pl_Main3, 2, 0);
+            this.tbl_Main.Controls.Add(this.txt_Fixture, 1, 1);
+            this.tbl_Main.Controls.Add(this.tableLayoutPanel24, 0, 1);
+            this.tbl_Main.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tbl_Main.Location = new System.Drawing.Point(3, 3);
+            this.tbl_Main.Name = "tbl_Main";
+            this.tbl_Main.RowCount = 2;
+            this.tbl_Main.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 95.30639F));
+            this.tbl_Main.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 4.693612F));
+            this.tbl_Main.Size = new System.Drawing.Size(1243, 767);
+            this.tbl_Main.TabIndex = 0;
+            // 
+            // pl_Main1
+            // 
+            this.pl_Main1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pl_Main1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pl_Main1.Location = new System.Drawing.Point(3, 3);
+            this.pl_Main1.Name = "pl_Main1";
+            this.pl_Main1.Size = new System.Drawing.Size(408, 725);
+            this.pl_Main1.TabIndex = 0;
+            // 
+            // pl_Main2
+            // 
+            this.pl_Main2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pl_Main2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pl_Main2.Location = new System.Drawing.Point(417, 3);
+            this.pl_Main2.Name = "pl_Main2";
+            this.pl_Main2.Size = new System.Drawing.Size(408, 725);
+            this.pl_Main2.TabIndex = 1;
+            // 
+            // pl_Main3
+            // 
+            this.pl_Main3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pl_Main3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pl_Main3.Location = new System.Drawing.Point(831, 3);
+            this.pl_Main3.Name = "pl_Main3";
+            this.pl_Main3.Size = new System.Drawing.Size(409, 725);
+            this.pl_Main3.TabIndex = 2;
+            // 
+            // txt_Fixture
+            // 
+            this.txt_Fixture.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txt_Fixture.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txt_Fixture.Location = new System.Drawing.Point(417, 734);
+            this.txt_Fixture.Name = "txt_Fixture";
+            this.txt_Fixture.Size = new System.Drawing.Size(408, 27);
+            this.txt_Fixture.TabIndex = 3;
+            this.txt_Fixture.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txt_Fixture_KeyDown);
+            // 
+            // tableLayoutPanel24
+            // 
+            this.tableLayoutPanel24.ColumnCount = 2;
+            this.tableLayoutPanel24.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel24.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel24.Controls.Add(this.label43, 0, 0);
+            this.tableLayoutPanel24.Controls.Add(this.cbb_TestMode, 1, 0);
+            this.tableLayoutPanel24.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel24.Location = new System.Drawing.Point(3, 734);
+            this.tableLayoutPanel24.Name = "tableLayoutPanel24";
+            this.tableLayoutPanel24.RowCount = 1;
+            this.tableLayoutPanel24.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel24.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel24.Size = new System.Drawing.Size(408, 30);
+            this.tableLayoutPanel24.TabIndex = 4;
+            // 
+            // label43
+            // 
+            this.label43.AutoSize = true;
+            this.label43.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label43.Location = new System.Drawing.Point(3, 0);
+            this.label43.Name = "label43";
+            this.label43.Size = new System.Drawing.Size(198, 30);
+            this.label43.TabIndex = 0;
+            this.label43.Text = "Test Mode:";
+            this.label43.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // cbb_TestMode
+            // 
+            this.cbb_TestMode.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.cbb_TestMode.FormattingEnabled = true;
+            this.cbb_TestMode.Location = new System.Drawing.Point(207, 3);
+            this.cbb_TestMode.Name = "cbb_TestMode";
+            this.cbb_TestMode.Size = new System.Drawing.Size(198, 25);
+            this.cbb_TestMode.TabIndex = 1;
+            this.cbb_TestMode.SelectedIndexChanged += new System.EventHandler(this.cbb_TestMode_SelectedIndexChanged);
+            // 
             // SerialHistory
             // 
+            this.SerialHistory.Controls.Add(this.pl_Report);
             this.SerialHistory.Location = new System.Drawing.Point(4, 26);
             this.SerialHistory.Name = "SerialHistory";
             this.SerialHistory.Padding = new System.Windows.Forms.Padding(3);
@@ -280,14 +392,31 @@
             this.SerialHistory.Text = "Serial History";
             this.SerialHistory.UseVisualStyleBackColor = true;
             // 
+            // pl_Report
+            // 
+            this.pl_Report.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pl_Report.Location = new System.Drawing.Point(3, 3);
+            this.pl_Report.Name = "pl_Report";
+            this.pl_Report.Size = new System.Drawing.Size(1243, 767);
+            this.pl_Report.TabIndex = 0;
+            // 
             // Report
             // 
+            this.Report.Controls.Add(this.pl_SNHistory);
             this.Report.Location = new System.Drawing.Point(4, 26);
             this.Report.Name = "Report";
             this.Report.Size = new System.Drawing.Size(1249, 773);
             this.Report.TabIndex = 2;
             this.Report.Text = "Report";
             this.Report.UseVisualStyleBackColor = true;
+            // 
+            // pl_SNHistory
+            // 
+            this.pl_SNHistory.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pl_SNHistory.Location = new System.Drawing.Point(0, 0);
+            this.pl_SNHistory.Name = "pl_SNHistory";
+            this.pl_SNHistory.Size = new System.Drawing.Size(1249, 773);
+            this.pl_SNHistory.TabIndex = 0;
             // 
             // PNInfor
             // 
@@ -789,11 +918,11 @@
             // 
             // chart_Flow
             // 
-            chartArea1.Name = "ChartArea1";
-            this.chart_Flow.ChartAreas.Add(chartArea1);
+            chartArea2.Name = "ChartArea1";
+            this.chart_Flow.ChartAreas.Add(chartArea2);
             this.chart_Flow.Dock = System.Windows.Forms.DockStyle.Fill;
-            legend1.Name = "Legend1";
-            this.chart_Flow.Legends.Add(legend1);
+            legend2.Name = "Legend1";
+            this.chart_Flow.Legends.Add(legend2);
             this.chart_Flow.Location = new System.Drawing.Point(4, 22);
             this.chart_Flow.Name = "chart_Flow";
             this.chart_Flow.Size = new System.Drawing.Size(650, 344);
@@ -1012,7 +1141,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 26);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(226, 340);
+            this.tabPage2.Size = new System.Drawing.Size(227, 340);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Inverter Serial Port";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -1048,7 +1177,7 @@
             this.tableLayoutPanel21.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
             this.tableLayoutPanel21.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
             this.tableLayoutPanel21.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
-            this.tableLayoutPanel21.Size = new System.Drawing.Size(220, 334);
+            this.tableLayoutPanel21.Size = new System.Drawing.Size(221, 334);
             this.tableLayoutPanel21.TabIndex = 3;
             // 
             // label37
@@ -1057,7 +1186,7 @@
             this.label37.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label37.Location = new System.Drawing.Point(3, 0);
             this.label37.Name = "label37";
-            this.label37.Size = new System.Drawing.Size(78, 26);
+            this.label37.Size = new System.Drawing.Size(79, 26);
             this.label37.TabIndex = 0;
             this.label37.Text = "COM Port:";
             this.label37.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1068,7 +1197,7 @@
             this.label38.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label38.Location = new System.Drawing.Point(3, 26);
             this.label38.Name = "label38";
-            this.label38.Size = new System.Drawing.Size(78, 27);
+            this.label38.Size = new System.Drawing.Size(79, 27);
             this.label38.TabIndex = 0;
             this.label38.Text = "Baudrate:";
             this.label38.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1079,7 +1208,7 @@
             this.label39.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label39.Location = new System.Drawing.Point(3, 53);
             this.label39.Name = "label39";
-            this.label39.Size = new System.Drawing.Size(78, 27);
+            this.label39.Size = new System.Drawing.Size(79, 27);
             this.label39.TabIndex = 0;
             this.label39.Text = "DataBit:";
             this.label39.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1090,7 +1219,7 @@
             this.label40.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label40.Location = new System.Drawing.Point(3, 80);
             this.label40.Name = "label40";
-            this.label40.Size = new System.Drawing.Size(78, 26);
+            this.label40.Size = new System.Drawing.Size(79, 26);
             this.label40.TabIndex = 0;
             this.label40.Text = "Parity:";
             this.label40.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1101,7 +1230,7 @@
             this.label41.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label41.Location = new System.Drawing.Point(3, 106);
             this.label41.Name = "label41";
-            this.label41.Size = new System.Drawing.Size(78, 27);
+            this.label41.Size = new System.Drawing.Size(79, 27);
             this.label41.TabIndex = 0;
             this.label41.Text = "StopBit:";
             this.label41.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1110,7 +1239,7 @@
             // 
             this.cbb_InverterComPort.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cbb_InverterComPort.FormattingEnabled = true;
-            this.cbb_InverterComPort.Location = new System.Drawing.Point(87, 3);
+            this.cbb_InverterComPort.Location = new System.Drawing.Point(88, 3);
             this.cbb_InverterComPort.Name = "cbb_InverterComPort";
             this.cbb_InverterComPort.Size = new System.Drawing.Size(130, 25);
             this.cbb_InverterComPort.TabIndex = 1;
@@ -1119,7 +1248,7 @@
             // 
             this.cbb_InverterBaudrate.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cbb_InverterBaudrate.FormattingEnabled = true;
-            this.cbb_InverterBaudrate.Location = new System.Drawing.Point(87, 29);
+            this.cbb_InverterBaudrate.Location = new System.Drawing.Point(88, 29);
             this.cbb_InverterBaudrate.Name = "cbb_InverterBaudrate";
             this.cbb_InverterBaudrate.Size = new System.Drawing.Size(130, 25);
             this.cbb_InverterBaudrate.TabIndex = 1;
@@ -1128,7 +1257,7 @@
             // 
             this.cbb_InverterDatabit.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cbb_InverterDatabit.FormattingEnabled = true;
-            this.cbb_InverterDatabit.Location = new System.Drawing.Point(87, 56);
+            this.cbb_InverterDatabit.Location = new System.Drawing.Point(88, 56);
             this.cbb_InverterDatabit.Name = "cbb_InverterDatabit";
             this.cbb_InverterDatabit.Size = new System.Drawing.Size(130, 25);
             this.cbb_InverterDatabit.TabIndex = 1;
@@ -1137,7 +1266,7 @@
             // 
             this.cbb_InverterParity.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cbb_InverterParity.FormattingEnabled = true;
-            this.cbb_InverterParity.Location = new System.Drawing.Point(87, 83);
+            this.cbb_InverterParity.Location = new System.Drawing.Point(88, 83);
             this.cbb_InverterParity.Name = "cbb_InverterParity";
             this.cbb_InverterParity.Size = new System.Drawing.Size(130, 25);
             this.cbb_InverterParity.TabIndex = 1;
@@ -1146,7 +1275,7 @@
             // 
             this.cbb_InverterStopbit.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cbb_InverterStopbit.FormattingEnabled = true;
-            this.cbb_InverterStopbit.Location = new System.Drawing.Point(87, 109);
+            this.cbb_InverterStopbit.Location = new System.Drawing.Point(88, 109);
             this.cbb_InverterStopbit.Name = "cbb_InverterStopbit";
             this.cbb_InverterStopbit.Size = new System.Drawing.Size(130, 25);
             this.cbb_InverterStopbit.TabIndex = 1;
@@ -1154,7 +1283,7 @@
             // btn_InverterSave
             // 
             this.btn_InverterSave.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btn_InverterSave.Location = new System.Drawing.Point(87, 198);
+            this.btn_InverterSave.Location = new System.Drawing.Point(88, 198);
             this.btn_InverterSave.Name = "btn_InverterSave";
             this.btn_InverterSave.Size = new System.Drawing.Size(130, 27);
             this.btn_InverterSave.TabIndex = 2;
@@ -1168,7 +1297,7 @@
             this.label42.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label42.Location = new System.Drawing.Point(3, 133);
             this.label42.Name = "label42";
-            this.label42.Size = new System.Drawing.Size(78, 62);
+            this.label42.Size = new System.Drawing.Size(79, 62);
             this.label42.TabIndex = 3;
             // 
             // tableLayoutPanel17
@@ -1464,7 +1593,6 @@
             this.tableLayoutPanel23.Controls.Add(this.textBox3, 2, 6);
             this.tableLayoutPanel23.Controls.Add(this.label21, 3, 5);
             this.tableLayoutPanel23.Controls.Add(this.txt_PVFlow, 2, 5);
-            this.tableLayoutPanel23.Controls.Add(this.txt_SVFlow, 2, 4);
             this.tableLayoutPanel23.Controls.Add(this.label19, 1, 5);
             this.tableLayoutPanel23.Controls.Add(this.btn_AdjustFlow, 0, 5);
             this.tableLayoutPanel23.Controls.Add(this.label20, 3, 4);
@@ -1487,6 +1615,7 @@
             this.tableLayoutPanel23.Controls.Add(this.txt_ADI3, 3, 2);
             this.tableLayoutPanel23.Controls.Add(this.txt_ADI4, 3, 3);
             this.tableLayoutPanel23.Controls.Add(this.btn_ChangeMode, 3, 9);
+            this.tableLayoutPanel23.Controls.Add(this.nm_SV, 2, 4);
             this.tableLayoutPanel23.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel23.Location = new System.Drawing.Point(3, 31);
             this.tableLayoutPanel23.Name = "tableLayoutPanel23";
@@ -1633,6 +1762,7 @@
             // textBox3
             // 
             this.textBox3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox3.Enabled = false;
             this.textBox3.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBox3.Location = new System.Drawing.Point(198, 202);
             this.textBox3.Name = "textBox3";
@@ -1653,20 +1783,12 @@
             // txt_PVFlow
             // 
             this.txt_PVFlow.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txt_PVFlow.Enabled = false;
             this.txt_PVFlow.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txt_PVFlow.Location = new System.Drawing.Point(198, 169);
             this.txt_PVFlow.Name = "txt_PVFlow";
             this.txt_PVFlow.Size = new System.Drawing.Size(92, 27);
             this.txt_PVFlow.TabIndex = 2;
-            // 
-            // txt_SVFlow
-            // 
-            this.txt_SVFlow.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txt_SVFlow.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txt_SVFlow.Location = new System.Drawing.Point(198, 136);
-            this.txt_SVFlow.Name = "txt_SVFlow";
-            this.txt_SVFlow.Size = new System.Drawing.Size(92, 27);
-            this.txt_SVFlow.TabIndex = 1;
             // 
             // label19
             // 
@@ -1882,6 +2004,20 @@
             this.btn_ChangeMode.Text = "Manual";
             this.btn_ChangeMode.UseVisualStyleBackColor = true;
             this.btn_ChangeMode.Click += new System.EventHandler(this.btn_ChangeMode_Click);
+            // 
+            // nm_SV
+            // 
+            this.nm_SV.DecimalPlaces = 2;
+            this.nm_SV.Font = new System.Drawing.Font("Century Gothic", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.nm_SV.Location = new System.Drawing.Point(198, 136);
+            this.nm_SV.Maximum = new decimal(new int[] {
+            20,
+            0,
+            0,
+            0});
+            this.nm_SV.Name = "nm_SV";
+            this.nm_SV.Size = new System.Drawing.Size(92, 26);
+            this.nm_SV.TabIndex = 20;
             // 
             // tableLayoutPanel2
             // 
@@ -2112,10 +2248,19 @@
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form1";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.Shown += new System.EventHandler(this.Form1_Shown);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tabControl1.ResumeLayout(false);
+            this.TestLog.ResumeLayout(false);
+            this.tbl_Main.ResumeLayout(false);
+            this.tbl_Main.PerformLayout();
+            this.tableLayoutPanel24.ResumeLayout(false);
+            this.tableLayoutPanel24.PerformLayout();
+            this.SerialHistory.ResumeLayout(false);
+            this.Report.ResumeLayout(false);
             this.PNInfor.ResumeLayout(false);
             this.tabControl2.ResumeLayout(false);
             this.PartNumberInfor.ResumeLayout(false);
@@ -2162,6 +2307,7 @@
             this.tableLayoutPanel22.PerformLayout();
             this.tableLayoutPanel23.ResumeLayout(false);
             this.tableLayoutPanel23.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nm_SV)).EndInit();
             this.tableLayoutPanel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.tableLayoutPanel3.ResumeLayout(false);
@@ -2260,7 +2406,6 @@
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.Button btn_SetFlow;
         private System.Windows.Forms.Button btn_AdjustFlow;
-        private System.Windows.Forms.TextBox txt_SVFlow;
         private System.Windows.Forms.TextBox txt_PVFlow;
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.Label label19;
@@ -2330,6 +2475,17 @@
         private System.Windows.Forms.ComboBox cbb_InverterStopbit;
         private System.Windows.Forms.Button btn_InverterSave;
         private System.Windows.Forms.Label label42;
+        private System.Windows.Forms.Panel pl_Report;
+        private System.Windows.Forms.Panel pl_SNHistory;
+        private System.Windows.Forms.NumericUpDown nm_SV;
+        private System.Windows.Forms.TableLayoutPanel tbl_Main;
+        private System.Windows.Forms.Panel pl_Main1;
+        private System.Windows.Forms.Panel pl_Main2;
+        private System.Windows.Forms.Panel pl_Main3;
+        private System.Windows.Forms.TextBox txt_Fixture;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel24;
+        private System.Windows.Forms.Label label43;
+        private System.Windows.Forms.ComboBox cbb_TestMode;
     }
 }
 
