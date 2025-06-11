@@ -233,7 +233,7 @@
             this.txt_SN.Name = "txt_SN";
             this.txt_SN.Size = new System.Drawing.Size(394, 23);
             this.txt_SN.TabIndex = 1;
-            this.txt_SN.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txt_SN_KeyDown);
+            this.txt_SN.TextChanged += new System.EventHandler(this.txt_SN_TextChanged); 
             // 
             // tableLayoutPanel6
             // 

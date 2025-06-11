@@ -75,20 +75,21 @@ namespace DI_Water_Wash.Unit
                 }
             }     
         }
-        private void txt_SN_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Enter)
-            {
-                if (txt_SN.Text.Length == 0)
-                {
-                    MessageBox.Show("Please input the serial number.");
-                    return;
-                }
-                // Assuming there's a method to handle the test with the provided serial number
-                ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.SN = txt_SN.Text.Trim();
-                txt_SN.Enabled = false;
-            }
-        }
+        //private void txt_SN_KeyDown(object sender, KeyEventArgs e)
+        //{
+        //    string SN = txt_SN.Text.Trim();
+        //    if(SN.Length == ClsUnitManagercs.cls_Units[UnitIndex].SN_Length )
+        //    {
+        //        if (txt_SN.Text.Length == 0 )
+        //        {
+        //            MessageBox.Show("Please input the serial number.");
+        //            return;
+        //        }
+        //        // Assuming there's a method to handle the test with the provided serial number
+        //        ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.SN = txt_SN.Text.Trim();
+        //        txt_SN.Enabled = false;
+        //    }
+        //}
         private void Updatelabel(string value,Label label)
         {
             try
@@ -220,6 +221,25 @@ namespace DI_Water_Wash.Unit
                     Updatelabel("Error", lb_StatusMachine);
                     lb_StatusMachine.BackColor = Color.Red;
                     break;
+            }
+        }
+
+        private void txt_SN_TextChanged(object sender, EventArgs e)
+        {
+            string SN = txt_SN.Text.Trim();
+
+            // Kiểm tra nếu độ dài của SN đã đủ
+            if (SN.Length == 10)
+            //if (SN.Length == ClsUnitManagercs.cls_Units[UnitIndex].SN_Length)
+            {
+                if (txt_SN.Text.Length == 0)
+                {
+                    MessageBox.Show("Please input the serial number.");
+                    return;
+                }
+                // Nếu đủ độ dài, thực hiện hành động cần thiết
+                ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.SN = txt_SN.Text.Trim();
+                txt_SN.Enabled = false;  // Vô hiệu hóa TextBox sau khi nhập đủ SN
             }
         }
     }

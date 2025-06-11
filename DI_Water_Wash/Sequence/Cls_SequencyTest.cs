@@ -836,7 +836,7 @@ namespace DI_Water_Wash
             {
                 case TestSeq.SN_INSERT:
                     {
-                        int num = 5000;
+                        int num = 10000;
                         int num2 = 0;
                         int num3 = 100;
                         AccessInsertSN = true;

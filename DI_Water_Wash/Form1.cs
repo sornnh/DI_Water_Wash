@@ -112,6 +112,7 @@ namespace DI_Water_Wash
             catch
             { }
             timer1.Start();
+            timer2.Start();
             StateCommon.LoadingText += "Setting thread update resuorce completed\r\n";
             StateCommon.LoadingValue = 10;
             StateCommon.LoadingText += "Create DataBase Connection...\r\n";
@@ -1149,36 +1150,41 @@ namespace DI_Water_Wash
 
         private void txt_Fixture_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter)
+            switch (e.KeyCode)
             {
-                string text = txt_Fixture.Text;
-
-                if (!string.IsNullOrEmpty(text))
-                {
-                    char lastChar = text[text.Length - 1];
-
-                    // Chuyển thành chuỗi để dùng TryParse
-                    if (int.TryParse(lastChar.ToString(), out int number))
+                case Keys.D1:
+                case Keys.NumPad1:
+                    if ((ClsUnitManagercs.cls_Units[0].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.WAIT ||
+                    ClsUnitManagercs.cls_Units[0].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.SN_INSERT)
+                    && ClsUnitManagercs.cls_Units[0].cls_SequencyTest.testSeq != Cls_SequencyTest.TestSeq.ERROR)
                     {
-                        if (number > 3)
-                        {
-                            log.Error("Fixture number must be less than or equal to 3");
-                            return;
-                        }
-                        if((ClsUnitManagercs.cls_Units[number - 1].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.WAIT||
-                           ClsUnitManagercs.cls_Units[number - 1].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.SN_INSERT)
-                           && ClsUnitManagercs.cls_Units[number - 1].cls_SequencyTest.testSeq != Cls_SequencyTest.TestSeq.ERROR)
-                        {
-                            uC_MaintTests[number - 1].SetSNForTest();
-                            ClsUnitManagercs.cls_Units[number - 1].cls_SequencyTest.testSeq = Cls_SequencyTest.TestSeq.SN_INSERT;
-                        }    
+                        uC_MaintTests[0].SetSNForTest();
+                        ClsUnitManagercs.cls_Units[0].cls_SequencyTest.testSeq = Cls_SequencyTest.TestSeq.SN_INSERT;
                     }
-                    else
+                    txt_Fixture.Text = ""; // Xóa nội dung TextBox sau khi xử lý
+                    break;
+                case Keys.D2:
+                case Keys.NumPad2:
+                    if ((ClsUnitManagercs.cls_Units[1].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.WAIT ||
+                    ClsUnitManagercs.cls_Units[1].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.SN_INSERT)
+                    && ClsUnitManagercs.cls_Units[1].cls_SequencyTest.testSeq != Cls_SequencyTest.TestSeq.ERROR)
                     {
-                        log.Error("Ký tự cuối không phải là số nguyên");
+                        uC_MaintTests[1].SetSNForTest();
+                        ClsUnitManagercs.cls_Units[1].cls_SequencyTest.testSeq = Cls_SequencyTest.TestSeq.SN_INSERT;
                     }
-                }
-                txt_Fixture.Text= ""; // Xóa nội dung TextBox sau khi xử lý
+                    txt_Fixture.Text = ""; // Xóa nội dung TextBox sau khi xử lý
+                    break;
+                case Keys.D3:
+                case Keys.NumPad3:
+                    if ((ClsUnitManagercs.cls_Units[2].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.WAIT ||
+                    ClsUnitManagercs.cls_Units[2].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.SN_INSERT)
+                    && ClsUnitManagercs.cls_Units[2].cls_SequencyTest.testSeq != Cls_SequencyTest.TestSeq.ERROR)
+                    {
+                        uC_MaintTests[2].SetSNForTest();
+                        ClsUnitManagercs.cls_Units[2].cls_SequencyTest.testSeq = Cls_SequencyTest.TestSeq.SN_INSERT;
+                    }
+                    txt_Fixture.Text = ""; // Xóa nội dung TextBox sau khi xử lý
+                    break;
             }
         }
         private int previousTestModeIndex = -1;
@@ -1245,6 +1251,22 @@ namespace DI_Water_Wash
         {
             //ClsUnitManagercs.cls_Units[1].cls_SequencyCommon.process = StateCommon.ProcessState.Running;
             //ClsUnitManagercs.cls_Units[1].cls_SequencyTest.testSeq = Cls_SequencyTest.TestSeq.TEST_PASS;
+        }
+
+        private void timer2_Tick(object sender, EventArgs e)
+        {
+            if(ClsUnitManagercs.cls_Units[0] == null ||
+                ClsUnitManagercs.cls_Units[1] == null ||
+                ClsUnitManagercs.cls_Units[2] == null)
+            {
+                return;
+            }
+            if (ClsUnitManagercs.cls_Units[0].cls_SequencyTest.testSeq != Cls_SequencyTest.TestSeq.SN_INSERT&&
+                ClsUnitManagercs.cls_Units[1].cls_SequencyTest.testSeq != Cls_SequencyTest.TestSeq.SN_INSERT&&
+                ClsUnitManagercs.cls_Units[2].cls_SequencyTest.testSeq != Cls_SequencyTest.TestSeq.SN_INSERT)
+            {
+                txt_Fixture.Focus();
+            }
         }
     }
 }
