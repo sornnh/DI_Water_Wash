@@ -1,4 +1,5 @@
-﻿using System;
+﻿using log4net;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -10,8 +11,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Hosting;
 using System.Windows.Forms;
-using log4net;
 using static DI_Water_Wash.Cls_ASPcontrol;
+using static System.Net.Mime.MediaTypeNames;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace DI_Water_Wash
 {
@@ -21,6 +23,7 @@ namespace DI_Water_Wash
 
         public enum TestSeq
         {
+            NONE = -2, // Trạng thái không có quá trình nào đang chạy
             ERROR = -1,
             WAIT = 9999,
             SN_INSERT = 0,
@@ -39,9 +42,11 @@ namespace DI_Water_Wash
             REVERSE_DRYING = 14,
             CHECKING_RESULT = 15,
             TEST_PASS = 16,
-            TEST_FAIL = 17,
-            CREATE_LOCAL_LOG = 18,
-            SAVE_DB = 19,
+            SET_LIGHT_TOWER_PASS = 17,
+            TEST_FAIL = 18,
+            SET_LIGHT_TOWER_FAIL = 19,
+            CREATE_LOCAL_LOG = 20,
+            SAVE_DB = 21,
         }
 
         //public delegate void DelShow_AddProcessLogTest_Request(DataTable sender);
@@ -56,9 +61,12 @@ namespace DI_Water_Wash
         public Stopwatch sw_reverse { get; private set; }
         public Stopwatch sw_drying { get; private set; }
         public Stopwatch sw_reverse_drying { get; private set; }
+
+        Stopwatch sw_Showpass = new Stopwatch();
+        Stopwatch sw_Showfail = new Stopwatch();
+        private bool _isTestResultShown = false;
         private static readonly ILog log = LogManager.GetLogger(typeof(Cls_ASPcontrol));
         private string TestResult;
-        private StateCommon.ProcessState _process = StateCommon.ProcessState.Idle;
 
         private Cls_ASPcontrol cls_ASPcontrol;
 
@@ -74,13 +82,7 @@ namespace DI_Water_Wash
         private string _SN = "";
 
         private bool AccessInsertSN = false;
-        private string _StationID;
-        public string StationID
-        {
-            get { return _StationID; }
-            set { _StationID = value; }
-        }
-        private TestSeq _testSeq = TestSeq.WAIT;
+        private TestSeq _testSeq = TestSeq.NONE;
         public TestSeq testSeq
         {
             get
@@ -104,11 +106,14 @@ namespace DI_Water_Wash
         public int iIndex { get; private set; }
 
         public int iADAFlowRate { get; private set; }
-
+        public int iRelayRed { get; private set; }
+        public int iRelayGreen { get; private set; }
+        public int iRelayBuzzer { get; private set; }
+        public int iRelayYellow { get; private set; }
         public byte slaveID { get; private set; }
 
         public double FlowRate { get; private set; }
-        private int _StepTesting;
+        private int _StepTesting = 0;
         private string _TestType = "Production Test";
         public string TestType 
         {
@@ -168,18 +173,6 @@ namespace DI_Water_Wash
             }
         }
 
-        public StateCommon.ProcessState process
-        {
-            get
-            {
-                return _process;
-            }
-            set
-            {
-                _process = value;
-            }
-        }
-
         public event DelShow_UpdateFlowRate_Request OnRequestUpdateFlowRate;
 
         public Cls_SequencyTest(int Index, Cls_ASPcontrol cls_ASP, ClsInverterModbus clsInverterModbus, StateCommon.InverterType inverterType)
@@ -219,6 +212,33 @@ namespace DI_Water_Wash
                     slaveID = 4;
                     break;
             }
+            switch (Index)
+            {
+                case 0:
+                    iRelayRed = 9;
+                    iRelayYellow = 10;
+                    iRelayGreen = 11;
+                    iRelayBuzzer = 12;
+                    break;
+                case 1:
+                    iRelayRed = 13;
+                    iRelayYellow = 14;
+                    iRelayGreen = 15;
+                    iRelayBuzzer = 16;
+                    break;
+                case 2:
+                    iRelayRed = 17;
+                    iRelayYellow = 18;
+                    iRelayGreen = 19;
+                    iRelayBuzzer = 20;
+                    break;
+            }
+            sw_prewash = new Stopwatch();
+            sw_flush = new Stopwatch();
+            sw_reverse = new Stopwatch();
+            sw_drying = new Stopwatch();
+            sw_reverse_drying = new Stopwatch();
+            _testSeq = TestSeq.WAIT;
             _InverterType = inverterType;
             ProductionDB.Initialize("10.102.4.20", "Production_SZ", "sa", "nuventixleo");
             ProductionDB.Open();
@@ -350,7 +370,13 @@ namespace DI_Water_Wash
                     break;
             }
         }
-
+        private async Task ShowLighTowerError()
+        {
+            await cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayRed, 1);
+            await cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayYellow, 0);
+            await cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayGreen, 0);
+            await cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayBuzzer, 1);
+        }
         public async void SwitchRelay3Way_Reverse(bool bOnOff)
         {
             if (bOnOff)
@@ -503,6 +529,7 @@ namespace DI_Water_Wash
             }
             return true;
         }
+
         private async Task<bool> Setting_Pump2Test(int rery = 5)
         {
             bool bResult = false;
@@ -666,16 +693,16 @@ namespace DI_Water_Wash
             }
             return serverTime;
         }
-        private bool SavetoDBMonths_Log(string SN,string PN,string FailCode,string proc,string step)
+        public bool SavetoDBMonths_Log(string SN, string PN, string StationID, string FailCode,string proc,string step)
         {
             DateTime dt = GetDateTimefromDB();
-            bool b = ProductionDB.SaveToLogMonths_LogTable(SN, PN,dt,_StationID, FailCode, proc, step);   
+            bool b = ProductionDB.SaveToLogMonths_LogTable(SN, PN,dt,StationID, FailCode, proc, step);   
             return b;
         }
-        private bool SaveToDBDIWaterWashLog(string SN, string PN,string wo, string FailCode, string step)
+        public bool SaveToDBDIWaterWashLog(string SN, string PN,string wo, string StationID, string FailCode, string step)
         {
             DateTime dt = GetDateTimefromDB();
-            bool b = ProductionDB.SaveToDIWaterWashLog(SN, PN, _StationID, FailCode,"",_TestType,wo, step);
+            bool b = ProductionDB.SaveToDIWaterWashLog(SN, PN, StationID, FailCode,"",_TestType,wo, step);
             return b;
         }
         private async Task<bool> Setting_Drying(int rery = 5)
@@ -790,6 +817,7 @@ namespace DI_Water_Wash
         }
         public async void LoopTest()
         {
+            
             if (!_AutoMode)
             {
                 return;
@@ -831,7 +859,7 @@ namespace DI_Water_Wash
                         break;
                     }
                 case TestSeq.SN_VERIFY:
-                    if (TestType == "Production Test")
+                    if (TestType != "Engineering Test")
                     {
                         if (IsSNValidFormat(_SN))
                         {
@@ -849,7 +877,7 @@ namespace DI_Water_Wash
                         _testSeq = TestSeq.SN_CHECK_ROUTER;
                     break;
                 case TestSeq.SN_CHECK_ROUTER:
-                    if(TestType == "Production Test")
+                    if(TestType != "Engineering Test")
                     {
                         DataTable dtResult = new DataTable();
                         int iCheckRouter = IsInProcess("DI_Water_Wash", _SN, ref dtResult);
@@ -881,6 +909,7 @@ namespace DI_Water_Wash
                     {
                         log.Error((object)$"Failed to set pump and relays for SN {_SN}.");
                         MessageBox.Show($"Failed to set pump and relays for SN {_SN}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                        await ShowLighTowerError();
                         _testSeq = TestSeq.ERROR;
                         ClsUnitManagercs.cls_Units[iIndex].cls_SequencyCommon.process = StateCommon.ProcessState.Error;
                     }
@@ -896,6 +925,7 @@ namespace DI_Water_Wash
                     {
                         log.Error((object)$"Failed to flushing relay set for SN {_SN}.");
                         MessageBox.Show($"Failed to flushing relay set for SN {_SN}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                        await ShowLighTowerError();
                         _testSeq = TestSeq.ERROR;
                         ClsUnitManagercs.cls_Units[iIndex].cls_SequencyCommon.process = StateCommon.ProcessState.Error;
                     }
@@ -908,6 +938,7 @@ namespace DI_Water_Wash
                         if (ClsUnitManagercs.cls_Units[iIndex].cls_SequencyCommon.process == StateCommon.ProcessState.Error)
                         {
                             log.Error((object)$"Process error during testing for SN {_SN}.");
+                            await ShowLighTowerError();
                             _testSeq = TestSeq.ERROR;
                             return;
                         }
@@ -924,6 +955,7 @@ namespace DI_Water_Wash
                         if (ClsUnitManagercs.cls_Units[iIndex].cls_SequencyCommon.process == StateCommon.ProcessState.Error)
                         {
                             log.Error((object)$"Process error during testing for SN {_SN}.");
+                            await ShowLighTowerError();
                             _testSeq = TestSeq.ERROR;
                             return;
                         }
@@ -943,6 +975,7 @@ namespace DI_Water_Wash
                     {
                         log.Error((object)$"Failed to Reverse relay set for SN {_SN}.");
                         MessageBox.Show($"Failed to Reverse relay set for SN {_SN}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                        await ShowLighTowerError();
                         _testSeq = TestSeq.ERROR;
                         ClsUnitManagercs.cls_Units[iIndex].cls_SequencyCommon.process = StateCommon.ProcessState.Error;
                     }
@@ -958,6 +991,7 @@ namespace DI_Water_Wash
                             if (ClsUnitManagercs.cls_Units[iIndex].cls_SequencyCommon.process == StateCommon.ProcessState.Error)
                             {
                                 log.Error((object)$"Process error during testing for SN {_SN}.");
+                                await ShowLighTowerError();
                                 _testSeq = TestSeq.ERROR;
                                 return;
                             }
@@ -985,6 +1019,7 @@ namespace DI_Water_Wash
                     {
                         log.Error((object)$"Failed to Drying relay set for SN {_SN}.");
                         MessageBox.Show($"Failed to Drying relay set for SN {_SN}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                        await ShowLighTowerError();
                         _testSeq = TestSeq.ERROR;
                         ClsUnitManagercs.cls_Units[iIndex].cls_SequencyCommon.process = StateCommon.ProcessState.Error;
                     }
@@ -997,6 +1032,7 @@ namespace DI_Water_Wash
                         if (ClsUnitManagercs.cls_Units[iIndex].cls_SequencyCommon.process == StateCommon.ProcessState.Error)
                         {
                             log.Error((object)$"Process error during testing for SN {_SN}.");
+                            await ShowLighTowerError();
                             _testSeq = TestSeq.ERROR;
                             return;
                         }
@@ -1016,6 +1052,7 @@ namespace DI_Water_Wash
                     {
                         log.Error((object)$"Failed to Reverse Drying relay set for SN {_SN}.");
                         MessageBox.Show($"Failed to Reverse Drying relay set for SN {_SN}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                        await ShowLighTowerError();
                         _testSeq = TestSeq.ERROR;
                         ClsUnitManagercs.cls_Units[iIndex].cls_SequencyCommon.process = StateCommon.ProcessState.Error;
                     }
@@ -1030,6 +1067,7 @@ namespace DI_Water_Wash
                             if (ClsUnitManagercs.cls_Units[iIndex].cls_SequencyCommon.process == StateCommon.ProcessState.Error)
                             {
                                 log.Error((object)$"Process error during testing for SN {_SN}.");
+                                await ShowLighTowerError();
                                 _testSeq = TestSeq.ERROR;
                                 return;
                             }
@@ -1062,11 +1100,22 @@ namespace DI_Water_Wash
                 case TestSeq.SAVE_DB:
                     string PN = ClsUnitManagercs.cls_Units[iIndex].AssyPN;
                     string WO = ClsUnitManagercs.cls_Units[iIndex].WO;
-                    if(SavetoDBMonths_Log(_SN, PN,TestResult, "DI_Water_Wash","1"))
+                    string Station = ClsUnitManagercs.cls_Units[iIndex].StaionID;
+                    if (TestType == "Engineering Test") TestResult = "FAIL";
+                    if (!SavetoDBMonths_Log(_SN, PN ,Station, TestResult, "DI_Water_Wash" , "1"))
                     {
                         MessageBox.Show("Failed to save DB months log failed.");
+                        await ShowLighTowerError();
+                        _testSeq = TestSeq.ERROR;
+                        break;
                     }
-                    SaveToDBDIWaterWashLog(_SN, PN,WO, TestResult,"1");
+                    if (!SaveToDBDIWaterWashLog(_SN, PN,WO, Station, TestResult,"1"))
+                    {
+                        MessageBox.Show("Failed to save DB DI_Water log failed.");
+                        await ShowLighTowerError();
+                        _testSeq = TestSeq.ERROR;
+                        break;
+                    }
                     _testSeq = TestSeq.WAIT;
                     break;
             }

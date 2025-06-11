@@ -30,7 +30,19 @@ namespace DI_Water_Wash
             }
             else
             {
-                lblInfo.Text = StateCommon.LoadingText;
+                if (richTextBox1.InvokeRequired)
+                {
+                    richTextBox1.BeginInvoke(new MethodInvoker(delegate {
+                        richTextBox1.Text =StateCommon.LoadingText + "\n";
+                        richTextBox1.ScrollToCaret();
+                    }));
+                }
+                else
+                {
+                    richTextBox1.Text = StateCommon.LoadingText + "\n";
+                    richTextBox1.ScrollToCaret();
+                }
+                
                 progressBar1.Value = StateCommon.LoadingValue;
             }
 

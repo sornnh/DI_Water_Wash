@@ -24,7 +24,17 @@ namespace DI_Water_Wash
                 Directory.CreateDirectory(@"C:\Aavid_Test\Logs"); // Tạo thư mục nếu chưa có
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+
+            var itemDB = new Cls_DBMsSQL();
+            itemDB.Initialize("10.102.4.20", "ApprovalDB", "sa", "nuventixleo");
+            string password = itemDB.GetPasswordByUser("ChangeMode");
+            if (password == null)
+            {
+                MessageBox.Show("Can't connect to DataBase. Please contact PIE Technical or IT!!!",
+                                "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            Application.Run(new Form1(password));
         }
     }
 }

@@ -200,16 +200,18 @@ namespace DI_Water_Wash
                 return false;
             }
         }
-        public async void SetAllRelayOFF()
+        public async Task SetAllRelayOFF()
         {
             await GetAllRelay();
-            for (int i=1;i<relayStates.Length;i++)
+            for (int i=0;i<relayStates.Length;i++)
             {
                 if (relayStates[i] == false)
                 {
                     continue;
                 }
-                string cmd =$"WR{i:D3}0\n";
+                int iRelay = i + 1;
+                string cmd =$"WR{iRelay:D3}0\n";
+                log.Debug((object)($"Set Relay {iRelay} to OFF: " + cmd));
                 await SendCommandAndWaitResponseAsync(cmd);
             }
         }
@@ -233,7 +235,6 @@ namespace DI_Water_Wash
                 return false;
             }
         }
-
         public async void ConnectASPSerial()
         {
             try

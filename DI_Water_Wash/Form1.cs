@@ -1,30 +1,32 @@
-﻿using System;
+﻿using DI_Water_Wash;
+using DI_Water_Wash.DataSummary;
+using DI_Water_Wash.ParameterInitial;
+using DI_Water_Wash.Sequence;
+using DI_Water_Wash.Unit;
+using LinkPNReplace;
+using log4net;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Text;
+using System.IO;
+using System.IO.Ports;
 using System.Linq;
 using System.Management;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
+using System.Xml.Linq;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using System.Reflection;
-using System.IO;
-using System.Collections;
-using System.Drawing.Text;
-using System.Runtime.InteropServices;
-using DI_Water_Wash;
-using System.IO.Ports;
-using log4net;
-using DI_Water_Wash.Sequence;
-using System.Xml.Linq;
-using System.Windows.Forms.DataVisualization.Charting;
-using DI_Water_Wash.DataSummary;
-using DI_Water_Wash.Unit;
 
 
 namespace DI_Water_Wash
@@ -72,6 +74,7 @@ namespace DI_Water_Wash
         private System.Windows.Forms.TextBox[] ADVShow = new System.Windows.Forms.TextBox[4];
         private System.Windows.Forms.TextBox[] ADIShow = new System.Windows.Forms.TextBox[4];
         NestMenu nestMenu = NestMenu.None;
+        private string Station;
         enum NestMenu
         {
             None,Nest1, Nest2, Nest3, Nest4,
@@ -80,10 +83,11 @@ namespace DI_Water_Wash
         {
 
         }
-        public Form1()
+        private string password;
+        public Form1( string pass)
         {
             InitializeComponent();
-            
+            password =pass;
             ThreadPool.QueueUserWorkItem(o =>
             {
                 FrmLoading frmLoading = new FrmLoading();
@@ -174,7 +178,6 @@ namespace DI_Water_Wash
                 for (int i = 0; i < ClsUnitManagercs.cls_Units.Length; i++)
                 {
                     ClsUnitManagercs.cls_Units[i].cls_SequencyCommon.AutoMode = AutoMode;
-                    ClsUnitManagercs.cls_Units[i].cls_SequencyCommon.AutoMode = AutoMode;
                     ClsUnitManagercs.cls_Units[i].cls_SequencyTest.OnRequestUpdateFlowRate += delegate (Cls_SequencyTest sender)
                     {
                         if (base.InvokeRequired)
@@ -214,6 +217,8 @@ namespace DI_Water_Wash
                 pl_SNHistory.Controls.Add(uC_SerialNumberHistory);
                 StateCommon.LoadingText += "Create Data History Query completed\r\n";
                 StateCommon.LoadingValue = 80;
+                StateCommon.LoadingText += "Set All Relay to turn OFF\r\n";
+                SetAllRelayOFF();
                 StateCommon.LoadingText += "Complete\r\n";
                 StateCommon.LoadingValue = 100;
                 StateCommon.bLoading = false;
@@ -431,6 +436,7 @@ namespace DI_Water_Wash
             try
             {
                 this.cbb_TestMode.Items.AddRange(Testmodes);
+                this.cbb_TestMode.SelectedIndex = 0;
                 this.cbbASPComPort.Items.AddRange(SerialPort.GetPortNames());
                 this.cbbASPBaudrate.Items.AddRange(Baudrates.Cast<object>().ToArray());
                 this.cbbASPDataBit.Items.AddRange(DataBits.Cast<object>().ToArray());
@@ -489,7 +495,21 @@ namespace DI_Water_Wash
                 AssyPN[i] = array2[1].Trim();
                 WorkOder[i]= array2[2].Trim();
             }
-            ClsUnitManagercs.Initialize(AssyPN, WorkOder, cls_AS, clsInverterModbus);
+            string stationID = ClsIO.ReadValue("LOGGING_DATA", "Tester_ID", "", "C:\\Aavid_Test\\Setup-ini\\LCS_Logging_Setup.ini");
+            if (stationID.Length == 0)
+            {
+                using (var stationForm = new Frm_ShowInputStation())
+                {
+                    var result = stationForm.ShowDialog();
+
+                    if (result == DialogResult.OK)
+                    {
+                        stationID = stationForm.EnteredStation;
+                    }
+                }
+                ClsIO.WriteValue("LOGGING_DATA", "Tester_ID", stationID, "C:\\Aavid_Test\\Setup-ini\\LCS_Logging_Setup.ini");
+            }
+            ClsUnitManagercs.Initialize(AssyPN, WorkOder, stationID, cls_AS, clsInverterModbus);
             GenerateProcess();
             Panel[] array3 = new Panel[3] { pl_PNInfor1, pl_PNInfor2, pl_PNInfor3 };
             Panel[] pl_main = new Panel[3] { pl_Main1, pl_Main2, pl_Main3 };
@@ -619,6 +639,7 @@ namespace DI_Water_Wash
         {
             DateTime dtNow = DateTime.Now;
             this.lb_Date.Text = dtNow.ToString("yyyy-MM-dd HH:mm:ss");
+
         }
         private void UpdateRelayStatus(bool[] relays)
         {
@@ -726,6 +747,16 @@ namespace DI_Water_Wash
                 this.lb_ASPConnected.Text = "Disconnected";
                 this.lb_ASPConnected.BackColor = Color.Red;
             }
+            lb_StationID.Text = ClsUnitManagercs.cls_Units[0].StaionID;
+            AutoMode = true;
+            DisableAllControl();
+            btn_ChangeMode.Text = "AUTO";
+            for (int i = 0; i < ClsUnitManagercs.cls_Units.Length; i++)
+            {
+                ClsUnitManagercs.cls_Units[i].cls_SequencyCommon.AutoMode = true;
+                ClsUnitManagercs.cls_Units[i].cls_SequencyCommon.AutoMode = true;
+            }
+            button4.Enabled = true;
         }
 
         private void btn_SaveASPPort_Click(object sender, EventArgs e)
@@ -1150,20 +1181,70 @@ namespace DI_Water_Wash
                 txt_Fixture.Text= ""; // Xóa nội dung TextBox sau khi xử lý
             }
         }
-
+        private int previousTestModeIndex = -1;
         private void cbb_TestMode_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if(cbb_TestMode.SelectedIndex == 2)
+            {
+                using (var passwordForm = new Frm_PasswordInput())
+                {
+                    var result = passwordForm.ShowDialog();
 
+                    if (result == DialogResult.OK)
+                    {
+                        string Inputpassword = passwordForm.EnteredPassword;
+                        if (Inputpassword != password)
+                        {
+                            MessageBox.Show("Sai mật khẩu!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            // Quay lại giá trị cũ
+                            cbb_TestMode.SelectedIndex = previousTestModeIndex;
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        cbb_TestMode.SelectedIndex = previousTestModeIndex;
+                        return;
+                    }    
+                }
+            }    
+            for (int i = 0; i < ClsUnitManagercs.cls_Units.Length; i++)
+            {
+                ClsUnitManagercs.cls_Units[i].cls_SequencyTest.TestType = cbb_TestMode.Text;
+            }
+            // Cập nhật chỉ số đã chọn gần nhất
+            previousTestModeIndex = cbb_TestMode.SelectedIndex;
+        }
+        private async void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            
         }
 
-        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        private async void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            ASP_ControlPort.SetAllRelayOFF();
-        }
+            if (!_isClosingHandled)
+            {
+                e.Cancel = true; // Chặn form đóng ngay
+                _isClosingHandled = true;
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+                // Optional: Hiện thông báo hoặc loading
+                this.Enabled = false; // Khoá UI nếu cần
+
+                await ASP_ControlPort.SetAllRelayOFF();
+
+                this.Enabled = true;
+                this.Close(); // Đóng form lại sau khi hoàn tất
+            }
+        }
+        private bool _isClosingHandled = false;
+        private async void SetAllRelayOFF()
         {
-            ASP_ControlPort.SetAllRelayOFF();
+            await ASP_ControlPort.SetAllRelayOFF();
+        }
+        private void button4_Click(object sender, EventArgs e)
+        {
+            //ClsUnitManagercs.cls_Units[1].cls_SequencyCommon.process = StateCommon.ProcessState.Running;
+            //ClsUnitManagercs.cls_Units[1].cls_SequencyTest.testSeq = Cls_SequencyTest.TestSeq.TEST_PASS;
         }
     }
 }

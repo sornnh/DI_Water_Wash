@@ -24,6 +24,23 @@ namespace DI_Water_Wash.Unit
             lb_Status.Text= "Ready for test";
             lb_TotalCycle.Text= ClsUnitManagercs.cls_Units[UnitIndex].iWash_Cycle.ToString();
             timer1.Start();
+            pictureBox1.Image = Image.FromFile(@"panel.jpg");
+        }
+        public void funAddLog_Auto(string _text)
+        {
+            if (!richTextBox1.Created) return;
+            if (richTextBox1.InvokeRequired)
+            {
+                richTextBox1.BeginInvoke(new MethodInvoker(delegate {
+                    richTextBox1.AppendText(_text + "\n");
+                    richTextBox1.ScrollToCaret();
+                }));
+            }
+            else
+            {
+                richTextBox1.AppendText(_text + "\n");
+                richTextBox1.ScrollToCaret();
+            }
         }
         public void SetSNForTest()
         {
@@ -93,6 +110,7 @@ namespace DI_Water_Wash.Unit
                         }
                     }
                     catch { }
+                    
                 }
             }
             catch { }
@@ -106,6 +124,16 @@ namespace DI_Water_Wash.Unit
             }
             else
                 progressBar1.Value = value;
+        }
+        private void UpdatePercentTotal(int value)
+        {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action(() => UpdatePercent(value)));
+                return;
+            }
+            else
+                procTesting.Value = value;
         }
         private void timer1_Tick(object sender, EventArgs e)
         {
@@ -137,8 +165,10 @@ namespace DI_Water_Wash.Unit
                     Updatelabel("Pre Washing", lb_CycleTest);
                     Updatelabel(ClsUnitManagercs.cls_Units[UnitIndex].iPre_Washing_Time.ToString(), lb_TimeStep);
                     Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.sw_prewash.ElapsedMilliseconds / 1000).ToString("0"), lb_CurrentTime);
+                    UpdatePercentTotal(10);
                     break;
                 case Cls_SequencyTest.TestSeq.FLUSHING_WASHING:
+                    UpdatePercentTotal(70);
                     Updatelabel("Washing", lb_CycleTest);
                     Updatelabel(ClsUnitManagercs.cls_Units[UnitIndex].iWashing_Time.ToString(), lb_TimeStep);
                     Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.sw_flush.ElapsedMilliseconds / 1000).ToString("0"), lb_CurrentTime);
@@ -157,6 +187,7 @@ namespace DI_Water_Wash.Unit
                     Updatelabel("Reverse Drying", lb_CycleTest);
                     Updatelabel(ClsUnitManagercs.cls_Units[UnitIndex].iReverse_DI_Drying_Time.ToString(), lb_TimeStep);
                     Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.sw_reverse_drying.ElapsedMilliseconds / 1000).ToString("0"), lb_CurrentTime);
+                    UpdatePercentTotal(100);
                     break;
                 default:
                     txt_SN.Enabled = false;

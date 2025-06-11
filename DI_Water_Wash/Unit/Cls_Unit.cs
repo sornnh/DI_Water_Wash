@@ -21,6 +21,7 @@ namespace DI_Water_Wash
 
         private string _AssyPN;
         private string _WO;
+        private string _StationID;
         public bool Verify_Serial_No { get; private set; }
 
         public bool Verify_Thermal_Test { get; private set; }
@@ -63,6 +64,7 @@ namespace DI_Water_Wash
 
         public string AssyPN => _AssyPN;
         public string WO => _WO;
+        public string StaionID => _StationID;
         public string[] verifyFlags { get; private set; }
 
         public int SN_Length { get; private set; }
@@ -167,13 +169,14 @@ namespace DI_Water_Wash
 
         public double iN2FillPressureTolerance { get; private set; }
 
-        public Cls_Unit(int unitIndex, string assyPN,string Workoder , Cls_ASPcontrol cls_AS, ClsInverterModbus clsInverter)
+        public Cls_Unit(int unitIndex, string assyPN,string Workoder ,string StationID, Cls_ASPcontrol cls_AS, ClsInverterModbus clsInverter)
         {
             try
             {
                 _UnitIndex = unitIndex;
                 _AssyPN = assyPN;
                 _WO = Workoder;
+                _StationID = StationID;
                 cls_ASPcontrol = cls_AS;
                 Cls_InverterModbus = clsInverter;
                 cls_SequencyCommon = new Cls_SequencyCommon(unitIndex, cls_ASPcontrol);
@@ -184,7 +187,7 @@ namespace DI_Water_Wash
                 cls_SequencyTest = new Cls_SequencyTest(unitIndex, cls_ASPcontrol, Cls_InverterModbus, StateCommon.InverterType.ASP);
                 Thread thrTest = new Thread(funThreadTest);
                 thrTest.IsBackground = true;
-                thrTest.Name = "ThreadCommon";
+                thrTest.Name = "ThreadTest";
                 thrTest.Start();
                 cls_SequencyCommon.AutoMode = true;
                 cls_SequencyCommon.process = StateCommon.ProcessState.Idle;

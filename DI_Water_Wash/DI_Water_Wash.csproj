@@ -32,6 +32,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>icon_b_500x500 %281%29.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="log4net, Version=3.1.0.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.3.1.0\lib\net462\log4net.dll</HintPath>
@@ -80,6 +83,18 @@
     </Compile>
     <Compile Include="ParameterInitial\Frm_ChangePartNumber.Designer.cs">
       <DependentUpon>Frm_ChangePartNumber.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ParameterInitial\Frm_PasswordInput.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ParameterInitial\Frm_PasswordInput.Designer.cs">
+      <DependentUpon>Frm_PasswordInput.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ParameterInitial\Frm_ShowInputStation.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ParameterInitial\Frm_ShowInputStation.Designer.cs">
+      <DependentUpon>Frm_ShowInputStation.cs</DependentUpon>
     </Compile>
     <Compile Include="ParameterInitial\UC_SelectPartNumber.cs">
       <SubType>UserControl</SubType>
@@ -158,6 +173,12 @@
     <EmbeddedResource Include="ParameterInitial\Frm_ChangePartNumber.resx">
       <DependentUpon>Frm_ChangePartNumber.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="ParameterInitial\Frm_PasswordInput.resx">
+      <DependentUpon>Frm_PasswordInput.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ParameterInitial\Frm_ShowInputStation.resx">
+      <DependentUpon>Frm_ShowInputStation.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ParameterInitial\UC_SelectPartNumber.resx">
       <DependentUpon>UC_SelectPartNumber.cs</DependentUpon>
     </EmbeddedResource>
@@ -217,6 +238,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\3643772-archive-archives-document-folder-open_113445.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="icon_b_500x500 %281%29.ico" />
+    <Content Include="icon_b_500x500.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

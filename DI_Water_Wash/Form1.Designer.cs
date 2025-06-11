@@ -30,8 +30,8 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.TestLog = new System.Windows.Forms.TabPage();
@@ -43,6 +43,9 @@
             this.tableLayoutPanel24 = new System.Windows.Forms.TableLayoutPanel();
             this.label43 = new System.Windows.Forms.Label();
             this.cbb_TestMode = new System.Windows.Forms.ComboBox();
+            this.tableLayoutPanel25 = new System.Windows.Forms.TableLayoutPanel();
+            this.label44 = new System.Windows.Forms.Label();
+            this.lb_StationID = new System.Windows.Forms.Label();
             this.SerialHistory = new System.Windows.Forms.TabPage();
             this.pl_Report = new System.Windows.Forms.Panel();
             this.Report = new System.Windows.Forms.TabPage();
@@ -157,6 +160,7 @@
             this.txt_PVFlow = new System.Windows.Forms.TextBox();
             this.label19 = new System.Windows.Forms.Label();
             this.btn_AdjustFlow = new System.Windows.Forms.Button();
+            this.button4 = new System.Windows.Forms.Button();
             this.label20 = new System.Windows.Forms.Label();
             this.btn_SetFlow = new System.Windows.Forms.Button();
             this.label18 = new System.Windows.Forms.Label();
@@ -201,6 +205,7 @@
             this.TestLog.SuspendLayout();
             this.tbl_Main.SuspendLayout();
             this.tableLayoutPanel24.SuspendLayout();
+            this.tableLayoutPanel25.SuspendLayout();
             this.SerialHistory.SuspendLayout();
             this.Report.SuspendLayout();
             this.PNInfor.SuspendLayout();
@@ -298,6 +303,7 @@
             this.tbl_Main.Controls.Add(this.pl_Main3, 2, 0);
             this.tbl_Main.Controls.Add(this.txt_Fixture, 1, 1);
             this.tbl_Main.Controls.Add(this.tableLayoutPanel24, 0, 1);
+            this.tbl_Main.Controls.Add(this.tableLayoutPanel25, 2, 1);
             this.tbl_Main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tbl_Main.Location = new System.Drawing.Point(3, 3);
             this.tbl_Main.Name = "tbl_Main";
@@ -380,6 +386,45 @@
             this.cbb_TestMode.Size = new System.Drawing.Size(198, 25);
             this.cbb_TestMode.TabIndex = 1;
             this.cbb_TestMode.SelectedIndexChanged += new System.EventHandler(this.cbb_TestMode_SelectedIndexChanged);
+            // 
+            // tableLayoutPanel25
+            // 
+            this.tableLayoutPanel25.ColumnCount = 2;
+            this.tableLayoutPanel25.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel25.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel25.Controls.Add(this.label44, 0, 0);
+            this.tableLayoutPanel25.Controls.Add(this.lb_StationID, 1, 0);
+            this.tableLayoutPanel25.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel25.Location = new System.Drawing.Point(831, 734);
+            this.tableLayoutPanel25.Name = "tableLayoutPanel25";
+            this.tableLayoutPanel25.RowCount = 1;
+            this.tableLayoutPanel25.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel25.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel25.Size = new System.Drawing.Size(409, 30);
+            this.tableLayoutPanel25.TabIndex = 5;
+            // 
+            // label44
+            // 
+            this.label44.AutoSize = true;
+            this.label44.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label44.Location = new System.Drawing.Point(3, 0);
+            this.label44.Name = "label44";
+            this.label44.Size = new System.Drawing.Size(198, 30);
+            this.label44.TabIndex = 0;
+            this.label44.Text = "Station ID:";
+            this.label44.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lb_StationID
+            // 
+            this.lb_StationID.AutoSize = true;
+            this.lb_StationID.BackColor = System.Drawing.Color.White;
+            this.lb_StationID.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lb_StationID.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lb_StationID.Location = new System.Drawing.Point(207, 0);
+            this.lb_StationID.Name = "lb_StationID";
+            this.lb_StationID.Size = new System.Drawing.Size(199, 30);
+            this.lb_StationID.TabIndex = 1;
+            this.lb_StationID.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // SerialHistory
             // 
@@ -918,11 +963,11 @@
             // 
             // chart_Flow
             // 
-            chartArea2.Name = "ChartArea1";
-            this.chart_Flow.ChartAreas.Add(chartArea2);
+            chartArea1.Name = "ChartArea1";
+            this.chart_Flow.ChartAreas.Add(chartArea1);
             this.chart_Flow.Dock = System.Windows.Forms.DockStyle.Fill;
-            legend2.Name = "Legend1";
-            this.chart_Flow.Legends.Add(legend2);
+            legend1.Name = "Legend1";
+            this.chart_Flow.Legends.Add(legend1);
             this.chart_Flow.Location = new System.Drawing.Point(4, 22);
             this.chart_Flow.Name = "chart_Flow";
             this.chart_Flow.Size = new System.Drawing.Size(650, 344);
@@ -1595,6 +1640,7 @@
             this.tableLayoutPanel23.Controls.Add(this.txt_PVFlow, 2, 5);
             this.tableLayoutPanel23.Controls.Add(this.label19, 1, 5);
             this.tableLayoutPanel23.Controls.Add(this.btn_AdjustFlow, 0, 5);
+            this.tableLayoutPanel23.Controls.Add(this.button4, 2, 9);
             this.tableLayoutPanel23.Controls.Add(this.label20, 3, 4);
             this.tableLayoutPanel23.Controls.Add(this.btn_SetFlow, 0, 4);
             this.tableLayoutPanel23.Controls.Add(this.label18, 1, 4);
@@ -1810,6 +1856,16 @@
             this.btn_AdjustFlow.TabIndex = 0;
             this.btn_AdjustFlow.Text = "Adjust Flow";
             this.btn_AdjustFlow.UseVisualStyleBackColor = true;
+            // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(198, 301);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(75, 23);
+            this.button4.TabIndex = 20;
+            this.button4.Text = "button3";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
             // label20
             // 
@@ -2245,9 +2301,10 @@
             this.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.ClientSize = new System.Drawing.Size(1263, 911);
             this.Controls.Add(this.tableLayoutPanel1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Form1";
+            this.Text = "BOYD Corp";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
@@ -2259,6 +2316,8 @@
             this.tbl_Main.PerformLayout();
             this.tableLayoutPanel24.ResumeLayout(false);
             this.tableLayoutPanel24.PerformLayout();
+            this.tableLayoutPanel25.ResumeLayout(false);
+            this.tableLayoutPanel25.PerformLayout();
             this.SerialHistory.ResumeLayout(false);
             this.Report.ResumeLayout(false);
             this.PNInfor.ResumeLayout(false);
@@ -2486,6 +2545,10 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel24;
         private System.Windows.Forms.Label label43;
         private System.Windows.Forms.ComboBox cbb_TestMode;
+        private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel25;
+        private System.Windows.Forms.Label label44;
+        private System.Windows.Forms.Label lb_StationID;
     }
 }
 

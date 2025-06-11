@@ -53,6 +53,28 @@ namespace DI_Water_Wash
             if (!IsConnected)
                 connection.Close();
         }
+        public string GetPasswordByUser(string username)
+        {
+            string password = null;
+            string query = "SELECT [Password] FROM [ApprovalDB].[dbo].[Account] WHERE [User] = @User";
+
+            try
+            {
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@User", username);
+                    Open();
+                    object result = command.ExecuteScalar();
+                    if (result != null && result != DBNull.Value)
+                    {
+                        password = result.ToString();
+                    }
+                }
+            }
+            catch { }
+            return password;
+        }
         // Truy vấn dữ liệu (SELECT)
         public DataTable ExecuteQuery(string query)
         {
