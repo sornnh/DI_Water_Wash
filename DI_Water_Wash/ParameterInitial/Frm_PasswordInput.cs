@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace LinkPNReplace
+namespace Hot_Air_Drying
 {
     public partial class Frm_PasswordInput : Form
     {

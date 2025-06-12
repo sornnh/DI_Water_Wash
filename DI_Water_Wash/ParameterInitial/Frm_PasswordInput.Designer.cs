@@ -1,4 +1,4 @@
-﻿namespace LinkPNReplace
+﻿namespace Hot_Air_Drying
 {
     partial class Frm_PasswordInput
     {

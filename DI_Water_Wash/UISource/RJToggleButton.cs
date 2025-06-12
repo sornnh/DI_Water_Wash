@@ -9,7 +9,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.ComponentModel;
 
-namespace DI_Water_Wash
+namespace Hot_Air_Drying
 {
     public class RJToggleButton : CheckBox
     {

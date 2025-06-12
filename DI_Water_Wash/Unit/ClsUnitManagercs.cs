@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DI_Water_Wash
+namespace Hot_Air_Drying
 {
 
     public static class ClsUnitManagercs

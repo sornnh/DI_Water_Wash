@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
 
-namespace DI_Water_Wash
+namespace Hot_Air_Drying
 {
     public partial class UC_DataSummary : UserControl
     {

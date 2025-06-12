@@ -1,4 +1,4 @@
-﻿namespace DI_Water_Wash.ParameterInitial
+﻿namespace Hot_Air_Drying
 {
     partial class Frm_ShowInputStation
     {

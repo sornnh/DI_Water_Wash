@@ -11,11 +11,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Hosting;
 using System.Windows.Forms;
-using static DI_Water_Wash.Cls_ASPcontrol;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
-namespace DI_Water_Wash
+namespace Hot_Air_Drying
 {
     public class Cls_SequencyTest
     {
@@ -824,7 +823,7 @@ namespace DI_Water_Wash
             }
             if(_testSeq == TestSeq.ERROR)
             {
-                log.Error((object)"Test sequence is in ERROR state. Cannot proceed.");
+                _SN = "";
                 return;
             }
             if (_testSeq == TestSeq.WAIT)

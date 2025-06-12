@@ -8,7 +8,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.ComponentModel;
 
-namespace DI_Water_Wash.UISource
+namespace Hot_Air_Drying
 {
     public class ToggleButton:CheckBox
     {

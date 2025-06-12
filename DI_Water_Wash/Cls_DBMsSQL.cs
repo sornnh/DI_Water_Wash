@@ -7,7 +7,7 @@ using System.Data.SqlClient;
 using System.Data;
 using log4net;
 
-namespace DI_Water_Wash
+namespace Hot_Air_Drying
 {
     public class Cls_DBMsSQL
     {

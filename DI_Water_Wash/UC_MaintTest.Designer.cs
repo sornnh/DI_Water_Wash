@@ -1,4 +1,4 @@
-﻿namespace DI_Water_Wash.Unit
+﻿namespace Hot_Air_Drying
 {
     partial class UC_MaintTest
     {
@@ -118,8 +118,8 @@
             this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 579);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 3;
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 52.20588F));
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 24.26471F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 46.42857F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 27.14286F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel2.Size = new System.Drawing.Size(402, 141);
             this.tableLayoutPanel2.TabIndex = 0;
@@ -138,7 +138,7 @@
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(394, 64);
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(394, 58);
             this.tableLayoutPanel3.TabIndex = 0;
             // 
             // tableLayoutPanel4
@@ -155,7 +155,7 @@
             this.tableLayoutPanel4.RowCount = 2;
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 48.07692F));
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 51.92308F));
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(195, 58);
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(195, 52);
             this.tableLayoutPanel4.TabIndex = 0;
             // 
             // label2
@@ -165,7 +165,7 @@
             this.label2.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.Location = new System.Drawing.Point(4, 1);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(187, 26);
+            this.label2.Size = new System.Drawing.Size(187, 23);
             this.label2.TabIndex = 0;
             this.label2.Text = "PN:";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -177,9 +177,9 @@
             this.lb_PN.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lb_PN.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lb_PN.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lb_PN.Location = new System.Drawing.Point(4, 28);
+            this.lb_PN.Location = new System.Drawing.Point(4, 25);
             this.lb_PN.Name = "lb_PN";
-            this.lb_PN.Size = new System.Drawing.Size(187, 29);
+            this.lb_PN.Size = new System.Drawing.Size(187, 26);
             this.lb_PN.TabIndex = 1;
             this.lb_PN.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
@@ -191,7 +191,7 @@
             this.lb_Result.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lb_Result.Location = new System.Drawing.Point(327, 0);
             this.lb_Result.Name = "lb_Result";
-            this.lb_Result.Size = new System.Drawing.Size(64, 64);
+            this.lb_Result.Size = new System.Drawing.Size(64, 58);
             this.lb_Result.TabIndex = 1;
             this.lb_Result.Text = "P/F";
             this.lb_Result.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -208,7 +208,7 @@
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 55.76923F));
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 17.30769F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(117, 56);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(117, 52);
             this.tableLayoutPanel5.TabIndex = 2;
             // 
             // lb_StatusMachine
@@ -217,9 +217,9 @@
             this.lb_StatusMachine.BackColor = System.Drawing.Color.Gold;
             this.lb_StatusMachine.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lb_StatusMachine.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lb_StatusMachine.Location = new System.Drawing.Point(3, 14);
+            this.lb_StatusMachine.Location = new System.Drawing.Point(3, 13);
             this.lb_StatusMachine.Name = "lb_StatusMachine";
-            this.lb_StatusMachine.Size = new System.Drawing.Size(111, 31);
+            this.lb_StatusMachine.Size = new System.Drawing.Size(111, 29);
             this.lb_StatusMachine.TabIndex = 0;
             this.lb_StatusMachine.Text = "Idle";
             this.lb_StatusMachine.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -228,12 +228,12 @@
             // 
             this.txt_SN.Dock = System.Windows.Forms.DockStyle.Fill;
             this.txt_SN.Enabled = false;
-            this.txt_SN.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txt_SN.Location = new System.Drawing.Point(4, 75);
+            this.txt_SN.Font = new System.Drawing.Font("Century Gothic", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txt_SN.Location = new System.Drawing.Point(4, 69);
             this.txt_SN.Name = "txt_SN";
-            this.txt_SN.Size = new System.Drawing.Size(394, 23);
+            this.txt_SN.Size = new System.Drawing.Size(394, 31);
             this.txt_SN.TabIndex = 1;
-            this.txt_SN.TextChanged += new System.EventHandler(this.txt_SN_TextChanged); 
+            this.txt_SN.TextChanged += new System.EventHandler(this.txt_SN_TextChanged);
             // 
             // tableLayoutPanel6
             // 
@@ -242,12 +242,12 @@
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 70.70707F));
             this.tableLayoutPanel6.Controls.Add(this.lb_Status, 1, 0);
             this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel6.Location = new System.Drawing.Point(4, 108);
+            this.tableLayoutPanel6.Location = new System.Drawing.Point(4, 107);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 1;
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 29F));
-            this.tableLayoutPanel6.Size = new System.Drawing.Size(394, 29);
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(394, 30);
             this.tableLayoutPanel6.TabIndex = 2;
             // 
             // lb_Status
@@ -259,7 +259,7 @@
             this.lb_Status.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lb_Status.Location = new System.Drawing.Point(118, 0);
             this.lb_Status.Name = "lb_Status";
-            this.lb_Status.Size = new System.Drawing.Size(273, 29);
+            this.lb_Status.Size = new System.Drawing.Size(273, 30);
             this.lb_Status.TabIndex = 0;
             this.lb_Status.Text = "Null";
             this.lb_Status.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;

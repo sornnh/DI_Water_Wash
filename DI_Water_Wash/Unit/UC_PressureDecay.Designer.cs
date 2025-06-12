@@ -1,4 +1,4 @@
-﻿namespace DI_Water_Wash.Unit
+﻿namespace Hot_Air_Drying
 {
     partial class UC_PressureDecay
     {

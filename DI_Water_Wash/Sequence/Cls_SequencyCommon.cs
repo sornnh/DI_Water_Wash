@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DI_Water_Wash.Sequence
+namespace Hot_Air_Drying
 {
     public class Cls_SequencyCommon
     {
@@ -40,22 +40,22 @@ namespace DI_Water_Wash.Sequence
             switch (Index)
             {
                 case 0:
-                    iRelayRed = 8;
-                    iRelayYellow = 9;
-                    iRelayGreen = 10;
-                    iRelayBuzzer = 11;
+                    iRelayRed = 9;
+                    iRelayYellow = 10;
+                    iRelayGreen = 11;
+                    iRelayBuzzer = 12;
                     break;
                 case 1:
-                    iRelayRed = 12;
-                    iRelayYellow = 13;
-                    iRelayGreen = 14;
-                    iRelayBuzzer = 15;
+                    iRelayRed = 13;
+                    iRelayYellow = 14;
+                    iRelayGreen = 15;
+                    iRelayBuzzer = 16;
                     break;
                 case 2:
-                    iRelayRed = 16;
-                    iRelayYellow = 17;
-                    iRelayGreen = 18;
-                    iRelayBuzzer = 19;
+                    iRelayRed = 17;
+                    iRelayYellow = 18;
+                    iRelayGreen = 19;
+                    iRelayBuzzer = 20;
                     break;
             }
         }
@@ -74,39 +74,39 @@ namespace DI_Water_Wash.Sequence
             switch (_process)
             {
                 case StateCommon.ProcessState.Idle:
-                    if (Cls_ASPcontrol.relayStates[iRelayRed])
+                    if (Cls_ASPcontrol.relayStates[iRelayRed-1])
                     {
-                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayRed + 1, 0);
+                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayRed, 0);
                     }
-                    if (!Cls_ASPcontrol.relayStates[iRelayGreen])
+                    if (!Cls_ASPcontrol.relayStates[iRelayGreen-1])
                     {
-                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayGreen + 1, 1);
+                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayGreen, 1);
                     }
-                    if (!Cls_ASPcontrol.relayStates[iRelayYellow])
+                    if (!Cls_ASPcontrol.relayStates[iRelayYellow - 1])
                     {
-                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayYellow + 1, 1);
+                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayYellow, 1);
                     }
-                    if (Cls_ASPcontrol.relayStates[iRelayBuzzer])
+                    if (Cls_ASPcontrol.relayStates[iRelayBuzzer - 1])
                     {
-                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayBuzzer + 1, 0);
+                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayBuzzer, 0);
                     }
                     break;
                 case StateCommon.ProcessState.Running:
-                    if (Cls_ASPcontrol.relayStates[iRelayRed])
+                    if (Cls_ASPcontrol.relayStates[iRelayRed - 1])
                     {
-                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayRed + 1, 0);
+                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayRed, 0);
                     }
-                    if (!Cls_ASPcontrol.relayStates[iRelayGreen])
+                    if (!Cls_ASPcontrol.relayStates[iRelayGreen - 1])
                     {
-                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayGreen + 1, 1);
+                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayGreen, 1);
                     }
-                    if (Cls_ASPcontrol.relayStates[iRelayYellow])
+                    if (Cls_ASPcontrol.relayStates[iRelayYellow - 1])
                     {
-                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayYellow + 1, 0);
+                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayYellow, 0);
                     }
-                    if (Cls_ASPcontrol.relayStates[iRelayBuzzer])
+                    if (Cls_ASPcontrol.relayStates[iRelayBuzzer - 1])
                     {
-                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayBuzzer + 1, 0);
+                        await Cls_ASPcontrol.SetRelayONOFFAsyncCheckResult(iRelayBuzzer, 0);
                     }
                     break;
                 case StateCommon.ProcessState.CompletedPass:

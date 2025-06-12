@@ -1,4 +1,4 @@
-﻿namespace DI_Water_Wash
+﻿namespace Hot_Air_Drying
 {
     partial class Form1
     {
@@ -30,8 +30,8 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.TestLog = new System.Windows.Forms.TabPage();
@@ -145,7 +145,10 @@
             this.tableLayoutPanel22 = new System.Windows.Forms.TableLayoutPanel();
             this.label28 = new System.Windows.Forms.Label();
             this.tableLayoutPanel23 = new System.Windows.Forms.TableLayoutPanel();
+            this.Tbtn_ReverserFlow = new Hot_Air_Drying.RJToggleButton();
+            this.Tbtn_Pump = new Hot_Air_Drying.RJToggleButton();
             this.lb_StageStatus = new System.Windows.Forms.Label();
+            this.Tbtn_3WaySwitch = new Hot_Air_Drying.RJToggleButton();
             this.label24 = new System.Windows.Forms.Label();
             this.label27 = new System.Windows.Forms.Label();
             this.label26 = new System.Windows.Forms.Label();
@@ -197,9 +200,6 @@
             this.lb_Date = new System.Windows.Forms.Label();
             this.lb_Station = new System.Windows.Forms.Label();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.Tbtn_ReverserFlow = new DI_Water_Wash.RJToggleButton();
-            this.Tbtn_Pump = new DI_Water_Wash.RJToggleButton();
-            this.Tbtn_3WaySwitch = new DI_Water_Wash.RJToggleButton();
             this.timer2 = new System.Windows.Forms.Timer(this.components);
             this.tableLayoutPanel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -349,6 +349,7 @@
             this.txt_Fixture.Name = "txt_Fixture";
             this.txt_Fixture.Size = new System.Drawing.Size(408, 27);
             this.txt_Fixture.TabIndex = 3;
+            this.txt_Fixture.TextChanged += new System.EventHandler(this.txt_Fixture_TextChanged);
             this.txt_Fixture.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txt_Fixture_KeyDown);
             // 
             // tableLayoutPanel24
@@ -788,7 +789,7 @@
             this.tableLayoutPanel10.Name = "tableLayoutPanel10";
             this.tableLayoutPanel10.RowCount = 1;
             this.tableLayoutPanel10.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel10.Size = new System.Drawing.Size(1189, 621);
+            this.tableLayoutPanel10.Size = new System.Drawing.Size(1189, 617);
             this.tableLayoutPanel10.TabIndex = 1;
             // 
             // dgv2
@@ -800,7 +801,7 @@
             this.dgv2.Location = new System.Drawing.Point(1013, 4);
             this.dgv2.Name = "dgv2";
             this.dgv2.ScrollBars = System.Windows.Forms.ScrollBars.Horizontal;
-            this.dgv2.Size = new System.Drawing.Size(172, 613);
+            this.dgv2.Size = new System.Drawing.Size(172, 609);
             this.dgv2.TabIndex = 1;
             // 
             // ProcessFixture2
@@ -814,7 +815,7 @@
             this.pl_PNInfor2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pl_PNInfor2.Location = new System.Drawing.Point(4, 4);
             this.pl_PNInfor2.Name = "pl_PNInfor2";
-            this.pl_PNInfor2.Size = new System.Drawing.Size(1002, 613);
+            this.pl_PNInfor2.Size = new System.Drawing.Size(1002, 609);
             this.pl_PNInfor2.TabIndex = 2;
             // 
             // Fixture3
@@ -903,7 +904,7 @@
             this.tableLayoutPanel12.RowCount = 2;
             this.tableLayoutPanel12.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel12.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel12.Size = new System.Drawing.Size(1222, 765);
+            this.tableLayoutPanel12.Size = new System.Drawing.Size(1219, 765);
             this.tableLayoutPanel12.TabIndex = 0;
             // 
             // tableLayoutPanel13
@@ -921,13 +922,13 @@
             this.tableLayoutPanel13.Name = "tableLayoutPanel13";
             this.tableLayoutPanel13.RowCount = 1;
             this.tableLayoutPanel13.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel13.Size = new System.Drawing.Size(1216, 376);
+            this.tableLayoutPanel13.Size = new System.Drawing.Size(1213, 376);
             this.tableLayoutPanel13.TabIndex = 0;
             // 
             // rtb_ASPPortBuffer
             // 
             this.rtb_ASPPortBuffer.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.rtb_ASPPortBuffer.Location = new System.Drawing.Point(910, 3);
+            this.rtb_ASPPortBuffer.Location = new System.Drawing.Point(907, 3);
             this.rtb_ASPPortBuffer.Name = "rtb_ASPPortBuffer";
             this.rtb_ASPPortBuffer.Size = new System.Drawing.Size(303, 370);
             this.rtb_ASPPortBuffer.TabIndex = 2;
@@ -947,7 +948,7 @@
             this.tableLayoutPanel20.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 4.878049F));
             this.tableLayoutPanel20.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 95.12195F));
             this.tableLayoutPanel20.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel20.Size = new System.Drawing.Size(660, 370);
+            this.tableLayoutPanel20.Size = new System.Drawing.Size(658, 370);
             this.tableLayoutPanel20.TabIndex = 3;
             // 
             // label17
@@ -957,21 +958,21 @@
             this.label17.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label17.Location = new System.Drawing.Point(4, 1);
             this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(652, 17);
+            this.label17.Size = new System.Drawing.Size(650, 17);
             this.label17.TabIndex = 1;
             this.label17.Text = "Flow Control";
             this.label17.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // chart_Flow
             // 
-            chartArea4.Name = "ChartArea1";
-            this.chart_Flow.ChartAreas.Add(chartArea4);
+            chartArea1.Name = "ChartArea1";
+            this.chart_Flow.ChartAreas.Add(chartArea1);
             this.chart_Flow.Dock = System.Windows.Forms.DockStyle.Fill;
-            legend4.Name = "Legend1";
-            this.chart_Flow.Legends.Add(legend4);
+            legend1.Name = "Legend1";
+            this.chart_Flow.Legends.Add(legend1);
             this.chart_Flow.Location = new System.Drawing.Point(4, 22);
             this.chart_Flow.Name = "chart_Flow";
-            this.chart_Flow.Size = new System.Drawing.Size(652, 344);
+            this.chart_Flow.Size = new System.Drawing.Size(650, 344);
             this.chart_Flow.TabIndex = 3;
             this.chart_Flow.Text = "chart1";
             // 
@@ -980,10 +981,10 @@
             this.tabControl4.Controls.Add(this.tabPage1);
             this.tabControl4.Controls.Add(this.tabPage2);
             this.tabControl4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl4.Location = new System.Drawing.Point(669, 3);
+            this.tabControl4.Location = new System.Drawing.Point(667, 3);
             this.tabControl4.Name = "tabControl4";
             this.tabControl4.SelectedIndex = 0;
-            this.tabControl4.Size = new System.Drawing.Size(235, 370);
+            this.tabControl4.Size = new System.Drawing.Size(234, 370);
             this.tabControl4.TabIndex = 4;
             // 
             // tabPage1
@@ -992,7 +993,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 26);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(227, 340);
+            this.tabPage1.Size = new System.Drawing.Size(226, 340);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "ASP Serial Port";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -1031,7 +1032,7 @@
             this.tableLayoutPanel15.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
             this.tableLayoutPanel15.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
             this.tableLayoutPanel15.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
-            this.tableLayoutPanel15.Size = new System.Drawing.Size(221, 334);
+            this.tableLayoutPanel15.Size = new System.Drawing.Size(220, 334);
             this.tableLayoutPanel15.TabIndex = 2;
             // 
             // label12
@@ -1040,7 +1041,7 @@
             this.label12.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label12.Location = new System.Drawing.Point(3, 0);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(79, 26);
+            this.label12.Size = new System.Drawing.Size(78, 26);
             this.label12.TabIndex = 0;
             this.label12.Text = "COM Port:";
             this.label12.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1051,7 +1052,7 @@
             this.label13.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label13.Location = new System.Drawing.Point(3, 26);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(79, 27);
+            this.label13.Size = new System.Drawing.Size(78, 27);
             this.label13.TabIndex = 0;
             this.label13.Text = "Baudrate:";
             this.label13.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1062,7 +1063,7 @@
             this.label14.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label14.Location = new System.Drawing.Point(3, 53);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(79, 27);
+            this.label14.Size = new System.Drawing.Size(78, 27);
             this.label14.TabIndex = 0;
             this.label14.Text = "DataBit:";
             this.label14.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1073,7 +1074,7 @@
             this.label15.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label15.Location = new System.Drawing.Point(3, 80);
             this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(79, 26);
+            this.label15.Size = new System.Drawing.Size(78, 26);
             this.label15.TabIndex = 0;
             this.label15.Text = "Parity:";
             this.label15.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1084,7 +1085,7 @@
             this.label16.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label16.Location = new System.Drawing.Point(3, 106);
             this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(79, 27);
+            this.label16.Size = new System.Drawing.Size(78, 27);
             this.label16.TabIndex = 0;
             this.label16.Text = "StopBit:";
             this.label16.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1093,7 +1094,7 @@
             // 
             this.cbbASPComPort.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cbbASPComPort.FormattingEnabled = true;
-            this.cbbASPComPort.Location = new System.Drawing.Point(88, 3);
+            this.cbbASPComPort.Location = new System.Drawing.Point(87, 3);
             this.cbbASPComPort.Name = "cbbASPComPort";
             this.cbbASPComPort.Size = new System.Drawing.Size(130, 25);
             this.cbbASPComPort.TabIndex = 1;
@@ -1102,7 +1103,7 @@
             // 
             this.cbbASPBaudrate.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cbbASPBaudrate.FormattingEnabled = true;
-            this.cbbASPBaudrate.Location = new System.Drawing.Point(88, 29);
+            this.cbbASPBaudrate.Location = new System.Drawing.Point(87, 29);
             this.cbbASPBaudrate.Name = "cbbASPBaudrate";
             this.cbbASPBaudrate.Size = new System.Drawing.Size(130, 25);
             this.cbbASPBaudrate.TabIndex = 1;
@@ -1111,7 +1112,7 @@
             // 
             this.cbbASPDataBit.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cbbASPDataBit.FormattingEnabled = true;
-            this.cbbASPDataBit.Location = new System.Drawing.Point(88, 56);
+            this.cbbASPDataBit.Location = new System.Drawing.Point(87, 56);
             this.cbbASPDataBit.Name = "cbbASPDataBit";
             this.cbbASPDataBit.Size = new System.Drawing.Size(130, 25);
             this.cbbASPDataBit.TabIndex = 1;
@@ -1130,7 +1131,7 @@
             // 
             this.cbbASPParity.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cbbASPParity.FormattingEnabled = true;
-            this.cbbASPParity.Location = new System.Drawing.Point(88, 83);
+            this.cbbASPParity.Location = new System.Drawing.Point(87, 83);
             this.cbbASPParity.Name = "cbbASPParity";
             this.cbbASPParity.Size = new System.Drawing.Size(130, 25);
             this.cbbASPParity.TabIndex = 1;
@@ -1139,7 +1140,7 @@
             // 
             this.cbbASPStopBit.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cbbASPStopBit.FormattingEnabled = true;
-            this.cbbASPStopBit.Location = new System.Drawing.Point(88, 109);
+            this.cbbASPStopBit.Location = new System.Drawing.Point(87, 109);
             this.cbbASPStopBit.Name = "cbbASPStopBit";
             this.cbbASPStopBit.Size = new System.Drawing.Size(130, 25);
             this.cbbASPStopBit.TabIndex = 1;
@@ -1147,7 +1148,7 @@
             // btn_SaveASPPort
             // 
             this.btn_SaveASPPort.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btn_SaveASPPort.Location = new System.Drawing.Point(88, 198);
+            this.btn_SaveASPPort.Location = new System.Drawing.Point(87, 198);
             this.btn_SaveASPPort.Name = "btn_SaveASPPort";
             this.btn_SaveASPPort.Size = new System.Drawing.Size(130, 27);
             this.btn_SaveASPPort.TabIndex = 2;
@@ -1161,19 +1162,19 @@
             this.lb_ASPConnected.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lb_ASPConnected.Location = new System.Drawing.Point(3, 133);
             this.lb_ASPConnected.Name = "lb_ASPConnected";
-            this.lb_ASPConnected.Size = new System.Drawing.Size(79, 62);
+            this.lb_ASPConnected.Size = new System.Drawing.Size(78, 62);
             this.lb_ASPConnected.TabIndex = 3;
             // 
             // txt_Command
             // 
-            this.txt_Command.Location = new System.Drawing.Point(88, 264);
+            this.txt_Command.Location = new System.Drawing.Point(87, 264);
             this.txt_Command.Name = "txt_Command";
             this.txt_Command.Size = new System.Drawing.Size(130, 23);
             this.txt_Command.TabIndex = 4;
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(88, 297);
+            this.button1.Location = new System.Drawing.Point(87, 297);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 5;
@@ -1223,7 +1224,7 @@
             this.tableLayoutPanel21.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
             this.tableLayoutPanel21.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
             this.tableLayoutPanel21.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
-            this.tableLayoutPanel21.Size = new System.Drawing.Size(221, 338);
+            this.tableLayoutPanel21.Size = new System.Drawing.Size(221, 334);
             this.tableLayoutPanel21.TabIndex = 3;
             // 
             // label37
@@ -1232,7 +1233,7 @@
             this.label37.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label37.Location = new System.Drawing.Point(3, 0);
             this.label37.Name = "label37";
-            this.label37.Size = new System.Drawing.Size(79, 27);
+            this.label37.Size = new System.Drawing.Size(79, 26);
             this.label37.TabIndex = 0;
             this.label37.Text = "COM Port:";
             this.label37.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1241,9 +1242,9 @@
             // 
             this.label38.AutoSize = true;
             this.label38.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label38.Location = new System.Drawing.Point(3, 27);
+            this.label38.Location = new System.Drawing.Point(3, 26);
             this.label38.Name = "label38";
-            this.label38.Size = new System.Drawing.Size(79, 28);
+            this.label38.Size = new System.Drawing.Size(79, 27);
             this.label38.TabIndex = 0;
             this.label38.Text = "Baudrate:";
             this.label38.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1252,9 +1253,9 @@
             // 
             this.label39.AutoSize = true;
             this.label39.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label39.Location = new System.Drawing.Point(3, 55);
+            this.label39.Location = new System.Drawing.Point(3, 53);
             this.label39.Name = "label39";
-            this.label39.Size = new System.Drawing.Size(79, 28);
+            this.label39.Size = new System.Drawing.Size(79, 27);
             this.label39.TabIndex = 0;
             this.label39.Text = "DataBit:";
             this.label39.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1263,9 +1264,9 @@
             // 
             this.label40.AutoSize = true;
             this.label40.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label40.Location = new System.Drawing.Point(3, 83);
+            this.label40.Location = new System.Drawing.Point(3, 80);
             this.label40.Name = "label40";
-            this.label40.Size = new System.Drawing.Size(79, 27);
+            this.label40.Size = new System.Drawing.Size(79, 26);
             this.label40.TabIndex = 0;
             this.label40.Text = "Parity:";
             this.label40.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1274,9 +1275,9 @@
             // 
             this.label41.AutoSize = true;
             this.label41.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label41.Location = new System.Drawing.Point(3, 110);
+            this.label41.Location = new System.Drawing.Point(3, 106);
             this.label41.Name = "label41";
-            this.label41.Size = new System.Drawing.Size(79, 28);
+            this.label41.Size = new System.Drawing.Size(79, 27);
             this.label41.TabIndex = 0;
             this.label41.Text = "StopBit:";
             this.label41.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1294,7 +1295,7 @@
             // 
             this.cbb_InverterBaudrate.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cbb_InverterBaudrate.FormattingEnabled = true;
-            this.cbb_InverterBaudrate.Location = new System.Drawing.Point(88, 30);
+            this.cbb_InverterBaudrate.Location = new System.Drawing.Point(88, 29);
             this.cbb_InverterBaudrate.Name = "cbb_InverterBaudrate";
             this.cbb_InverterBaudrate.Size = new System.Drawing.Size(130, 25);
             this.cbb_InverterBaudrate.TabIndex = 1;
@@ -1303,7 +1304,7 @@
             // 
             this.cbb_InverterDatabit.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cbb_InverterDatabit.FormattingEnabled = true;
-            this.cbb_InverterDatabit.Location = new System.Drawing.Point(88, 58);
+            this.cbb_InverterDatabit.Location = new System.Drawing.Point(88, 56);
             this.cbb_InverterDatabit.Name = "cbb_InverterDatabit";
             this.cbb_InverterDatabit.Size = new System.Drawing.Size(130, 25);
             this.cbb_InverterDatabit.TabIndex = 1;
@@ -1312,7 +1313,7 @@
             // 
             this.cbb_InverterParity.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cbb_InverterParity.FormattingEnabled = true;
-            this.cbb_InverterParity.Location = new System.Drawing.Point(88, 86);
+            this.cbb_InverterParity.Location = new System.Drawing.Point(88, 83);
             this.cbb_InverterParity.Name = "cbb_InverterParity";
             this.cbb_InverterParity.Size = new System.Drawing.Size(130, 25);
             this.cbb_InverterParity.TabIndex = 1;
@@ -1321,7 +1322,7 @@
             // 
             this.cbb_InverterStopbit.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cbb_InverterStopbit.FormattingEnabled = true;
-            this.cbb_InverterStopbit.Location = new System.Drawing.Point(88, 113);
+            this.cbb_InverterStopbit.Location = new System.Drawing.Point(88, 109);
             this.cbb_InverterStopbit.Name = "cbb_InverterStopbit";
             this.cbb_InverterStopbit.Size = new System.Drawing.Size(130, 25);
             this.cbb_InverterStopbit.TabIndex = 1;
@@ -1329,9 +1330,9 @@
             // btn_InverterSave
             // 
             this.btn_InverterSave.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btn_InverterSave.Location = new System.Drawing.Point(88, 203);
+            this.btn_InverterSave.Location = new System.Drawing.Point(88, 198);
             this.btn_InverterSave.Name = "btn_InverterSave";
-            this.btn_InverterSave.Size = new System.Drawing.Size(130, 28);
+            this.btn_InverterSave.Size = new System.Drawing.Size(130, 27);
             this.btn_InverterSave.TabIndex = 2;
             this.btn_InverterSave.Text = "Save";
             this.btn_InverterSave.UseVisualStyleBackColor = true;
@@ -1341,7 +1342,7 @@
             // 
             this.label42.AutoSize = true;
             this.label42.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label42.Location = new System.Drawing.Point(3, 138);
+            this.label42.Location = new System.Drawing.Point(3, 133);
             this.label42.Name = "label42";
             this.label42.Size = new System.Drawing.Size(79, 62);
             this.label42.TabIndex = 3;
@@ -1364,7 +1365,7 @@
             this.tableLayoutPanel17.RowCount = 1;
             this.tableLayoutPanel17.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel17.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 376F));
-            this.tableLayoutPanel17.Size = new System.Drawing.Size(1216, 377);
+            this.tableLayoutPanel17.Size = new System.Drawing.Size(1213, 377);
             this.tableLayoutPanel17.TabIndex = 1;
             // 
             // rtb_DetailRelay
@@ -1373,7 +1374,7 @@
             this.rtb_DetailRelay.Location = new System.Drawing.Point(4, 4);
             this.rtb_DetailRelay.Name = "rtb_DetailRelay";
             this.rtb_DetailRelay.ReadOnly = true;
-            this.rtb_DetailRelay.Size = new System.Drawing.Size(297, 369);
+            this.rtb_DetailRelay.Size = new System.Drawing.Size(296, 369);
             this.rtb_DetailRelay.TabIndex = 0;
             this.rtb_DetailRelay.Text = resources.GetString("rtb_DetailRelay.Text");
             this.rtb_DetailRelay.TextChanged += new System.EventHandler(this.rtb_DetailRelay_TextChanged);
@@ -1390,7 +1391,7 @@
             this.tableLayoutPanel14.Controls.Add(this.lb_Buzzer, 0, 3);
             this.tableLayoutPanel14.Controls.Add(this.tableLayoutPanel16, 0, 4);
             this.tableLayoutPanel14.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel14.Location = new System.Drawing.Point(308, 4);
+            this.tableLayoutPanel14.Location = new System.Drawing.Point(307, 4);
             this.tableLayoutPanel14.Name = "tableLayoutPanel14";
             this.tableLayoutPanel14.RowCount = 5;
             this.tableLayoutPanel14.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
@@ -1398,7 +1399,7 @@
             this.tableLayoutPanel14.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel14.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel14.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tableLayoutPanel14.Size = new System.Drawing.Size(200, 369);
+            this.tableLayoutPanel14.Size = new System.Drawing.Size(199, 369);
             this.tableLayoutPanel14.TabIndex = 1;
             // 
             // lb_Red
@@ -1409,7 +1410,7 @@
             this.lb_Red.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lb_Red.Location = new System.Drawing.Point(3, 0);
             this.lb_Red.Name = "lb_Red";
-            this.lb_Red.Size = new System.Drawing.Size(194, 73);
+            this.lb_Red.Size = new System.Drawing.Size(193, 73);
             this.lb_Red.TabIndex = 3;
             this.lb_Red.Text = "RED";
             this.lb_Red.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -1423,7 +1424,7 @@
             this.lb_Yellow.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lb_Yellow.Location = new System.Drawing.Point(3, 73);
             this.lb_Yellow.Name = "lb_Yellow";
-            this.lb_Yellow.Size = new System.Drawing.Size(194, 73);
+            this.lb_Yellow.Size = new System.Drawing.Size(193, 73);
             this.lb_Yellow.TabIndex = 4;
             this.lb_Yellow.Text = "YELLOW";
             this.lb_Yellow.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -1437,7 +1438,7 @@
             this.lb_Green.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lb_Green.Location = new System.Drawing.Point(3, 146);
             this.lb_Green.Name = "lb_Green";
-            this.lb_Green.Size = new System.Drawing.Size(194, 73);
+            this.lb_Green.Size = new System.Drawing.Size(193, 73);
             this.lb_Green.TabIndex = 5;
             this.lb_Green.Text = "GREEN";
             this.lb_Green.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -1451,7 +1452,7 @@
             this.lb_Buzzer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lb_Buzzer.Location = new System.Drawing.Point(3, 219);
             this.lb_Buzzer.Name = "lb_Buzzer";
-            this.lb_Buzzer.Size = new System.Drawing.Size(194, 73);
+            this.lb_Buzzer.Size = new System.Drawing.Size(193, 73);
             this.lb_Buzzer.TabIndex = 6;
             this.lb_Buzzer.Text = "BUZZER";
             this.lb_Buzzer.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -1473,7 +1474,7 @@
             this.tableLayoutPanel16.RowCount = 1;
             this.tableLayoutPanel16.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel16.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 70F));
-            this.tableLayoutPanel16.Size = new System.Drawing.Size(194, 71);
+            this.tableLayoutPanel16.Size = new System.Drawing.Size(193, 71);
             this.tableLayoutPanel16.TabIndex = 7;
             // 
             // lb_Nest1
@@ -1509,7 +1510,7 @@
             this.lb_Nest3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lb_Nest3.Location = new System.Drawing.Point(132, 1);
             this.lb_Nest3.Name = "lb_Nest3";
-            this.lb_Nest3.Size = new System.Drawing.Size(58, 69);
+            this.lb_Nest3.Size = new System.Drawing.Size(57, 69);
             this.lb_Nest3.TabIndex = 2;
             this.lb_Nest3.Text = "Nest 3";
             this.lb_Nest3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -1522,7 +1523,7 @@
             this.tableLayoutPanel18.Controls.Add(this.tbl_RelayControl, 0, 1);
             this.tableLayoutPanel18.Controls.Add(this.tableLayoutPanel19, 0, 0);
             this.tableLayoutPanel18.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel18.Location = new System.Drawing.Point(914, 4);
+            this.tableLayoutPanel18.Location = new System.Drawing.Point(911, 4);
             this.tableLayoutPanel18.Name = "tableLayoutPanel18";
             this.tableLayoutPanel18.RowCount = 2;
             this.tableLayoutPanel18.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10.18767F));
@@ -1598,12 +1599,12 @@
             this.tableLayoutPanel22.Controls.Add(this.label28, 0, 0);
             this.tableLayoutPanel22.Controls.Add(this.tableLayoutPanel23, 0, 1);
             this.tableLayoutPanel22.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel22.Location = new System.Drawing.Point(515, 4);
+            this.tableLayoutPanel22.Location = new System.Drawing.Point(513, 4);
             this.tableLayoutPanel22.Name = "tableLayoutPanel22";
             this.tableLayoutPanel22.RowCount = 2;
             this.tableLayoutPanel22.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 7.859078F));
             this.tableLayoutPanel22.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 92.14092F));
-            this.tableLayoutPanel22.Size = new System.Drawing.Size(392, 369);
+            this.tableLayoutPanel22.Size = new System.Drawing.Size(391, 369);
             this.tableLayoutPanel22.TabIndex = 3;
             // 
             // label28
@@ -1613,7 +1614,7 @@
             this.label28.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label28.Location = new System.Drawing.Point(3, 0);
             this.label28.Name = "label28";
-            this.label28.Size = new System.Drawing.Size(386, 28);
+            this.label28.Size = new System.Drawing.Size(385, 28);
             this.label28.TabIndex = 5;
             this.label28.Text = "ADC Reading (mV/mA)";
             this.label28.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1677,8 +1678,40 @@
             this.tableLayoutPanel23.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
             this.tableLayoutPanel23.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
             this.tableLayoutPanel23.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
-            this.tableLayoutPanel23.Size = new System.Drawing.Size(386, 335);
+            this.tableLayoutPanel23.Size = new System.Drawing.Size(385, 335);
             this.tableLayoutPanel23.TabIndex = 4;
+            // 
+            // Tbtn_ReverserFlow
+            // 
+            this.Tbtn_ReverserFlow.AutoSize = true;
+            this.Tbtn_ReverserFlow.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Tbtn_ReverserFlow.Location = new System.Drawing.Point(109, 301);
+            this.Tbtn_ReverserFlow.MinimumSize = new System.Drawing.Size(45, 22);
+            this.Tbtn_ReverserFlow.Name = "Tbtn_ReverserFlow";
+            this.Tbtn_ReverserFlow.OffBackColor = System.Drawing.Color.Gray;
+            this.Tbtn_ReverserFlow.OffToggleColor = System.Drawing.Color.Gainsboro;
+            this.Tbtn_ReverserFlow.OnBackColor = System.Drawing.Color.MediumSlateBlue;
+            this.Tbtn_ReverserFlow.OnToggleColor = System.Drawing.Color.WhiteSmoke;
+            this.Tbtn_ReverserFlow.Size = new System.Drawing.Size(82, 30);
+            this.Tbtn_ReverserFlow.TabIndex = 19;
+            this.Tbtn_ReverserFlow.UseVisualStyleBackColor = true;
+            this.Tbtn_ReverserFlow.CheckedChanged += new System.EventHandler(this.Tbtn_ReverserFlow_CheckedChanged);
+            // 
+            // Tbtn_Pump
+            // 
+            this.Tbtn_Pump.AutoSize = true;
+            this.Tbtn_Pump.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Tbtn_Pump.Location = new System.Drawing.Point(109, 268);
+            this.Tbtn_Pump.MinimumSize = new System.Drawing.Size(45, 22);
+            this.Tbtn_Pump.Name = "Tbtn_Pump";
+            this.Tbtn_Pump.OffBackColor = System.Drawing.Color.Gray;
+            this.Tbtn_Pump.OffToggleColor = System.Drawing.Color.Gainsboro;
+            this.Tbtn_Pump.OnBackColor = System.Drawing.Color.MediumSlateBlue;
+            this.Tbtn_Pump.OnToggleColor = System.Drawing.Color.WhiteSmoke;
+            this.Tbtn_Pump.Size = new System.Drawing.Size(82, 26);
+            this.Tbtn_Pump.TabIndex = 18;
+            this.Tbtn_Pump.UseVisualStyleBackColor = true;
+            this.Tbtn_Pump.CheckedChanged += new System.EventHandler(this.Tbtn_Pump_CheckedChanged);
             // 
             // lb_StageStatus
             // 
@@ -1687,10 +1720,26 @@
             this.lb_StageStatus.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lb_StageStatus.Location = new System.Drawing.Point(297, 265);
             this.lb_StageStatus.Name = "lb_StageStatus";
-            this.lb_StageStatus.Size = new System.Drawing.Size(85, 32);
+            this.lb_StageStatus.Size = new System.Drawing.Size(84, 32);
             this.lb_StageStatus.TabIndex = 11;
             this.lb_StageStatus.Text = "Idle";
             this.lb_StageStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // Tbtn_3WaySwitch
+            // 
+            this.Tbtn_3WaySwitch.AutoSize = true;
+            this.Tbtn_3WaySwitch.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Tbtn_3WaySwitch.Location = new System.Drawing.Point(109, 235);
+            this.Tbtn_3WaySwitch.MinimumSize = new System.Drawing.Size(45, 22);
+            this.Tbtn_3WaySwitch.Name = "Tbtn_3WaySwitch";
+            this.Tbtn_3WaySwitch.OffBackColor = System.Drawing.Color.Gray;
+            this.Tbtn_3WaySwitch.OffToggleColor = System.Drawing.Color.Gainsboro;
+            this.Tbtn_3WaySwitch.OnBackColor = System.Drawing.Color.MediumSlateBlue;
+            this.Tbtn_3WaySwitch.OnToggleColor = System.Drawing.Color.WhiteSmoke;
+            this.Tbtn_3WaySwitch.Size = new System.Drawing.Size(82, 26);
+            this.Tbtn_3WaySwitch.TabIndex = 17;
+            this.Tbtn_3WaySwitch.UseVisualStyleBackColor = true;
+            this.Tbtn_3WaySwitch.CheckedChanged += new System.EventHandler(this.Tbtn_3WaySwitch_CheckedChanged);
             // 
             // label24
             // 
@@ -1742,7 +1791,7 @@
             this.label23.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label23.Location = new System.Drawing.Point(297, 199);
             this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(85, 32);
+            this.label23.Size = new System.Drawing.Size(84, 32);
             this.label23.TabIndex = 7;
             this.label23.Text = "LPM";
             this.label23.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1774,7 +1823,7 @@
             this.label21.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label21.Location = new System.Drawing.Point(297, 166);
             this.label21.Name = "label21";
-            this.label21.Size = new System.Drawing.Size(85, 32);
+            this.label21.Size = new System.Drawing.Size(84, 32);
             this.label21.TabIndex = 6;
             this.label21.Text = "LPM";
             this.label21.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1826,7 +1875,7 @@
             this.label20.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label20.Location = new System.Drawing.Point(297, 133);
             this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(85, 32);
+            this.label20.Size = new System.Drawing.Size(84, 32);
             this.label20.TabIndex = 5;
             this.label20.Text = "LPM";
             this.label20.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1977,7 +2026,7 @@
             this.txt_ADI1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.txt_ADI1.Location = new System.Drawing.Point(297, 4);
             this.txt_ADI1.Name = "txt_ADI1";
-            this.txt_ADI1.Size = new System.Drawing.Size(85, 23);
+            this.txt_ADI1.Size = new System.Drawing.Size(84, 23);
             this.txt_ADI1.TabIndex = 12;
             // 
             // txt_ADI2
@@ -1985,7 +2034,7 @@
             this.txt_ADI2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.txt_ADI2.Location = new System.Drawing.Point(297, 37);
             this.txt_ADI2.Name = "txt_ADI2";
-            this.txt_ADI2.Size = new System.Drawing.Size(85, 23);
+            this.txt_ADI2.Size = new System.Drawing.Size(84, 23);
             this.txt_ADI2.TabIndex = 13;
             // 
             // txt_ADI3
@@ -1993,7 +2042,7 @@
             this.txt_ADI3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.txt_ADI3.Location = new System.Drawing.Point(297, 70);
             this.txt_ADI3.Name = "txt_ADI3";
-            this.txt_ADI3.Size = new System.Drawing.Size(85, 23);
+            this.txt_ADI3.Size = new System.Drawing.Size(84, 23);
             this.txt_ADI3.TabIndex = 14;
             // 
             // txt_ADI4
@@ -2001,7 +2050,7 @@
             this.txt_ADI4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.txt_ADI4.Location = new System.Drawing.Point(297, 103);
             this.txt_ADI4.Name = "txt_ADI4";
-            this.txt_ADI4.Size = new System.Drawing.Size(85, 23);
+            this.txt_ADI4.Size = new System.Drawing.Size(84, 23);
             this.txt_ADI4.TabIndex = 15;
             // 
             // btn_ChangeMode
@@ -2247,54 +2296,6 @@
             // 
             this.timer1.Interval = 1000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
-            // 
-            // Tbtn_ReverserFlow
-            // 
-            this.Tbtn_ReverserFlow.AutoSize = true;
-            this.Tbtn_ReverserFlow.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.Tbtn_ReverserFlow.Location = new System.Drawing.Point(109, 301);
-            this.Tbtn_ReverserFlow.MinimumSize = new System.Drawing.Size(45, 22);
-            this.Tbtn_ReverserFlow.Name = "Tbtn_ReverserFlow";
-            this.Tbtn_ReverserFlow.OffBackColor = System.Drawing.Color.Gray;
-            this.Tbtn_ReverserFlow.OffToggleColor = System.Drawing.Color.Gainsboro;
-            this.Tbtn_ReverserFlow.OnBackColor = System.Drawing.Color.MediumSlateBlue;
-            this.Tbtn_ReverserFlow.OnToggleColor = System.Drawing.Color.WhiteSmoke;
-            this.Tbtn_ReverserFlow.Size = new System.Drawing.Size(82, 30);
-            this.Tbtn_ReverserFlow.TabIndex = 19;
-            this.Tbtn_ReverserFlow.UseVisualStyleBackColor = true;
-            this.Tbtn_ReverserFlow.CheckedChanged += new System.EventHandler(this.Tbtn_ReverserFlow_CheckedChanged);
-            // 
-            // Tbtn_Pump
-            // 
-            this.Tbtn_Pump.AutoSize = true;
-            this.Tbtn_Pump.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.Tbtn_Pump.Location = new System.Drawing.Point(109, 268);
-            this.Tbtn_Pump.MinimumSize = new System.Drawing.Size(45, 22);
-            this.Tbtn_Pump.Name = "Tbtn_Pump";
-            this.Tbtn_Pump.OffBackColor = System.Drawing.Color.Gray;
-            this.Tbtn_Pump.OffToggleColor = System.Drawing.Color.Gainsboro;
-            this.Tbtn_Pump.OnBackColor = System.Drawing.Color.MediumSlateBlue;
-            this.Tbtn_Pump.OnToggleColor = System.Drawing.Color.WhiteSmoke;
-            this.Tbtn_Pump.Size = new System.Drawing.Size(82, 26);
-            this.Tbtn_Pump.TabIndex = 18;
-            this.Tbtn_Pump.UseVisualStyleBackColor = true;
-            this.Tbtn_Pump.CheckedChanged += new System.EventHandler(this.Tbtn_Pump_CheckedChanged);
-            // 
-            // Tbtn_3WaySwitch
-            // 
-            this.Tbtn_3WaySwitch.AutoSize = true;
-            this.Tbtn_3WaySwitch.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.Tbtn_3WaySwitch.Location = new System.Drawing.Point(109, 235);
-            this.Tbtn_3WaySwitch.MinimumSize = new System.Drawing.Size(45, 22);
-            this.Tbtn_3WaySwitch.Name = "Tbtn_3WaySwitch";
-            this.Tbtn_3WaySwitch.OffBackColor = System.Drawing.Color.Gray;
-            this.Tbtn_3WaySwitch.OffToggleColor = System.Drawing.Color.Gainsboro;
-            this.Tbtn_3WaySwitch.OnBackColor = System.Drawing.Color.MediumSlateBlue;
-            this.Tbtn_3WaySwitch.OnToggleColor = System.Drawing.Color.WhiteSmoke;
-            this.Tbtn_3WaySwitch.Size = new System.Drawing.Size(82, 26);
-            this.Tbtn_3WaySwitch.TabIndex = 17;
-            this.Tbtn_3WaySwitch.UseVisualStyleBackColor = true;
-            this.Tbtn_3WaySwitch.CheckedChanged += new System.EventHandler(this.Tbtn_3WaySwitch_CheckedChanged);
             // 
             // timer2
             // 

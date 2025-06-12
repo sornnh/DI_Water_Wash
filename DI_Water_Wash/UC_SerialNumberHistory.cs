@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace DI_Water_Wash.DataSummary
+namespace Hot_Air_Drying
 {
     public partial class UC_SerialNumberHistory : UserControl
     {

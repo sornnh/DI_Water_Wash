@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace DI_Water_Wash
+namespace Hot_Air_Drying
 {
     public partial class Frm_ChangePartNumber : Form
     {

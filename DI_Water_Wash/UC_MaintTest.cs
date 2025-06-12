@@ -8,9 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
-using DI_Water_Wash.Sequence;
 
-namespace DI_Water_Wash.Unit
+namespace Hot_Air_Drying
 {
     public partial class UC_MaintTest : UserControl
     {
@@ -116,6 +115,23 @@ namespace DI_Water_Wash.Unit
             }
             catch { }
         }
+        private void UpdatelabelwithColor(string value, Color color, Label label)
+        {
+            try
+            {
+                if (this.InvokeRequired)
+                {
+                    this.BeginInvoke(new Action(() => UpdatelabelwithColor(value,color, label)));
+                    return;
+                }
+                else
+                {
+                    label.Text = value;
+                    label.BackColor = color;
+                }
+            }
+            catch { }
+        }
         private void UpdatePercent(int value)
         {
             if (this.InvokeRequired)
@@ -160,6 +176,7 @@ namespace DI_Water_Wash.Unit
                 case Cls_SequencyTest.TestSeq.ERROR:
                     txt_SN.Enabled=false;
                     Updatelabel("ERROR", lb_Status);
+                    Updatelabel("ERROR", lb_Result);
                     break;
                 case Cls_SequencyTest.TestSeq.PRE_WASHING:
                     Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.StepTesting+1).ToString(), lb_CurentCycle);
@@ -169,7 +186,7 @@ namespace DI_Water_Wash.Unit
                     UpdatePercentTotal(10);
                     break;
                 case Cls_SequencyTest.TestSeq.FLUSHING_WASHING:
-                    UpdatePercentTotal(70);
+                    UpdatePercentTotal(40);
                     Updatelabel("Washing", lb_CycleTest);
                     Updatelabel(ClsUnitManagercs.cls_Units[UnitIndex].iWashing_Time.ToString(), lb_TimeStep);
                     Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.sw_flush.ElapsedMilliseconds / 1000).ToString("0"), lb_CurrentTime);
@@ -180,6 +197,7 @@ namespace DI_Water_Wash.Unit
                     Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.sw_reverse.ElapsedMilliseconds / 1000).ToString("0"), lb_CurrentTime);
                     break;
                 case Cls_SequencyTest.TestSeq.DRYING:
+                    UpdatePercentTotal(70);
                     Updatelabel("Drying", lb_CycleTest);
                     Updatelabel(ClsUnitManagercs.cls_Units[UnitIndex].iDI_Drying_Time.ToString(), lb_TimeStep);
                     Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.sw_drying.ElapsedMilliseconds / 1000).ToString("0"), lb_CurrentTime);
@@ -193,6 +211,7 @@ namespace DI_Water_Wash.Unit
                 default:
                     txt_SN.Enabled = false;
                     Updatelabel("Testing", lb_Status);
+                    
                     break;
             }
             switch (ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyCommon.process)
@@ -204,6 +223,7 @@ namespace DI_Water_Wash.Unit
                 case StateCommon.ProcessState.Running:
                     Updatelabel("Running", lb_StatusMachine);
                     lb_StatusMachine.BackColor = Color.Yellow;
+                    UpdatelabelwithColor("P/F", Color.Yellow, lb_Result);
                     break;
                 case StateCommon.ProcessState.CompletedPass:
                     Updatelabel("Pass", lb_StatusMachine);
@@ -220,6 +240,7 @@ namespace DI_Water_Wash.Unit
                 case StateCommon.ProcessState.Error:
                     Updatelabel("Error", lb_StatusMachine);
                     lb_StatusMachine.BackColor = Color.Red;
+                    UpdatelabelwithColor("ERROR", Color.Red, lb_Result);
                     break;
             }
         }
@@ -229,8 +250,7 @@ namespace DI_Water_Wash.Unit
             string SN = txt_SN.Text.Trim();
 
             // Kiểm tra nếu độ dài của SN đã đủ
-            if (SN.Length == 10)
-            //if (SN.Length == ClsUnitManagercs.cls_Units[UnitIndex].SN_Length)
+            if (SN.Length == ClsUnitManagercs.cls_Units[UnitIndex].SN_Length)
             {
                 if (txt_SN.Text.Length == 0)
                 {

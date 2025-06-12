@@ -9,7 +9,7 @@ using System.IO;
 
 [assembly: log4net.Config.XmlConfigurator(ConfigFile = "log4net.config", Watch = true)]
 
-namespace DI_Water_Wash
+namespace Hot_Air_Drying
 {
     internal static class Program
     {

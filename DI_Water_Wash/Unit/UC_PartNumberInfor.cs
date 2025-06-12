@@ -7,10 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DI_Water_Wash.Unit;
-using static DI_Water_Wash.UC_PartNumberInfor;
 
-namespace DI_Water_Wash
+namespace Hot_Air_Drying
 {
     public partial class UC_PartNumberInfor : UserControl
     {

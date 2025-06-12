@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Windows.Forms;
 
-namespace DI_Water_Wash
+namespace Hot_Air_Drying
 {
     public static class ClsIO
     {

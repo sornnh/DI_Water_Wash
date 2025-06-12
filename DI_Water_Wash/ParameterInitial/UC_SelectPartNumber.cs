@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.LinkLabel;
 
-namespace DI_Water_Wash
+namespace Hot_Air_Drying
 {
     public partial class UC_SelectPartNumber : UserControl
     {

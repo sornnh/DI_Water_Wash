@@ -12,7 +12,7 @@ using log4net;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
-namespace DI_Water_Wash
+namespace Hot_Air_Drying
 {
     public class Cls_ASPcontrol
     {

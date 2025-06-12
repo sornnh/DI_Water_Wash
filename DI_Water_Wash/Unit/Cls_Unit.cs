@@ -7,9 +7,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DI_Water_Wash.Sequence;
 
-namespace DI_Water_Wash
+namespace Hot_Air_Drying
 {
     public class Cls_Unit
     {
