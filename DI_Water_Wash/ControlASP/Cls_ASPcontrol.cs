@@ -31,10 +31,11 @@ namespace DI_Water_Wash
         private double[] _ADVs = new double[4];
 
         private double[] _ADIs = new double[4];
+        private double[] _ADCs = new double[8];
 
         private List<byte> _buffer = new List<byte>();
 
-        private TaskCompletionSource<string> _tcs = new TaskCompletionSource<string>();
+        private TaskCompletionSource<string[]> _tcs = new TaskCompletionSource<string[]>();
 
         public string SerialCom { get; set; }
 
@@ -58,6 +59,8 @@ namespace DI_Water_Wash
 
         public double[] ADIs => _ADIs;
 
+        public double[] ADCs => _ADCs;
+
         public bool isConnected
         {
             get
@@ -71,12 +74,17 @@ namespace DI_Water_Wash
         }
 
         public bool _isWaitingResponse { get; private set; }
+        private int _expectedLineCount = 1; // mặc định là 1 dòng
+        private List<string> _receivedLines = new List<string>();
 
         public event DelShow_addLog_Request OnRequestAddLog;
 
         public event DelShow_UpdateRelayStatus_Request OnRequestUpdateRelayStatus;
 
         public event DelShow_UpdateADC_Request OnRequestUpdateADC;
+
+        private readonly SemaphoreSlim _cmdLock = new SemaphoreSlim(1, 1); //FIFO Queue
+
 
         public Cls_ASPcontrol()
         {
@@ -100,7 +108,7 @@ namespace DI_Water_Wash
         {
             try
             {
-                string bitString = (await SendCommandAndWaitResponseAsync("RR000\n")).Substring(5, 30);
+                string bitString = (await SendCommandAndWaitLineResponseAsync("RR000\n"))[0].Substring(5, 30);
                 bool[] result = bitString.Select((char c) => c == '1').ToArray();
                 if (result.Length != 30)
                 {
@@ -125,42 +133,41 @@ namespace DI_Water_Wash
             string cmd = ((onOff == 1) ? $"WR{relay:D3}1\n" : $"WR{relay:D3}0\n");
             try
             {
-                await SendCommandAndWaitResponseAsync(cmd);
+                await SendCommandAndWaitLineResponseAsync(cmd);
             }
             catch (Exception ex)
             {
-                log.Error((object)("Lỗi gửi lệnh: " + ex.Message));
+                log.Error((object)($"Error when send command {cmd}: " + ex.Message));
             }
         }
 
         public async Task<double> GetADVAsync(int iFlowChannel)
         {
             string cmd = $"RADV{iFlowChannel}\n";
+            string subresponse = "";
+            string response = "";
             try
             {
-                string response = await SendCommandAndWaitResponseAsync(cmd);
-                string subresponse = "";
+                response = (await SendCommandAndWaitLineResponseAsync(cmd))[0];
                 if (response.Contains(cmd.Trim()))
                 {
                     subresponse = response.Substring(cmd.Length - 1);
                 }
-                _ADVs[iFlowChannel - 1] = double.Parse(subresponse) * 1000.0;
+                _ADVs[iFlowChannel - 1] = double.Parse(subresponse);
             }
             catch (Exception ex)
             {
-                Exception ex2 = ex;
-                log.Error((object)("Lỗi gửi lệnh: " + ex2.Message));
+                log.Error((object)($"Error when send command {cmd} with response {response} : " + ex.Message));
             }
             UpdateADC();
             return _ADVs[iFlowChannel - 1];
         }
-
         public async Task<double> GetADIAsync(int iFlowChannel)
         {
             string cmd = $"RADA{iFlowChannel}\n";
             try
             {
-                string response = await SendCommandAndWaitResponseAsync(cmd);
+                string response = (await SendCommandAndWaitLineResponseAsync(cmd))[0];
                 string subresponse = "";
                 if (response.Contains(cmd.Trim()))
                 {
@@ -171,12 +178,32 @@ namespace DI_Water_Wash
             catch (Exception ex)
             {
                 Exception ex2 = ex;
-                log.Error((object)("Lỗi gửi lệnh: " + ex2.Message));
+                log.Error((object)($"Error when send command {cmd}: " + ex2.Message));
             }
             UpdateADC();
             return _ADIs[iFlowChannel - 1];
         }
-
+        public async Task<double> GetADCAsync(int iFlowChannel)
+        {
+            string cmd = $"RADC{iFlowChannel}\n";
+            try
+            {
+                string response = (await SendCommandAndWaitLineResponseAsync(cmd))[0];
+                string subresponse = "";
+                if (response.Contains(cmd.Trim()))
+                {
+                    subresponse = response.Substring(cmd.Length - 1);
+                }
+                _ADCs[iFlowChannel - 1] = double.Parse(subresponse);
+            }
+            catch (Exception ex)
+            {
+                Exception ex2 = ex;
+                log.Error((object)("Lỗi gửi lệnh: " + ex2.Message));
+            }
+            UpdateADC();
+            return _ADCs[iFlowChannel - 1];
+        }
         public async Task<bool> SetRelayONOFFAsyncCheckResult(int relay, int onOff)
         {
             if (relayStates[relay - 1] == (onOff == 1))
@@ -186,7 +213,7 @@ namespace DI_Water_Wash
             string cmd = ((onOff == 1) ? $"WR{relay:D3}1\n" : $"WR{relay:D3}0\n");
             try
             {
-                await SendCommandAndWaitResponseAsync(cmd);
+                await SendCommandAndWaitLineResponseAsync(cmd);
                 await GetAllRelay();
                 if (relayStates[relay - 1] == (onOff == 1))
                 {
@@ -212,7 +239,7 @@ namespace DI_Water_Wash
                 int iRelay = i + 1;
                 string cmd =$"WR{iRelay:D3}0\n";
                 log.Debug((object)($"Set Relay {iRelay} to OFF: " + cmd));
-                await SendCommandAndWaitResponseAsync(cmd);
+                await SendCommandAndWaitLineResponseAsync(cmd);
             }
         }
         public async Task<bool> SetFlowRateCheckResult(int channel, int FlowRate)
@@ -220,7 +247,7 @@ namespace DI_Water_Wash
             try
             {
                 string cmd = $"WFLOW{channel}{FlowRate:D4}\n";
-                string response = await SendCommandAndWaitResponseAsync(cmd);
+                string response = (await SendCommandAndWaitLineResponseAsync(cmd))[0];
                 if (response.Contains(cmd.Trim()))
                 {
                     return true;
@@ -268,7 +295,7 @@ namespace DI_Water_Wash
             }
         }
 
-        public async void ASPSerialWriteCommand(string text)
+        public void ASPSerialWriteCommand(string text)
         {
             if (!_isConnected)
             {
@@ -276,7 +303,7 @@ namespace DI_Water_Wash
                 SerialPort.Open();
                 SerialPort.DataReceived += SerialPort_DataReceived;
                 _isConnected = true;
-                AddLogText(DateTime.Now.ToString("HH:mm:ss") + "+ ASP Serial RE-open");
+                AddLogText(DateTime.Now.ToString("HH:mm:ss") + "+ ASP Serial Re-open");
             }
             try
             {
@@ -304,49 +331,70 @@ namespace DI_Water_Wash
             this.OnRequestAddLog?.Invoke(_text);
         }
 
-        public async Task<string> SendCommandAndWaitResponseAsync(string command, int timeoutResponse = 1500, int timeoutAwait = 3500)
+        public async Task<string[]> SendCommandAndWaitLineResponseAsync(
+                string command,
+                int expectedLineCount = 1,
+                int timeoutResponse = 1500,
+                int timeoutAwait = 7000)
         {
-            if (SerialPort == null || !SerialPort.IsOpen)
-            {
-                try
-                {
-                    SerialPort = new SerialPort(SerialCom, Baudrate, Parity, DataBit, StopBit);
-                    SerialPort.Open();
-                    SerialPort.DataReceived += SerialPort_DataReceived;
-                    _isConnected = true;
-                    AddLogText(DateTime.Now.ToString("HH:mm:ss") + "+ ASP Serial Re-open");
-                }
-                catch (Exception)
-                {
-                    throw new InvalidOperationException("Serial port can not re-open.");
-                }
-            }
-            await WaitUntilNoPendingResponse(timeoutAwait);
-            _isWaitingResponse = true;
-            _buffer.Clear();
-            _tcs = new TaskCompletionSource<string>();
+            await _cmdLock.WaitAsync();   // 🔒 chỉ cho 1 cmd chạy
             try
             {
-                DateTime dt = DateTime.Now;
-                AddLogText($"{dt:HH:mm:ss}+ ASP Serial write: {command}");
-                SerialPort.Write(command);
-                Task completedTask = await Task.WhenAny(_tcs.Task, Task.Delay(timeoutResponse));
-                if (_tcs == null)
+                if (SerialPort == null || !SerialPort.IsOpen)
                 {
-                    throw new InvalidOperationException("TaskCompletionSource is null.");
+                    try
+                    {
+                        SerialPort = new SerialPort(SerialCom, Baudrate, Parity, DataBit, StopBit);
+                        SerialPort.Open();
+                        SerialPort.DataReceived -= SerialPort_DataReceived;
+                        SerialPort.DataReceived += SerialPort_DataReceived;
+                        _isConnected = true;
+                        AddLogText($"{DateTime.Now:HH:mm:ss.fff} ASP Serial Re-open");
+                    }
+                    catch (Exception)
+                    {
+                        throw new InvalidOperationException("Serial port can not re-open.");
+                    }
                 }
-                if (completedTask == _tcs.Task)
+
+                await WaitUntilNoPendingResponse(timeoutAwait);
+
+                _isWaitingResponse = true;
+                _buffer.Clear();
+                _receivedLines.Clear();
+                _expectedLineCount = expectedLineCount;
+
+                var tcs = new TaskCompletionSource<string[]>(TaskCreationOptions.RunContinuationsAsynchronously);
+                _tcs = tcs;
+
+                try
                 {
-                    return await _tcs.Task;
+                    AddLogText($"{DateTime.Now:HH:mm:ss.fff} ASP Serial write: {command}");
+                    SerialPort.Write(command);
+
+                    Task completedTask = await Task.WhenAny(tcs.Task, Task.Delay(timeoutResponse));
+
+                    if (completedTask == tcs.Task)
+                    {
+                        return await tcs.Task; // đủ dòng
+                    }
+
+                    _tcs = null;
+                    throw new TimeoutException("Timeout waiting for response.");
                 }
-                throw new TimeoutException("Timeout waiting for response.");
+                finally
+                {
+                    _isWaitingResponse = false;
+                    if (_tcs == tcs)
+                        _tcs = null;
+                }
             }
             finally
             {
-                _isWaitingResponse = false;
-                _tcs = null;
+                _cmdLock.Release();  // 🔓 cho command kế tiếp chạy
             }
         }
+
 
         private async Task WaitUntilNoPendingResponse(int maxWaitMs = 5000, int pollIntervalMs = 50)
         {
@@ -364,24 +412,40 @@ namespace DI_Water_Wash
 
         private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            DataReceive = "";
             try
             {
-                SerialPort serialPort = (SerialPort)sender;
-                string s = serialPort.ReadExisting();
-                _buffer.AddRange(Encoding.ASCII.GetBytes(s));
-                if (_buffer.Contains(10))
+                SerialPort sp = (SerialPort)sender;
+                string incoming = sp.ReadExisting();
+                _buffer.AddRange(Encoding.ASCII.GetBytes(incoming));
+
+                while (true)
                 {
-                    string text = Encoding.ASCII.GetString(_buffer.ToArray()).Trim();
-                    _buffer.Clear();
-                    _tcs?.TrySetResult(text);
-                    DateTime now = DateTime.Now;
-                    AddLogText($"{now:HH:mm:ss}+ ASP Serial read: {text}");
+
+                    int newLineIndex = _buffer.IndexOf(10); // LF (\n)
+                    if (newLineIndex < 0)
+                        break;
+                    byte[] lineBytes = _buffer.Take(newLineIndex + 1).ToArray();
+                    _buffer.RemoveRange(0, newLineIndex + 1);
+                    string line = Encoding.ASCII.GetString(lineBytes).Trim();
+                    if (!string.IsNullOrWhiteSpace(line))
+                    {
+                        _receivedLines.Add(line);
+                        AddLogText($"{DateTime.Now:HH:mm:ss.fff} ASP Serial read: {line}");
+                        // chỉ set nếu vẫn còn người chờ (_tcs != null)
+                        if (_tcs != null && _receivedLines.Count >= _expectedLineCount)
+                        {
+                            _tcs.TrySetResult(_receivedLines.ToArray());
+                            _tcs = null; // clear để không set lại sau timeout
+                            _receivedLines.Clear();
+                        }
+                    }
                 }
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
-                _tcs?.TrySetException(exception);
+                log.Error("Error in SerialPort_DataReceived", ex);
+                _tcs?.TrySetException(ex);
+                _tcs = null;
             }
         }
 

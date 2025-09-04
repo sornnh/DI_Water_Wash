@@ -1,10 +1,13 @@
-﻿using log4net;
+﻿using BoyD_Oven_Monitoring;
+using log4net;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -19,8 +22,7 @@ namespace DI_Water_Wash
 {
     public class Cls_SequencyTest
     {
-        public delegate void DelShow_UpdateFlowRate_Request(Cls_SequencyTest sender);
-
+        public delegate void DelShow_UpdateAnalogValue_Request(Cls_SequencyTest sender);
         public enum TestSeq
         {
             NONE = -2, // Trạng thái không có quá trình nào đang chạy
@@ -47,8 +49,27 @@ namespace DI_Water_Wash
             SET_LIGHT_TOWER_FAIL = 19,
             CREATE_LOCAL_LOG = 20,
             SAVE_DB = 21,
+            END = 22,
         }
-
+        private double Air_PressureMax = 0.0;
+        private double Air_PressureMin = 0.0;
+        private double Air_PressureVoltgeMax = 0.0;
+        private double Air_PressureVoltgeMin = 0.0;
+        private double WaterPressureMax = 0.0;
+        private double WaterPressureMin = 0.0;
+        private double WaterPressureVoltgeMax = 0.0;
+        private double WaterPressureVoltgeMin = 0.0;
+        private double FlowRateMax = 0.0;
+        private double FlowRateMin = 0.0;
+        private double FlowRateCurrentMax = 0.0;
+        private double FlowRateCurrentMin = 0.0;
+        public double FlowRate { get; private set; }
+        public double AirPressure { get; private set; }
+        public double WaterPressure { get; private set; }
+        private Form _mainForm;
+        public List<double> ListFlowRates { get; private set; } = new List<double>();
+        public List<double> ListAirPressures { get; private set; } = new List<double>();
+        public List<double> ListWaterPressures { get; private set; } = new List<double>();
         //public delegate void DelShow_AddProcessLogTest_Request(DataTable sender);
         public event EventHandler<ProcessLogEventArgs> OnRequestAddProcessLogTest;
         public class ProcessLogEventArgs : EventArgs
@@ -62,25 +83,21 @@ namespace DI_Water_Wash
         public Stopwatch sw_drying { get; private set; }
         public Stopwatch sw_reverse_drying { get; private set; }
 
-        Stopwatch sw_Showpass = new Stopwatch();
-        Stopwatch sw_Showfail = new Stopwatch();
+        public Stopwatch sw_Showpass = new Stopwatch();
+        public Stopwatch sw_Showfail = new Stopwatch();
         private bool _isTestResultShown = false;
-        private static readonly ILog log = LogManager.GetLogger(typeof(Cls_ASPcontrol));
-        private string TestResult;
-
+        private static readonly ILog log = LogManager.GetLogger(typeof(Cls_SequencyTest));
+        public string TestResult { get; private set; }
         private Cls_ASPcontrol cls_ASPcontrol;
-
         private ClsInverterModbus Cls_InverterModbus;
         Cls_DBMsSQL ProductionDB = new Cls_DBMsSQL();
-
         private bool _AutoMode = true;
-
         private StateCommon.InverterType _InverterType;
-
+        private bool _bGetAnalogValue = false;
         private bool _bGetFlowRate = false;
-
+        private bool _bGetAirPressure = false;
+        private bool _bGetWaterPressure = false;
         private string _SN = "";
-
         private bool AccessInsertSN = false;
         private TestSeq _testSeq = TestSeq.NONE;
         public TestSeq testSeq
@@ -91,28 +108,25 @@ namespace DI_Water_Wash
             }
             set
             {
-                if (_testSeq == TestSeq.WAIT)
+                if (_testSeq == TestSeq.WAIT || _testSeq == TestSeq.ERROR)
                 {
                     _testSeq = value;
                 }
             }
         }
         public int iRelay3Way_Air_Water { get; private set; }
-
         public int iRelayPump { get; private set; }
-
         public int iRelay3Way_Reverse { get; private set; }
-
         public int iIndex { get; private set; }
-
         public int iADAFlowRate { get; private set; }
+        public int iADVAirPressure { get; private set; }
+        public int iADCWaterPressure { get; private set; }
         public int iRelayRed { get; private set; }
         public int iRelayGreen { get; private set; }
         public int iRelayBuzzer { get; private set; }
         public int iRelayYellow { get; private set; }
         public byte slaveID { get; private set; }
-
-        public double FlowRate { get; private set; }
+        
         private int _StepTesting = 0;
         private string _TestType = "Production Test";
         public string TestType 
@@ -149,15 +163,15 @@ namespace DI_Water_Wash
             }
         }
 
-        public bool bGetFlowRate
+        public bool bGetAnalogValue
         {
             get
             {
-                return _bGetFlowRate;
+                return _bGetAnalogValue;
             }
             set
             {
-                _bGetFlowRate = value;
+                _bGetAnalogValue = value;
             }
         }
 
@@ -173,14 +187,16 @@ namespace DI_Water_Wash
             }
         }
 
-        public event DelShow_UpdateFlowRate_Request OnRequestUpdateFlowRate;
+        public event DelShow_UpdateAnalogValue_Request OnRequestUpdateAnalogValue;
 
-        public Cls_SequencyTest(int Index, Cls_ASPcontrol cls_ASP, ClsInverterModbus clsInverterModbus, StateCommon.InverterType inverterType)
+        public Cls_SequencyTest(int Index, Form mainForm, Cls_ASPcontrol cls_ASP, ClsInverterModbus clsInverterModbus, StateCommon.InverterType inverterType)
         {
+            _mainForm = mainForm; // truyền form chính vào
             iIndex = Index;
             cls_ASPcontrol = cls_ASP;
             Cls_InverterModbus = clsInverterModbus;
             _InverterType = inverterType;
+            GetDefineforSensor();
             switch (Index)
             {
                 case 0:
@@ -188,6 +204,8 @@ namespace DI_Water_Wash
                     iRelayPump = 8;
                     iRelay3Way_Reverse = 22;
                     iADAFlowRate = 1;
+                    iADVAirPressure = 1;
+                    iADCWaterPressure = 1;
                     slaveID = 1;
                     break;
                 case 1:
@@ -195,6 +213,8 @@ namespace DI_Water_Wash
                     iRelayPump = 7;
                     iRelay3Way_Reverse = 23;
                     iADAFlowRate = 2;
+                    iADVAirPressure = 2;
+                    iADCWaterPressure = 2;
                     slaveID = 2;
                     break;
                 case 2:
@@ -202,6 +222,8 @@ namespace DI_Water_Wash
                     iRelayPump = 6;
                     iRelay3Way_Reverse = 24;
                     iADAFlowRate = 3;
+                    iADVAirPressure = 3;
+                    iADCWaterPressure = 3;
                     slaveID = 3;
                     break;
                 case 3:
@@ -209,6 +231,8 @@ namespace DI_Water_Wash
                     iRelayPump = 5;
                     iRelay3Way_Reverse = 25;
                     iADAFlowRate = 4;
+                    iADVAirPressure = 4;
+                    iADCWaterPressure = 4;
                     slaveID = 4;
                     break;
             }
@@ -242,28 +266,67 @@ namespace DI_Water_Wash
             _InverterType = inverterType;
             ProductionDB.Initialize("10.102.4.20", "Production_SZ", "sa", "nuventixleo");
             ProductionDB.Open();
-            Thread thread = new Thread(LoopGetFlowRate);
+            Thread thread = new Thread(LoopGetAnalogValue);
             thread.IsBackground = true;
             thread.Name = "ThrGetFlowRate" + Index;
             thread.Start();
         }
-        public void LoopGetFlowRate()
+        private void GetDefineforSensor()
+        {
+            Air_PressureMax = double.Parse(ClsIO.ReadValue("Air_Pressure", "Air_Pressure_Max", "1" , $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini"));
+            Air_PressureMin = double.Parse(ClsIO.ReadValue("Air_Pressure", "Air_Pressure_Min", "-0.1", $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini"));
+            Air_PressureVoltgeMax = double.Parse(ClsIO.ReadValue("Air_Pressure", "Air_Pressure_Voltge_Max", "5", $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini"));
+            Air_PressureVoltgeMin = double.Parse(ClsIO.ReadValue("Air_Pressure", "Air_Pressure_Voltge_Min", "0.6", $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini"));
+            WaterPressureMax = double.Parse(ClsIO.ReadValue("Water_Pressure", "Water_Pressure_Max", "0.7", $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini"));
+            WaterPressureMin = double.Parse(ClsIO.ReadValue("Water_Pressure", "Water_Pressure_Min", "0", $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini"));
+            WaterPressureVoltgeMax = double.Parse(ClsIO.ReadValue("Water_Pressure", "Water_Pressure_Voltge_Max", "10", $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini"));
+            WaterPressureVoltgeMin = double.Parse(ClsIO.ReadValue("Water_Pressure", "Water_Pressure_Voltge_Min", "0", $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini"));
+            FlowRateMax = double.Parse(ClsIO.ReadValue("Flow_Rate", "Flow_Rate_Max", "20", $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini"));
+            FlowRateMin = double.Parse(ClsIO.ReadValue("Flow_Rate", "Flow_Rate_Min", "0", $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini"));
+            FlowRateCurrentMax = double.Parse(ClsIO.ReadValue("Flow_Rate", "Flow_Rate_Current_Max", "20", $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini"));
+            FlowRateCurrentMin = double.Parse(ClsIO.ReadValue("Flow_Rate", "Flow_Rate_Current_Min", "0", $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini"));
+            if(!File.Exists("C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration.ini"))
+            {
+                ClsIO.WriteValue("Air_Pressure", "Air_Pressure_Max",Air_PressureMax.ToString(), $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini");
+                ClsIO.WriteValue("Air_Pressure", "Air_Pressure_Min", Air_PressureMin.ToString(), $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini");
+                ClsIO.WriteValue("Air_Pressure", "Air_Pressure_Voltge_Max", Air_PressureVoltgeMax.ToString(), $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini");
+                ClsIO.WriteValue("Air_Pressure", "Air_Pressure_Voltge_Min", Air_PressureVoltgeMin.ToString(), $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini");
+                ClsIO.WriteValue("Water_Pressure", "Water_Pressure_Max", WaterPressureMax.ToString(), $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini");
+                ClsIO.WriteValue("Water_Pressure", "Water_Pressure_Min", WaterPressureMin.ToString(), $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini");
+                ClsIO.WriteValue("Water_Pressure", "Water_Pressure_Voltge_Max", WaterPressureVoltgeMax.ToString(), $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini");
+                ClsIO.WriteValue("Water_Pressure", "Water_Pressure_Voltge_Min", WaterPressureVoltgeMin.ToString(), $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini");
+                ClsIO.WriteValue("Flow_Rate", "Flow_Rate_Max", FlowRateMax.ToString(), $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini");
+                ClsIO.WriteValue("Flow_Rate", "Flow_Rate_Min", FlowRateMin.ToString(), $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini");
+                ClsIO.WriteValue("Flow_Rate", "Flow_Rate_Current_Max", FlowRateCurrentMax.ToString(), $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini");
+                ClsIO.WriteValue("Flow_Rate", "Flow_Rate_Current_Min", FlowRateCurrentMin.ToString(), $"C:\\Aavid_Test\\Setup-ini\\AnalogSensorConfiguration_{iIndex}.ini");
+            }    
+        }
+        public void LoopGetAnalogValue()
         {
             while (true)
             {
-                if (_bGetFlowRate)
+                if (_bGetAnalogValue)
                 {
-                    ReadADA();
-                    UpdateFlowRate();
+                    ReadFlowRate();
+                    ReadAirPressure();
+                    ReadWaterPressure();
+                }
+                else
+                {
+                    if (_bGetAirPressure)
+                        ReadAirPressure();
+                    if (_bGetWaterPressure)
+                        ReadWaterPressure();
+                    if (_bGetFlowRate)
+                        ReadFlowRate();
                 }
                 Thread.Sleep(500);
             }
         }
-        public void UpdateFlowRate()
+        public void UpdateAnalogValue()
         {
-            this.OnRequestUpdateFlowRate?.Invoke(this);
+            this.OnRequestUpdateAnalogValue?.Invoke(this);
         }
-
         public async void SetFlowRate(double flowRate)
         {
             try
@@ -272,7 +335,6 @@ namespace DI_Water_Wash
                 if (!(await cls_ASPcontrol.SetFlowRateCheckResult(iADAFlowRate, flowRateInt)))
                 {
                     log.Error((object)$"Failed to set flow rate for ADA {iADAFlowRate} to {flowRate} L/min.");
-                    MessageBox.Show($"Failed to set flow rate for ADA {iADAFlowRate} to {flowRate} L/min.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
                 }
                 else
                 {
@@ -282,13 +344,10 @@ namespace DI_Water_Wash
             }
             catch (Exception ex)
             {
-                Exception ex2 = ex;
-                log.Error((object)$"Exception while setting flow rate for ADA {iADAFlowRate}: {ex2.Message}");
-                MessageBox.Show($"Exception while setting flow rate for ADA {iADAFlowRate}: {ex2.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                log.Error((object)$"Exception while setting flow rate for ADA {iADAFlowRate}: {ex.Message}");
             }
         }
-
-        public async void ReadADA()
+        public async void ReadFlowRate()
         {
             try
             {
@@ -296,22 +355,84 @@ namespace DI_Water_Wash
                 if (flowRate < 0.0)
                 {
                     log.Error((object)$"Failed to read flow rate for ADA {iADAFlowRate}.");
-                    MessageBox.Show($"Failed to read flow rate for ADA {iADAFlowRate}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
                 }
                 else
                 {
                     log.Info((object)$"Flow rate for ADA {iADAFlowRate}: {flowRate} L/min");
                 }
-                FlowRate = flowRate;
+                FlowRate = GetFlowrate(flowRate);
+                UpdateAnalogValue();
             }
             catch (Exception ex)
             {
-                Exception ex2 = ex;
-                log.Error((object)$"Exception while reading flow rate for ADA {iADAFlowRate}: {ex2.Message}");
-                MessageBox.Show($"Exception while reading flow rate for ADA {iADAFlowRate}: {ex2.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                log.Error((object)$"Exception while reading flow rate for ADA {iADAFlowRate}: {ex.Message}");
             }
         }
+        public async void ReadAirPressure()
+        {
+            try
+            {
+                double airpressure = await cls_ASPcontrol.GetADVAsync(iADVAirPressure);
+                if (airpressure < 0.0)
+                {
+                    log.Error((object)$"Failed to read voltage for RADV {iADVAirPressure}.");
+                }
+                AirPressure = GetAirPressure(airpressure);
 
+                UpdateAnalogValue();
+            }
+            catch (Exception ex)
+            {
+                log.Error((object)$"Exception while reading air pressure for ADV {iADAFlowRate}: {ex.Message}");
+            }
+        }
+        public async void ReadWaterPressure()
+        {
+            try
+            {
+                double waterpressure = await cls_ASPcontrol.GetADCAsync(iADCWaterPressure);
+                if (waterpressure < 0.0)
+                {
+                    log.Error((object)$"Failed to read water pressure for ADC {iADCWaterPressure}.");
+                }
+                WaterPressure = GetWaterPressure(waterpressure);
+                UpdateAnalogValue();
+            }
+            catch (Exception ex)
+            {
+                log.Error((object)$"Exception while reading water pressure for ADC {iADCWaterPressure}: {ex.Message}");
+            }
+        }
+        private double GetFlowrate(double mA)
+        {
+            double flowRate = 0;
+            if (mA < FlowRateCurrentMin || mA > FlowRateCurrentMax) return flowRate;
+            else
+            {
+                flowRate = ((mA - FlowRateCurrentMin) / (FlowRateCurrentMax - FlowRateCurrentMin)) * (FlowRateMax - FlowRateMin) + FlowRateMin;
+            }
+            return flowRate;
+        }
+        private double GetAirPressure(double V)
+        {
+            double AirPressure = 0;
+            if (V > Air_PressureVoltgeMax) return AirPressure;
+            else
+            {
+                AirPressure = ((V - Air_PressureVoltgeMin) / (Air_PressureVoltgeMax - Air_PressureVoltgeMin)) * (Air_PressureMax - Air_PressureMin) + Air_PressureMin;
+            }
+            return AirPressure;
+        }
+        private double GetWaterPressure(double V)
+        {
+            double WaterPressure = 0;
+            if (V > WaterPressureVoltgeMax) return WaterPressure;
+            else
+            {
+                WaterPressure = ((V - WaterPressureVoltgeMin) / (WaterPressureVoltgeMax - WaterPressureVoltgeMin)) * (WaterPressureMax - WaterPressureMin) + WaterPressureMin;
+            }
+            return WaterPressure;
+        }
         public async void SwitchRelay3Way_Air_Water(bool bOnOff)
         {
             if (bOnOff)
@@ -328,7 +449,6 @@ namespace DI_Water_Wash
                 MessageBox.Show($"Relay 3Way {iRelay3Way_Air_Water} failed to turn off.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
             }
         }
-
         public async void SwitchRelayPump(bool bOnOff)
         {
             if (bOnOff)
@@ -418,9 +538,9 @@ namespace DI_Water_Wash
                     foreach (DataRow row in dt.Rows)
                     {
                         string failCode = row["FailCode"]?.ToString().Trim().ToUpper();
-                        if (failCode.Contains("PASS") || failCode.Contains("OK"))
-                        {
-                            result[i] = true; // Có ít nhất 1 dòng PASS hoặc OK
+                        if(failCode.Trim().ToUpper() == "OK"|| failCode.Trim().ToUpper() == "PASS")
+                        {                            
+                            result[i] = true; // Có ít nhất 1 dòng OK
                             break;
                         }
                         else
@@ -491,7 +611,27 @@ namespace DI_Water_Wash
             bool[] resultcurrent = GetResultprocessBefore(new string[1] { proc });
             if (resultcurrent[0])
                 return 4;
+            //Check MRB
+            if (!GetMRBRecord(sSN))
+                return 5;
             return 0; // Tất cả các process trước đó đều PASS/OK
+        }
+        public bool GetMRBRecord(string sn)
+        {
+            string query = $"SELECT * FROM [Production_SZ].[dbo].[Aavid_MRB_Rework_Log_Station] where Serial ='{sn}'";
+            System.Data.DataTable dt = ProductionDB.ExecuteQuery(query);
+            if (dt != null && dt.Rows.Count > 0)
+            {
+                DataRow row = dt.Rows[dt.Rows.Count - 1];
+                string failCode = row["FailCode"]?.ToString().Trim().ToUpper();
+                if (failCode.Trim().ToUpper() == "OK" || failCode.Trim().ToUpper() == "PASS")
+                {
+                    return true;
+                }
+                else
+                    return false;
+            }
+            else return true;
         }
         private string GetProcesCodeError(int iCode)
         {
@@ -507,6 +647,8 @@ namespace DI_Water_Wash
                     return "Some station before is missing!!!";
                 case 4:
                     return "This product already passed in this staion!!!";
+                case 5:
+                    return "This product is in MRB, please check MRB log!!!";
                 default:
                     return $"Error is not define {iCode}";
             }
@@ -597,15 +739,15 @@ namespace DI_Water_Wash
             {
                 for (int i = 0; i < rery; i++)
                 {
-                    int flowRateInt = (int)(ClsUnitManagercs.cls_Units[iIndex].iDi_Flow_Rate * 100.0);
+                    int flowRateInt = (int)(ClsUnitManagercs.cls_Units[iIndex].dDi_Flow_Rate * 100.0);
                     if (!(await cls_ASPcontrol.SetFlowRateCheckResult(iADAFlowRate, flowRateInt)))
                     {
-                        log.Error((object)$"Failed to set flow rate to {ClsUnitManagercs.cls_Units[iIndex].iDi_Flow_Rate.ToString("0.00")} L/min.");
+                        log.Error((object)$"Failed to set flow rate to {ClsUnitManagercs.cls_Units[iIndex].dDi_Flow_Rate.ToString("0.00")} L/min.");
                         //MessageBox.Show($"Failed to set flow rate to {ClsUnitManagercs.cls_Units[iIndex].iDi_Flow_Rate.ToString("0.00")} L/min.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
                     }
                     else
                     {
-                        log.Info((object)$"Flow rate for ADA {iADAFlowRate} set to {ClsUnitManagercs.cls_Units[iIndex].iDi_Flow_Rate.ToString("0.00")} L/min");
+                        log.Info((object)$"Flow rate for ADA {iADAFlowRate} set to {ClsUnitManagercs.cls_Units[iIndex].dDi_Flow_Rate.ToString("0.00")} L/min");
                         bResult = true;
                         break;
                     }
@@ -699,10 +841,10 @@ namespace DI_Water_Wash
             bool b = ProductionDB.SaveToLogMonths_LogTable(SN, PN,dt,StationID, FailCode, proc, step);   
             return b;
         }
-        public bool SaveToDBDIWaterWashLog(string SN, string PN,string wo, string StationID, string FailCode, string step)
+        public bool SaveToDBDIWaterWashLog(string SN, string PN,string wo, string StationID, string FailCode, int step, float flowrate,float waterpressure,float airpressure)
         {
             DateTime dt = GetDateTimefromDB();
-            bool b = ProductionDB.SaveToDIWaterWashLog(SN, PN, StationID, FailCode,"",_TestType,wo, step);
+            bool b = ProductionDB.SaveToDIWaterWashLog(SN, PN, StationID, FailCode,"",_TestType,wo, step,flowrate,waterpressure,airpressure);
             return b;
         }
         private async Task<bool> Setting_Drying(int rery = 5)
@@ -824,7 +966,17 @@ namespace DI_Water_Wash
             }
             if(_testSeq == TestSeq.ERROR)
             {
-                log.Error((object)"Test sequence is in ERROR state. Cannot proceed.");
+                sw_drying.Stop();
+                sw_flush.Stop();
+                sw_prewash.Stop();
+                sw_reverse.Stop();
+                sw_reverse_drying.Stop();
+                _bGetAnalogValue = false;
+                _bGetAirPressure = false;
+                _bGetWaterPressure = false;
+                _bGetFlowRate = false;
+                _testSeq = TestSeq.END;
+                _SN = "";
                 return;
             }
             if (_testSeq == TestSeq.WAIT)
@@ -868,7 +1020,14 @@ namespace DI_Water_Wash
                         }
                         else
                         {
-                            MessageBox.Show(_SN + " is invalid. Please re-enter.", "Invalid SN", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            // gọi mở form phụ trên UI thread
+                            _mainForm.Invoke(new Action(() =>
+                            {
+                                var dialog = new FrmMessageError(_SN + " is invalid. Please re-enter.", Color.Red, Color.Black);
+                                dialog.StartPosition = FormStartPosition.CenterScreen; // ✅ hiện giữa màn hình
+                                dialog.Show(_mainForm);   // hoặc ShowDialog(_mainForm)
+                                dialog.BringToFront();
+                            }));
                             log.Warn((object)("SN " + _SN + " is invalid. Please re-enter."));
                             _testSeq = TestSeq.WAIT;
                         }
@@ -885,7 +1044,14 @@ namespace DI_Water_Wash
                         if (iCheckRouter == 0) _testSeq = TestSeq.SN_CHECK_ROUTER_OK;
                         else
                         {
-                            MessageBox.Show(GetProcesCodeError(iCheckRouter), "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            // gọi mở form phụ trên UI thread
+                            _mainForm.Invoke(new Action(() =>
+                            {
+                                var dialog = new FrmMessageError("SN " + _SN  +" " + GetProcesCodeError(iCheckRouter), Color.Red, Color.Black);
+                                dialog.StartPosition = FormStartPosition.CenterScreen; // ✅ hiện giữa màn hình
+                                dialog.Show(_mainForm);   // hoặc ShowDialog(_mainForm)
+                                dialog.BringToFront();
+                            }));
                             log.Warn((object)GetProcesCodeError(iCheckRouter) + _SN);
                             _testSeq = TestSeq.WAIT;
                         }
@@ -908,7 +1074,7 @@ namespace DI_Water_Wash
                     else
                     {
                         log.Error((object)$"Failed to set pump and relays for SN {_SN}.");
-                        MessageBox.Show($"Failed to set pump and relays for SN {_SN}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                        //MessageBox.Show($"Failed to set pump and relays for SN {_SN}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
                         await ShowLighTowerError();
                         _testSeq = TestSeq.ERROR;
                         ClsUnitManagercs.cls_Units[iIndex].cls_SequencyCommon.process = StateCommon.ProcessState.Error;
@@ -924,10 +1090,10 @@ namespace DI_Water_Wash
                     else
                     {
                         log.Error((object)$"Failed to flushing relay set for SN {_SN}.");
-                        MessageBox.Show($"Failed to flushing relay set for SN {_SN}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                        //MessageBox.Show($"Failed to flushing relay set for SN {_SN}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
                         await ShowLighTowerError();
                         _testSeq = TestSeq.ERROR;
-                        ClsUnitManagercs.cls_Units[iIndex].cls_SequencyCommon.process = StateCommon.ProcessState.Error;
+                        ClsUnitManagercs.cls_Units[iIndex].cls_SequencyCommon.process = StateCommon.ProcessState.Error; 
                     }
                     break;  
                 case TestSeq.PRE_WASHING:
@@ -942,7 +1108,7 @@ namespace DI_Water_Wash
                             _testSeq = TestSeq.ERROR;
                             return;
                         }
-                        Thread.Sleep(100);
+                        Thread.Sleep(1000);
                     }
                     sw_prewash.Stop();
                     _testSeq = TestSeq.FLUSHING_WASHING;
@@ -950,6 +1116,8 @@ namespace DI_Water_Wash
                 case TestSeq.FLUSHING_WASHING:
                     sw_flush = new Stopwatch();
                     sw_flush.Start();
+                    _bGetFlowRate = true;
+                    _bGetWaterPressure = true;
                     while (sw_flush.ElapsedMilliseconds < ClsUnitManagercs.cls_Units[iIndex].iWashing_Time * 1000)
                     {
                         if (ClsUnitManagercs.cls_Units[iIndex].cls_SequencyCommon.process == StateCommon.ProcessState.Error)
@@ -959,26 +1127,33 @@ namespace DI_Water_Wash
                             _testSeq = TestSeq.ERROR;
                             return;
                         }
-                        Thread.Sleep(100);
+                        Thread.Sleep(1000);
+                        ListFlowRates.Add(FlowRate);
+                        ListWaterPressures.Add(WaterPressure);
                     }
                     sw_flush.Stop();
                     _testSeq = TestSeq.TURN_REVERSE_WASHING;
                     break;
                 case TestSeq.TURN_REVERSE_WASHING:
-                    bool bReverse = await Setting_FlushingReverse(5);
-                    if (bReverse)
+                    if (ClsUnitManagercs.cls_Units[iIndex].bReverse_Washing_Flow)
                     {
-                        log.Info((object)$"Reverse relay set successfully for SN {_SN}.");
-                        _testSeq = TestSeq.REVERSE_WASHING;
+                        bool bReverse = await Setting_FlushingReverse(5);
+                        if (bReverse)
+                        {
+                            log.Info((object)$"Reverse relay set successfully for SN {_SN}.");
+                            _testSeq = TestSeq.REVERSE_WASHING;
+                        }
+                        else
+                        {
+                            log.Error((object)$"Failed to Reverse relay set for SN {_SN}.");
+                            //MessageBox.Show($"Failed to Reverse relay set for SN {_SN}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                            await ShowLighTowerError();
+                            _testSeq = TestSeq.ERROR;
+                            ClsUnitManagercs.cls_Units[iIndex].cls_SequencyCommon.process = StateCommon.ProcessState.Error;
+                        }
                     }
                     else
-                    {
-                        log.Error((object)$"Failed to Reverse relay set for SN {_SN}.");
-                        MessageBox.Show($"Failed to Reverse relay set for SN {_SN}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
-                        await ShowLighTowerError();
-                        _testSeq = TestSeq.ERROR;
-                        ClsUnitManagercs.cls_Units[iIndex].cls_SequencyCommon.process = StateCommon.ProcessState.Error;
-                    }
+                        _testSeq = TestSeq.REVERSE_WASHING;
                     break;
                 case TestSeq.REVERSE_WASHING:
                     _StepTesting++;
@@ -995,7 +1170,7 @@ namespace DI_Water_Wash
                                 _testSeq = TestSeq.ERROR;
                                 return;
                             }
-                            Thread.Sleep(100);
+                            Thread.Sleep(1000);
                         }
                         sw_reverse.Stop();
                     }    
@@ -1018,7 +1193,7 @@ namespace DI_Water_Wash
                     else
                     {
                         log.Error((object)$"Failed to Drying relay set for SN {_SN}.");
-                        MessageBox.Show($"Failed to Drying relay set for SN {_SN}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                        //MessageBox.Show($"Failed to Drying relay set for SN {_SN}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
                         await ShowLighTowerError();
                         _testSeq = TestSeq.ERROR;
                         ClsUnitManagercs.cls_Units[iIndex].cls_SequencyCommon.process = StateCommon.ProcessState.Error;
@@ -1027,6 +1202,9 @@ namespace DI_Water_Wash
                 case TestSeq.DRYING:
                     sw_drying = new Stopwatch();
                     sw_drying.Start();
+                    _bGetFlowRate = false;
+                    _bGetWaterPressure = false;
+                    _bGetAirPressure = true;
                     while (sw_drying.ElapsedMilliseconds < ClsUnitManagercs.cls_Units[iIndex].iDI_Drying_Time * 1000)
                     {
                         if (ClsUnitManagercs.cls_Units[iIndex].cls_SequencyCommon.process == StateCommon.ProcessState.Error)
@@ -1036,26 +1214,32 @@ namespace DI_Water_Wash
                             _testSeq = TestSeq.ERROR;
                             return;
                         }
-                        Thread.Sleep(100);
+                        Thread.Sleep(1000);
+                        ListAirPressures.Add(AirPressure);
                     }
                     sw_drying.Stop();
                     _testSeq = TestSeq.TURN_REVERSE_DRYING;
                     break;
                 case TestSeq.TURN_REVERSE_DRYING:
-                    bool breversedry = await Setting_ReverseDrying(5);
-                    if (breversedry)
+                    if (ClsUnitManagercs.cls_Units[iIndex].bReverse_DI_Flushing_Flow)
                     {
-                        log.Info((object)$"Reverse Drying relay set successfully for SN {_SN}.");
-                        _testSeq = TestSeq.REVERSE_DRYING;
+                        bool breversedry = await Setting_ReverseDrying(5);
+                        if (breversedry)
+                        {
+                            log.Info((object)$"Reverse Drying relay set successfully for SN {_SN}.");
+                            _testSeq = TestSeq.REVERSE_DRYING;
+                        }
+                        else
+                        {
+                            log.Error((object)$"Failed to Reverse Drying relay set for SN {_SN}.");
+                            //MessageBox.Show($"Failed to Reverse Drying relay set for SN {_SN}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                            await ShowLighTowerError();
+                            _testSeq = TestSeq.ERROR;
+                            ClsUnitManagercs.cls_Units[iIndex].cls_SequencyCommon.process = StateCommon.ProcessState.Error;
+                        }
                     }
                     else
-                    {
-                        log.Error((object)$"Failed to Reverse Drying relay set for SN {_SN}.");
-                        MessageBox.Show($"Failed to Reverse Drying relay set for SN {_SN}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
-                        await ShowLighTowerError();
-                        _testSeq = TestSeq.ERROR;
-                        ClsUnitManagercs.cls_Units[iIndex].cls_SequencyCommon.process = StateCommon.ProcessState.Error;
-                    }
+                        _testSeq = TestSeq.REVERSE_DRYING;
                     break;
                 case TestSeq.REVERSE_DRYING:
                     if (ClsUnitManagercs.cls_Units[iIndex].bReverse_DI_Flushing_Flow)
@@ -1071,30 +1255,138 @@ namespace DI_Water_Wash
                                 _testSeq = TestSeq.ERROR;
                                 return;
                             }
-                            Thread.Sleep(100);
+                            Thread.Sleep(1000);
                         }
                         sw_reverse_drying.Stop();
                     }
                     _testSeq = TestSeq.CHECKING_RESULT;
                     break;
                 case TestSeq.CHECKING_RESULT:
-                    if(ClsUnitManagercs.cls_Units[iIndex].bCheck_DI_Huminity)
+                    _bGetFlowRate = false;
+                    _bGetWaterPressure = false;
+                    _bGetAirPressure = false;
+                    //Check all values of ListAirPressures, ListWaterPressures, ListFlowRates   
+                    if (ListAirPressures.Count == 0 || ListWaterPressures.Count == 0 || ListFlowRates.Count == 0)
+                    {
+                        log.Error((object)$"No data collected during testing for SN {_SN}.");
+                        //MessageBox.Show("No data collected during testing. Please check the setup.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                        await ShowLighTowerError();
+                        _testSeq = TestSeq.ERROR;
+                        ClsUnitManagercs.cls_Units[iIndex].cls_SequencyCommon.process = StateCommon.ProcessState.Error;
+                        return;
+                    }
+                    double flowrateMax = ClsUnitManagercs.cls_Units[iIndex].dDi_Flow_Rate + ((ClsUnitManagercs.cls_Units[iIndex].dDi_Flow_Rate * ClsUnitManagercs.cls_Units[iIndex].dDi_Flow_Tol)/100);
+                    double flowrateMin = ClsUnitManagercs.cls_Units[iIndex].dDi_Flow_Rate - ((ClsUnitManagercs.cls_Units[iIndex].dDi_Flow_Rate * ClsUnitManagercs.cls_Units[iIndex].dDi_Flow_Tol)/100);
+                    int times2ignoreFlowRate = (ClsUnitManagercs.cls_Units[iIndex].iWashing_Time / 100) * 15;
+                    if (times2ignoreFlowRate < 15) times2ignoreFlowRate = 15;
+                    var checkFlowrate = CheckOutSpec(ListFlowRates, flowrateMin, flowrateMax, 5);
+                    if(!checkFlowrate.IsPass)
+                    {
+                        TestResult = "FAIL";
+                        _testSeq = TestSeq.TEST_FAIL;
+                        if (checkFlowrate.MinUnder != null)
+                        {
+                            TestResult = "Flow_Low";
+                            FlowRate = checkFlowrate.MinUnder ?? 0.0;
+                        }
+                        else
+                        {
+                            TestResult = "Flow_Hi";
+                            FlowRate = checkFlowrate.MaxOver ?? 0.0;
+                        }
+                    }
+                    else
+                    {
+                        FlowRate = checkFlowrate.AverageInSpec ?? 0.0;
+                    }
+                    double AirpressureMax = ClsUnitManagercs.cls_Units[iIndex].dDI_Max_AirPressure;
+                    double AirpressureMin = ClsUnitManagercs.cls_Units[iIndex].dDI_Min_AirPressure;
+                    int times2ignoreAir = (ClsUnitManagercs.cls_Units[iIndex].iDI_Drying_Time/100) * 15;
+                    if (times2ignoreAir < 15) times2ignoreAir = 15;
+                    var checkAirpressure = CheckOutSpec(ListAirPressures, AirpressureMin, AirpressureMax, 5);
+                    if(!checkAirpressure.IsPass)
+                    {
+                        TestResult = "FAIL";
+                        _testSeq = TestSeq.TEST_FAIL;
+                        if (checkAirpressure.MinUnder != null)
+                        {
+                            TestResult = "Air_Pr_Low";
+                            AirPressure = checkAirpressure.MinUnder ?? 0.0;
+                        }
+                        else
+                        {
+                            TestResult = "Air_Pr_Hi";
+                            AirPressure = checkAirpressure.MaxOver ?? 0.0;
+                        }
+                    }
+                    else
+                    {
+                        AirPressure = checkAirpressure.AverageInSpec ?? 0.0;
+                    }
+                    double WaterpressureMax = ClsUnitManagercs.cls_Units[iIndex].dDI_Max_WaterPressure;
+                    double WaterpressureMin = ClsUnitManagercs.cls_Units[iIndex].dDI_Min_WaterPressure;
+                    var checkWaterpressure = CheckOutSpec(ListWaterPressures, WaterpressureMin, WaterpressureMax, 5);
+                    if (!checkWaterpressure.IsPass)
+                    {
+                        TestResult = "FAIL";
+                        _testSeq = TestSeq.TEST_FAIL;
+                        if (checkWaterpressure.MinUnder != null)
+                        {
+                            TestResult = "Water_Pr_Low";
+                            WaterPressure = checkWaterpressure.MinUnder ?? 0.0;
+                        }
+                        else
+                        {
+                            TestResult = "Water_Pr_Hi";
+                            WaterPressure = checkWaterpressure.MaxOver ?? 0.0;
+                        }
+                    }
+                    else
+                    {
+                        WaterPressure = checkWaterpressure.AverageInSpec ?? 0.0;
+                    }
+                    if (ClsUnitManagercs.cls_Units[iIndex].bCheck_DI_Huminity)
                     {
                         //Check huminity
                     }
-                    _testSeq = TestSeq.TEST_PASS;
+                    if(_testSeq != TestSeq.TEST_FAIL)
+                    {
+                        _testSeq = TestSeq.TEST_PASS;
+                    }
+                    else
+                    {
+                        _testSeq = TestSeq.TEST_FAIL;
+                    }
                     break;
                 case TestSeq.TEST_PASS:
+                    TestResult ="PASS";
                     ClsUnitManagercs.cls_Units[iIndex].cls_SequencyCommon.process = StateCommon.ProcessState.CompletedPass;
-                    TestResult = "PASS";
                     _testSeq = TestSeq.CREATE_LOCAL_LOG;
                     break;
                 case TestSeq.TEST_FAIL:
                     ClsUnitManagercs.cls_Units[iIndex].cls_SequencyCommon.process = StateCommon.ProcessState.CompletedFail;
-                    TestResult = "FAIL";
                     _testSeq = TestSeq.CREATE_LOCAL_LOG;
                     break;
                 case TestSeq.CREATE_LOCAL_LOG:
+                    try
+                    {
+                        DateTime dt = DateTime.Now;
+                        var logger = new Logger($"C:\\Aavid_Test\\Datalog\\DI_Water_Wash\\{dt.ToString("yyyyMMdd")}.csv");
+                        var logData = new FlushingLog
+                        {
+                            Time = dt,
+                            SerialNumber = _SN,
+                            TestResult = TestResult,
+                            FlowRate = ListFlowRates,
+                            WaterPressure = ListWaterPressures,
+                            AirPressure = ListAirPressures,
+                        };
+                        logger.FlushingTest(logData);
+                    }
+                    catch (Exception ex)
+                    {
+                        log.Error("Exception when save local log: " + ex.ToString());
+                    }
                     _testSeq = TestSeq.SAVE_DB;
                     break;
                 case TestSeq.SAVE_DB:
@@ -1102,20 +1394,31 @@ namespace DI_Water_Wash
                     string WO = ClsUnitManagercs.cls_Units[iIndex].WO;
                     string Station = ClsUnitManagercs.cls_Units[iIndex].StaionID;
                     if (TestType == "Engineering Test") TestResult = "FAIL";
-                    if (!SavetoDBMonths_Log(_SN, PN ,Station, TestResult, "DI_Water_Wash" , "1"))
+                    if (!SavetoDBMonths_Log(_SN, PN ,Station, TestResult, "DI_Water_Wash" , "0"))
                     {
-                        MessageBox.Show("Failed to save DB months log failed.");
+                        //MessageBox.Show("Failed to save DB months log failed.");
+                        log.Error("Failed to save DB months log failed.");
                         await ShowLighTowerError();
                         _testSeq = TestSeq.ERROR;
                         break;
                     }
-                    if (!SaveToDBDIWaterWashLog(_SN, PN,WO, Station, TestResult,"1"))
+                    if (!SaveToDBDIWaterWashLog(_SN, PN,WO, Station, TestResult,0, (float)FlowRate, (float)WaterPressure, (float)AirPressure))
                     {
-                        MessageBox.Show("Failed to save DB DI_Water log failed.");
+                        //MessageBox.Show("Failed to save DB DI_Water log failed.");
+                        log.Error("Failed to save DB DI_Water log failed.");
                         await ShowLighTowerError();
                         _testSeq = TestSeq.ERROR;
                         break;
                     }
+                    _testSeq = TestSeq.END;
+                    break;
+                case TestSeq.END:
+                    _bGetAirPressure = false;
+                    _bGetFlowRate = false;
+                    _bGetWaterPressure = false;
+                    ListAirPressures = new List<double>();
+                    ListWaterPressures = new List<double>();
+                    ListFlowRates = new List<double>();
                     _testSeq = TestSeq.WAIT;
                     break;
             }
@@ -1127,6 +1430,38 @@ namespace DI_Water_Wash
                 UnitIndex = this.iIndex,
                 LogData = dtResult
             });
+        }
+        private CheckResult CheckOutSpec(List<double> values, double min, double max, int maxOutSpec = 5)
+        {
+            var result = new CheckResult();
+            var data = values.Skip(5).ToList();
+            // 👉 Trường hợp đặc biệt: min = max = 0
+            if (min == 0 && max == 0)
+            {
+                result.IsPass = true;
+                result.OutSpecCount = 0;
+                result.MinUnder = null;
+                result.MaxOver = null;
+                result.AverageInSpec = values.Any() ? values.Average() : (double?)null;
+                return result;
+            }
+            var under = data.Where(v => v < min).ToList();
+            var over = data.Where(v => v > max).ToList();
+            var inSpec = values.Where(v => v >= min && v <= max).ToList();
+            result.OutSpecCount = under.Count + over.Count;
+            result.MinUnder = under.Any() ? under.Min() : (double?)null;
+            result.MaxOver = over.Any() ? over.Max() : (double?)null;
+            result.AverageInSpec = inSpec.Any() ? inSpec.Average() : (double?)null;
+            result.IsPass = result.OutSpecCount <= maxOutSpec;
+            return result;
+        }
+        private class CheckResult
+        {
+            public bool IsPass { get; set; }
+            public int OutSpecCount { get; set; }
+            public double? MaxOver { get; set; }
+            public double? MinUnder { get; set; }
+            public double? AverageInSpec { get; set; }
         }
     }
 }

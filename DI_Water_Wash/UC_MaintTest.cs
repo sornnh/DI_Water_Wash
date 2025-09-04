@@ -25,21 +25,17 @@ namespace DI_Water_Wash.Unit
             lb_TotalCycle.Text= ClsUnitManagercs.cls_Units[UnitIndex].iWash_Cycle.ToString();
             timer1.Start();
             pictureBox1.Image = Image.FromFile(@"panel.jpg");
-        }
-        public void funAddLog_Auto(string _text)
-        {
-            if (!richTextBox1.Created) return;
-            if (richTextBox1.InvokeRequired)
+            if(ClsUnitManagercs.cls_Units[UnitIndex].bCheck_DI_Huminity)
             {
-                richTextBox1.BeginInvoke(new MethodInvoker(delegate {
-                    richTextBox1.AppendText(_text + "\n");
-                    richTextBox1.ScrollToCaret();
-                }));
+                label13.Visible = true;
+                lb_Humidity.Visible = true;
+                label21.Visible = true;
             }
             else
             {
-                richTextBox1.AppendText(_text + "\n");
-                richTextBox1.ScrollToCaret();
+                label13.Visible = false;
+                lb_Humidity.Visible = false;
+                label21.Visible = false;
             }
         }
         public void SetSNForTest()
@@ -116,6 +112,55 @@ namespace DI_Water_Wash.Unit
             }
             catch { }
         }
+        private void Hidenlabel(Label label)
+        {
+            try
+            {
+                if (this.InvokeRequired)
+                {
+                    this.BeginInvoke(new Action(() => Hidenlabel( label)));
+                    return;
+                }
+                else
+                {
+                    label.Visible = false;
+                }
+            }
+            catch { }
+        }
+        private void UnHidenlabel(Label label)
+        {
+            try
+            {
+                if (this.InvokeRequired)
+                {
+                    this.BeginInvoke(new Action(() => UnHidenlabel(label)));
+                    return;
+                }
+                else
+                {
+                    label.Visible = true;
+                }
+            }
+            catch { }
+        }
+        private void UpdatelabelwithColor(string value, Color color, Label label)
+        {
+            try
+            {
+                if (this.InvokeRequired)
+                {
+                    this.BeginInvoke(new Action(() => UpdatelabelwithColor(value,color, label)));
+                    return;
+                }
+                else
+                {
+                    label.Text = value;
+                    label.BackColor = color;
+                }
+            }
+            catch { }
+        }
         private void UpdatePercent(int value)
         {
             if (this.InvokeRequired)
@@ -141,6 +186,18 @@ namespace DI_Water_Wash.Unit
             switch(ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.testSeq)
             {
                 case Cls_SequencyTest.TestSeq.WAIT:
+                    UnHidenlabel(lb_Airpressure);
+                    UnHidenlabel(label11);
+                    UnHidenlabel(label19);
+                    UnHidenlabel(lb_Flowrate);
+                    UnHidenlabel(lb_Waterpressure);
+                    UnHidenlabel(label10);
+                    UnHidenlabel(label12);
+                    UnHidenlabel(label18);
+                    UnHidenlabel(label20);
+                    Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.WaterPressure).ToString("0.00"), lb_Waterpressure);
+                    Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.FlowRate).ToString("0.00"), lb_Flowrate);
+                    Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.AirPressure).ToString("0.00"), lb_Airpressure);
                     txt_SN.Enabled = false;
                     Updatelabel("Ready for test", lb_Status);
                     break;
@@ -160,8 +217,20 @@ namespace DI_Water_Wash.Unit
                 case Cls_SequencyTest.TestSeq.ERROR:
                     txt_SN.Enabled=false;
                     Updatelabel("ERROR", lb_Status);
+                    Updatelabel("ERROR", lb_Result);
                     break;
                 case Cls_SequencyTest.TestSeq.PRE_WASHING:
+                    Hidenlabel(lb_Airpressure);
+                    Hidenlabel(label11);
+                    Hidenlabel(label19);
+                    UnHidenlabel(lb_Flowrate);
+                    UnHidenlabel(lb_Waterpressure);
+                    UnHidenlabel(label10);
+                    UnHidenlabel(label12);
+                    UnHidenlabel(label18);
+                    UnHidenlabel(label20);
+                    Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.WaterPressure).ToString("0.00"), lb_Waterpressure);
+                    Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.FlowRate).ToString("0.00"), lb_Waterpressure);
                     Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.StepTesting+1).ToString(), lb_CurentCycle);
                     Updatelabel("Pre Washing", lb_CycleTest);
                     Updatelabel(ClsUnitManagercs.cls_Units[UnitIndex].iPre_Washing_Time.ToString(), lb_TimeStep);
@@ -169,23 +238,39 @@ namespace DI_Water_Wash.Unit
                     UpdatePercentTotal(10);
                     break;
                 case Cls_SequencyTest.TestSeq.FLUSHING_WASHING:
-                    UpdatePercentTotal(70);
+                    UpdatePercentTotal(40);
+                    Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.WaterPressure).ToString("0.00"), lb_Waterpressure);
+                    Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.FlowRate).ToString("0.00"), lb_Flowrate);
                     Updatelabel("Washing", lb_CycleTest);
                     Updatelabel(ClsUnitManagercs.cls_Units[UnitIndex].iWashing_Time.ToString(), lb_TimeStep);
                     Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.sw_flush.ElapsedMilliseconds / 1000).ToString("0"), lb_CurrentTime);
                     break;
                 case Cls_SequencyTest.TestSeq.REVERSE_WASHING:
+                    Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.WaterPressure).ToString(), lb_Waterpressure);
+                    Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.FlowRate).ToString(), lb_Waterpressure);
                     Updatelabel("Reverse Washing", lb_CycleTest);
                     Updatelabel(ClsUnitManagercs.cls_Units[UnitIndex].iWashing_Time.ToString(), lb_TimeStep);
                     Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.sw_reverse.ElapsedMilliseconds / 1000).ToString("0"), lb_CurrentTime);
                     break;
                 case Cls_SequencyTest.TestSeq.DRYING:
+                    UpdatePercentTotal(70);
+                    UnHidenlabel(lb_Airpressure);
+                    UnHidenlabel(label11);
+                    UnHidenlabel(label19);
+                    Hidenlabel(lb_Flowrate);
+                    Hidenlabel(lb_Waterpressure);
+                    Hidenlabel(label10);
+                    Hidenlabel(label12);
+                    Hidenlabel(label18);
+                    Hidenlabel(label20);
+                    Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.AirPressure).ToString("0.00"), lb_Airpressure);
                     Updatelabel("Drying", lb_CycleTest);
                     Updatelabel(ClsUnitManagercs.cls_Units[UnitIndex].iDI_Drying_Time.ToString(), lb_TimeStep);
                     Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.sw_drying.ElapsedMilliseconds / 1000).ToString("0"), lb_CurrentTime);
                     break;
                 case Cls_SequencyTest.TestSeq.REVERSE_DRYING:
                     Updatelabel("Reverse Drying", lb_CycleTest);
+                    Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.AirPressure).ToString("0.00"), lb_Airpressure);
                     Updatelabel(ClsUnitManagercs.cls_Units[UnitIndex].iReverse_DI_Drying_Time.ToString(), lb_TimeStep);
                     Updatelabel((ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.sw_reverse_drying.ElapsedMilliseconds / 1000).ToString("0"), lb_CurrentTime);
                     UpdatePercentTotal(100);
@@ -204,6 +289,7 @@ namespace DI_Water_Wash.Unit
                 case StateCommon.ProcessState.Running:
                     Updatelabel("Running", lb_StatusMachine);
                     lb_StatusMachine.BackColor = Color.Yellow;
+                    UpdatelabelwithColor("P/F", Color.Yellow, lb_Result);
                     break;
                 case StateCommon.ProcessState.CompletedPass:
                     Updatelabel("Pass", lb_StatusMachine);
@@ -214,12 +300,13 @@ namespace DI_Water_Wash.Unit
                 case StateCommon.ProcessState.CompletedFail:
                     Updatelabel("Fail", lb_StatusMachine);
                     lb_StatusMachine.BackColor = Color.Red;
-                    Updatelabel("Fail", lb_Result);
+                    Updatelabel(ClsUnitManagercs.cls_Units[UnitIndex].cls_SequencyTest.TestResult, lb_Result);
                     lb_Result.BackColor = Color.Red;
                     break;
                 case StateCommon.ProcessState.Error:
                     Updatelabel("Error", lb_StatusMachine);
                     lb_StatusMachine.BackColor = Color.Red;
+                    UpdatelabelwithColor("ERROR", Color.Red, lb_Result);
                     break;
             }
         }
@@ -229,8 +316,7 @@ namespace DI_Water_Wash.Unit
             string SN = txt_SN.Text.Trim();
 
             // Kiểm tra nếu độ dài của SN đã đủ
-            if (SN.Length == 10)
-            //if (SN.Length == ClsUnitManagercs.cls_Units[UnitIndex].SN_Length)
+            if (SN.Length == ClsUnitManagercs.cls_Units[UnitIndex].SN_Length)
             {
                 if (txt_SN.Text.Length == 0)
                 {

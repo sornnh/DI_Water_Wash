@@ -81,7 +81,17 @@ namespace DI_Water_Wash
 
         private void btn_ChangePart_Click(object sender, EventArgs e)
         {
-            allLine = File.ReadAllLines(@"C:\Aavid_Test\Setup-ini\Flushing_Part_Numbers.txt");
+            string[] allLine = File.ReadAllLines(@"C:\Aavid_Test\Setup-ini\Flushing_Part_Numbers.txt").Where(line => !string.IsNullOrWhiteSpace(line)).ToArray();
+            // Nếu ít hơn 4 phần tử thì tăng lên 4 bằng cách thêm dòng trống
+            if (allLine.Length < 5)
+            {
+                List<string> lines = allLine.ToList();
+                while (lines.Count < 5)
+                {
+                    lines.Add(""); // hoặc có thể là "N/A", "None", v.v.
+                }
+                allLine = lines.ToArray();
+            }
             string[] newLine = new string[] { $"{txt_PN.Text.Trim()}-TF-00{(UnitIndex+1).ToString()}", txt_PN.Text.Trim(), txt_WO.Text.Trim(), "0", "Enabled" };
             allLine[UnitIndex+1] = string.Join(",", newLine) + ",";
             // Ghi lại file

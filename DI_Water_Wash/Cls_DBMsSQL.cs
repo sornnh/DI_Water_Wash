@@ -150,14 +150,14 @@ namespace DI_Water_Wash
                 Close();
             }
         }
-        public bool SaveToDIWaterWashLog(string serial,string assyPN,string station,string failCode,string operatorName,string remark,string workOrder,string stepNo)
+        public bool SaveToDIWaterWashLog(string serial,string assyPN,string station,string failCode,string operatorName,string remark,string workOrder,int stepNo, float Flowrate,float Waterpressure, float Airpressure)
         {
             bool result = false;
             string query = @"
                             INSERT INTO DI_Water_Wash_Log
-                            (Serial, Assy_PN, Date_Time, Station, FailCode, Operator, Remark, Work_Order, Step_No)
+                            (Serial, Assy_PN, Date_Time, Station, FailCode, Operator, Remark, Work_Order, Step_No, Water_Flow_Rate, Water_Pressure, Air_Pressure)
                             VALUES
-                            (@Serial, @Assy_PN, @Date_Time, @Station, @FailCode, @Operator, @Remark, @Work_Order, @Step_No);";
+                            (@Serial, @Assy_PN, @Date_Time, @Station, @FailCode, @Operator, @Remark, @Work_Order, @Step_No, @Water_Flow_Rate, @Water_Pressure, @Air_Pressure);";
             try
             {
                 Open();
@@ -171,11 +171,10 @@ namespace DI_Water_Wash
                     command.Parameters.AddWithValue("@Operator", operatorName ?? "");
                     command.Parameters.AddWithValue("@Remark", remark ?? "");
                     command.Parameters.AddWithValue("@Work_Order", workOrder ?? "");
-                    // Chuyển đổi stepNo sang int trước khi thêm
-                    if (int.TryParse(stepNo, out int stepNumber))
-                        command.Parameters.AddWithValue("@Step_No", stepNumber);
-                    else
-                        command.Parameters.AddWithValue("@Step_No", 0); // hoặc throw lỗi tùy logic của bạn
+                    command.Parameters.AddWithValue("@Step_No", stepNo);
+                    command.Parameters.AddWithValue("@Water_Flow_Rate", Flowrate);
+                    command.Parameters.AddWithValue("@Water_Pressure", Waterpressure);
+                    command.Parameters.AddWithValue("@Air_Pressure", Airpressure);
                     command.ExecuteNonQuery();
                 }
                 result =  true;
@@ -196,7 +195,7 @@ namespace DI_Water_Wash
         {
             bool result = false;
             string query = @"
-        INSERT INTO [Production_SZ].[dbo].[Production_Flow_Current_Months_Log]
+        INSERT INTO [Production_SZ].[dbo].[Production_Flow_All_Months_Log]
         (Serial, Assy_PN, Date_Time, Station, FailCode, Process_Step, Step_No)
         VALUES 
         (@Serial, @Assy_PN, @Date_Time, @Station, @FailCode, @Process_Step, @Step_No);";

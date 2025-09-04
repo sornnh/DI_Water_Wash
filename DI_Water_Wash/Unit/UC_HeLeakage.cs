@@ -51,5 +51,10 @@ namespace DI_Water_Wash
                 cBox_Manual.Checked = true;
             }    
         }
+
+        private void txt_Min_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

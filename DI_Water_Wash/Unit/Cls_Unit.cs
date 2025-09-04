@@ -91,12 +91,14 @@ namespace DI_Water_Wash
 
         public int iReverse_DI_Drying_Time { get; set; }
 
-        public int iDi_Flow_Rate { get; private set; }
-
+        public double dDi_Flow_Rate { get; private set; }
+        public double dDi_Flow_Tol { get; private set; }
+        public double dDI_Max_AirPressure { get; private set; }
+        public double dDI_Min_AirPressure { get; private set; }
+        public double dDI_Max_WaterPressure { get; private set; }
+        public double dDI_Min_WaterPressure { get; private set; }
         public bool bCheck_DI_Huminity { get; private set; }
-
         public int iDI_Max_Huminity { get; private set; }
-
         public int iPre_Vacuum { get; private set; }
 
         public int iRoughing_Time_On { get; private set; }
@@ -169,7 +171,7 @@ namespace DI_Water_Wash
 
         public double iN2FillPressureTolerance { get; private set; }
 
-        public Cls_Unit(int unitIndex, string assyPN,string Workoder ,string StationID, Cls_ASPcontrol cls_AS, ClsInverterModbus clsInverter)
+        public Cls_Unit(int unitIndex, Form mainForm, string assyPN,string Workoder ,string StationID, Cls_ASPcontrol cls_AS, ClsInverterModbus clsInverter)
         {
             try
             {
@@ -184,7 +186,7 @@ namespace DI_Water_Wash
                 thrcommon.IsBackground = true;
                 thrcommon.Name = "ThreadCommon";
                 thrcommon.Start();
-                cls_SequencyTest = new Cls_SequencyTest(unitIndex, cls_ASPcontrol, Cls_InverterModbus, StateCommon.InverterType.ASP);
+                cls_SequencyTest = new Cls_SequencyTest(unitIndex, mainForm, cls_ASPcontrol, Cls_InverterModbus, StateCommon.InverterType.ASP);
                 Thread thrTest = new Thread(funThreadTest);
                 thrTest.IsBackground = true;
                 thrTest.Name = "ThreadTest";
@@ -422,7 +424,22 @@ namespace DI_Water_Wash
                         iReverse_DI_Drying_Time = Convert.ToInt32(dataRow[column]);
                         break;
                     case "DI_Flow_Rate":
-                        iDi_Flow_Rate = Convert.ToInt32(dataRow[column]);
+                        dDi_Flow_Rate = Convert.ToDouble(dataRow[column]);
+                        break;
+                    case "DI_Flow_Tol":
+                        dDi_Flow_Tol = Convert.ToDouble(dataRow[column]);
+                        break;
+                    case "Flush_Air_Pressure_Max":
+                        dDI_Max_AirPressure = Convert.ToDouble(dataRow[column]);
+                        break;
+                    case "Flush_Air_Pressure_Min":
+                        dDI_Min_AirPressure = Convert.ToDouble(dataRow[column]);
+                        break;
+                    case "Water_Pressure_Max":
+                        dDI_Max_WaterPressure = Convert.ToDouble(dataRow[column]);
+                        break;
+                    case "Water_Pressure_Min":
+                        dDI_Min_WaterPressure = Convert.ToDouble(dataRow[column]);
                         break;
                     case "Check_DI_Humidity":
                         bCheck_DI_Huminity = Convert.ToInt32(dataRow[column]) == 1;
@@ -433,7 +450,6 @@ namespace DI_Water_Wash
                 }
             }
         }
-
         private void GenerateProcessTesting()
         {
             string query = "SELECT * FROM Process_Flow_for_Part_Numbers WHERE Assy_PN = '" + _AssyPN + "' order by Date_Time";

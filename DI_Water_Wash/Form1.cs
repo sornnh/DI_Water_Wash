@@ -1,4 +1,5 @@
-﻿using DI_Water_Wash;
+﻿using BoyD_Oven_Monitoring;
+using DI_Water_Wash;
 using DI_Water_Wash.DataSummary;
 using DI_Water_Wash.ParameterInitial;
 using DI_Water_Wash.Sequence;
@@ -29,6 +30,7 @@ using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 
+
 namespace DI_Water_Wash
 {
     public partial class Form1 : Form
@@ -56,11 +58,9 @@ namespace DI_Water_Wash
         public string[] AssyPN;
         public string[] WorkOder;
         Dictionary<string, string> myDict = new Dictionary<string, string>();
-        private UC_PartNumberInfor[] uC_PartNumberInfors = new UC_PartNumberInfor[3];
+        private UC_PartNumberInfor[] uC_PartNumberInfors ;
         private UC_PartNumberInfor.SecsionTest SecsionTest = UC_PartNumberInfor.SecsionTest.DIWaterWash;
-        private UC_DataSummary uC_DataSummary;
-        private UC_SerialNumberHistory uC_SerialNumberHistory;
-        private UC_MaintTest [] uC_MaintTests = new UC_MaintTest[3];
+        private UC_MaintTest [] uC_MaintTests;
         private string[] Testmodes = new string[4] { "Production Test", "Production Retest", "Engineering Test", "Golden Sample Test" };
         private int[] Baudrates = { 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, 115200 };
         private int[] DataBits = { 5, 6, 7, 8 };
@@ -72,7 +72,10 @@ namespace DI_Water_Wash
         delegate void DelResource(); 
         private bool AutoMode = true;
         private System.Windows.Forms.TextBox[] ADVShow = new System.Windows.Forms.TextBox[4];
-        private System.Windows.Forms.TextBox[] ADIShow = new System.Windows.Forms.TextBox[4];
+        private System.Windows.Forms.TextBox[] ADAShow = new System.Windows.Forms.TextBox[4];
+        private System.Windows.Forms.TextBox[] ADCShow = new System.Windows.Forms.TextBox[8];
+        private Panel[] pl_infor ;
+        private Panel[] pl_main;
         NestMenu nestMenu = NestMenu.None;
         private string Station;
         enum NestMenu
@@ -84,7 +87,7 @@ namespace DI_Water_Wash
 
         }
         private string password;
-        public Form1( string pass)
+        public Form1(string pass)
         {
             InitializeComponent();
             password =pass;
@@ -112,7 +115,6 @@ namespace DI_Water_Wash
             catch
             { }
             timer1.Start();
-            timer2.Start();
             StateCommon.LoadingText += "Setting thread update resuorce completed\r\n";
             StateCommon.LoadingValue = 10;
             StateCommon.LoadingText += "Create DataBase Connection...\r\n";
@@ -179,18 +181,18 @@ namespace DI_Water_Wash
                 for (int i = 0; i < ClsUnitManagercs.cls_Units.Length; i++)
                 {
                     ClsUnitManagercs.cls_Units[i].cls_SequencyCommon.AutoMode = AutoMode;
-                    ClsUnitManagercs.cls_Units[i].cls_SequencyTest.OnRequestUpdateFlowRate += delegate (Cls_SequencyTest sender)
+                    ClsUnitManagercs.cls_Units[i].cls_SequencyTest.OnRequestUpdateAnalogValue += delegate (Cls_SequencyTest sender)
                     {
                         if (base.InvokeRequired)
                         {
                             BeginInvoke((MethodInvoker)delegate
                             {
-                                funUpdateFlowrate_Auto(sender);
+                                funUpdateAnalogValue_Auto(sender);
                             });
                         }
                         else
                         {
-                            funUpdateFlowrate_Auto(sender);
+                            funUpdateAnalogValue_Auto(sender);
                         }
                     };
                 }
@@ -205,21 +207,17 @@ namespace DI_Water_Wash
                 StateCommon.LoadingText += "Change nest selected to Nest1 completed\r\n";
                 StateCommon.LoadingValue = 70;
                 StateCommon.LoadingText += "Create Data Summary Table ....\r\n";
-                uC_DataSummary = new UC_DataSummary(ClsUnitManagercs.cls_Units[0].AssyPN, "DI Water Wash");
-                uC_DataSummary.Dock = DockStyle.Fill;
-                pl_Report.Controls.Clear();
-                pl_Report.Controls.Add(uC_DataSummary);
                 StateCommon.LoadingText += "Create Data Summary Table completed\r\n";
                 StateCommon.LoadingValue = 80;
                 StateCommon.LoadingText += "Create Data History Query ....\r\n";
-                uC_SerialNumberHistory = new UC_SerialNumberHistory(ClsUnitManagercs.cls_Units[0].AssyPN);
-                uC_SerialNumberHistory.Dock = DockStyle.Fill;
-                pl_SNHistory.Controls.Clear();
-                pl_SNHistory.Controls.Add(uC_SerialNumberHistory);
                 StateCommon.LoadingText += "Create Data History Query completed\r\n";
                 StateCommon.LoadingValue = 80;
                 StateCommon.LoadingText += "Set All Relay to turn OFF\r\n";
                 SetAllRelayOFF();
+                UpdateTodayHistory();
+                timer1.Start();
+                timer2.Start();
+                timer3.Start();
                 StateCommon.LoadingText += "Complete\r\n";
                 StateCommon.LoadingValue = 100;
                 StateCommon.bLoading = false;
@@ -232,35 +230,56 @@ namespace DI_Water_Wash
 
         private void InitializeADCShow()
         {
-            ADVShow[0]= txt_ADV1;
+            ADVShow[0] = txt_ADV1;
             ADVShow[1] = txt_ADV2;
             ADVShow[2] = txt_ADV3;
             ADVShow[3] = txt_ADV4;
-            ADIShow[0] = txt_ADI1;
-            ADIShow[1] = txt_ADI2;
-            ADIShow[2] = txt_ADI3;
-            ADIShow[3] = txt_ADI4;
+            ADAShow[0] = txt_ADI1;
+            ADAShow[1] = txt_ADI2;
+            ADAShow[2] = txt_ADI3;
+            ADAShow[3] = txt_ADI4;
+            ADCShow[0] = txt_ADC1;
+            ADCShow[1] = txt_ADC2;
+            ADCShow[2] = txt_ADC3;
+            ADCShow[3] = txt_ADC4;
+            ADCShow[4] = txt_ADC5;
+            ADCShow[5] = txt_ADC6;
+            ADCShow[6] = txt_ADC7;
+            ADCShow[7] = txt_ADC8;
         }
 
         private void funUpdateADC_Auto(Cls_ASPcontrol sender)
         {
             for(int i = 0; i < ADVShow.Length; i++)
             {
-                if (!ADIShow[i].Created || !ADVShow[i].Created)
+                if (!ADAShow[i].Created || !ADVShow[i].Created)
                     return;
                 if (ADVShow[i].InvokeRequired)
                 {
-                    ADVShow[i].BeginInvoke(new Action(() => ADVShow[i].Text = sender.ADVs[i].ToString()));
-                    ADIShow[i].BeginInvoke(new Action(() => ADIShow[i].Text = sender.ADIs[i].ToString("0.00")));
+                    ADVShow[i].BeginInvoke(new Action(() => ADVShow[i].Text = sender.ADVs[i].ToString("0.00")));
+                    ADAShow[i].BeginInvoke(new Action(() => ADAShow[i].Text = sender.ADIs[i].ToString("0.00")));
                 }
                 else
                 {
-                    ADVShow[i].Text = sender.ADVs[i].ToString();
-                    ADIShow[i].Text = sender.ADIs[i].ToString("0.00");
+                    ADVShow[i].Text = sender.ADVs[i].ToString("0.00") + " V";
+                    ADAShow[i].Text = sender.ADIs[i].ToString("0.00") +" mA";
+                }
+            }
+            for (int i = 0; i < ADCShow.Length; i++)
+            {
+                if (!ADCShow[i].Created)
+                    return;
+                if (ADCShow[i].InvokeRequired)
+                {
+                    ADCShow[i].BeginInvoke(new Action(() => ADCShow[i].Text = sender.ADCs[i].ToString("0.00")));
+                }
+                else
+                {
+                    ADCShow[i].Text = sender.ADCs[i].ToString("0.00");
                 }
             }
         }
-        private void funUpdateFlowrate_Auto(Cls_SequencyTest sender)
+        private void funUpdateAnalogValue_Auto(Cls_SequencyTest sender)
         {
             InitializeChartSeries(2);
             if (chart_Flow.InvokeRequired)
@@ -274,7 +293,9 @@ namespace DI_Water_Wash
             {
                 UpdateChartDataWithDateTime(sender);
             }
+            
         }
+
         private void InitializeChartSeries(int adiCount)
         {
             if (chart_Flow.Series.Count == adiCount)
@@ -311,19 +332,19 @@ namespace DI_Water_Wash
                 case NestMenu.Nest1:
                     chart_Flow.Series["PV"].Points.AddXY(now, GetFlowrate(ClsUnitManagercs.cls_Units[0].cls_SequencyTest.FlowRate));
                     chart_Flow.Series["SV"].Points.AddXY(now, (double)nm_SV.Value);
-                    txt_PVFlow.Text = GetFlowrate(ClsUnitManagercs.cls_Units[0].cls_SequencyTest.FlowRate).ToString("0.00");
+                    txt_PVFlow.Text = ClsUnitManagercs.cls_Units[0].cls_SequencyTest.FlowRate.ToString("0.00");
                     break;
                 case NestMenu.Nest2:
                     chart_Flow.Series["PV"].Points.AddXY(now, GetFlowrate(ClsUnitManagercs.cls_Units[1].cls_SequencyTest.FlowRate));
                     chart_Flow.Series["SV"].Points.AddXY(now, (double)nm_SV.Value);
-                    txt_PVFlow.Text = GetFlowrate(ClsUnitManagercs.cls_Units[1].cls_SequencyTest.FlowRate).ToString("0.00");
+                    txt_PVFlow.Text = ClsUnitManagercs.cls_Units[1].cls_SequencyTest.FlowRate.ToString("0.00");
                     break;
                 case NestMenu.Nest3:
                     chart_Flow.Series["PV"].Points.AddXY(now, GetFlowrate(ClsUnitManagercs.cls_Units[2].cls_SequencyTest.FlowRate));
                     chart_Flow.Series["SV"].Points.AddXY(now, (double)nm_SV.Value);
-                    txt_PVFlow.Text = GetFlowrate(ClsUnitManagercs.cls_Units[2].cls_SequencyTest.FlowRate).ToString("0.00");
+                    txt_PVFlow.Text = ClsUnitManagercs.cls_Units[2].cls_SequencyTest.FlowRate.ToString("0.00");
                     break;
-            }
+            }   
             foreach (Series item in chart_Flow.Series)
             {
                 while (item.Points.Count > num)
@@ -348,6 +369,16 @@ namespace DI_Water_Wash
                 flowRate = ((mA - 4) / 16) * 200;
             }
             return flowRate;
+        }
+        private double GetAirPressure(double V)
+        {
+            double AirPressure = 0;
+            if (V > 10) return AirPressure;
+            else
+            {
+
+            }
+            return AirPressure;
         }
         private void ThreadCheckASPPortAlive()
         {
@@ -394,12 +425,10 @@ namespace DI_Water_Wash
             tbl_RelayControl.RowCount = 5;
             tbl_RelayControl.ColumnStyles.Clear();
             tbl_RelayControl.RowStyles.Clear();
-
             for (int i = 0; i < 6; i++)
                 tbl_RelayControl.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / 6));
             for (int i = 0; i < 5; i++)
                 tbl_RelayControl.RowStyles.Add(new RowStyle(SizeType.Percent, 100f / 5));
-
             for (int i = 0; i < 30; i++)
             {
                 int index = i; // lưu lại để dùng trong event handler
@@ -410,9 +439,7 @@ namespace DI_Water_Wash
                 lbl.BorderStyle = BorderStyle.FixedSingle;
                 lbl.BackColor = Color.LightGray;
                 lbl.Cursor = Cursors.Hand;
-
                 lbl.Click += (s, e) => ToggleRelay(index);
-
                 relayLabels[i] = lbl;
                 int row = i / 6;
                 int col = i % 6;
@@ -484,10 +511,11 @@ namespace DI_Water_Wash
             txt_Leght.Text = ClsUnitManagercs.cls_Units[selectedIndex].Ctl_Str_Length.ToString();
             txt_Offset.Text = ClsUnitManagercs.cls_Units[selectedIndex].Ctl_Str_Offset.ToString();
         }
-
         private void InitializeUnitManager( Cls_ASPcontrol cls_AS)
         {
-            string[] array = File.ReadAllLines("C:\\Aavid_Test\\Setup-ini\\Flushing_Part_Numbers.txt");
+            string[] array = File.ReadAllLines("C:\\Aavid_Test\\Setup-ini\\Flushing_Part_Numbers.txt")
+                     .Where(line => !string.IsNullOrWhiteSpace(line))
+                     .ToArray();
             AssyPN = new string[array.Length - 1];
             WorkOder = new string[array.Length - 1];
             for (int i = 0; i < AssyPN.Length; i++)
@@ -496,7 +524,7 @@ namespace DI_Water_Wash
                 AssyPN[i] = array2[1].Trim();
                 WorkOder[i]= array2[2].Trim();
             }
-            string stationID = ClsIO.ReadValue("LOGGING_DATA", "Tester_ID", "", "C:\\Aavid_Test\\Setup-ini\\LCS_Logging_Setup.ini");
+            string stationID = ClsIO.ReadValue("LOGGING_DATA", "Tester_ID", "", "C:\\Aavid_Test\\Setup-ini\\LCS_Logging_Setup.ini").Trim().Trim('"');
             if (stationID.Length == 0)
             {
                 using (var stationForm = new Frm_ShowInputStation())
@@ -510,22 +538,22 @@ namespace DI_Water_Wash
                 }
                 ClsIO.WriteValue("LOGGING_DATA", "Tester_ID", stationID, "C:\\Aavid_Test\\Setup-ini\\LCS_Logging_Setup.ini");
             }
-            ClsUnitManagercs.Initialize(AssyPN, WorkOder, stationID, cls_AS, clsInverterModbus);
+            ClsUnitManagercs.Initialize(AssyPN, WorkOder,this, stationID, cls_AS, clsInverterModbus);
             GenerateProcess();
-            Panel[] array3 = new Panel[3] { pl_PNInfor1, pl_PNInfor2, pl_PNInfor3 };
-            Panel[] pl_main = new Panel[3] { pl_Main1, pl_Main2, pl_Main3 };
-            for (int i = 0; i < pl_main.Length; i++)
+            uC_MaintTests = new UC_MaintTest[ClsUnitManagercs.cls_Units.Length];
+            for (int i = 0; i < ClsUnitManagercs.cls_Units.Length; i++)
             {
                 uC_MaintTests[i] = new UC_MaintTest(i);
                 uC_MaintTests[i].Dock = DockStyle.Fill;
                 pl_main[i].Controls.Add(uC_MaintTests[i]);
             }
+            uC_PartNumberInfors = new UC_PartNumberInfor[ClsUnitManagercs.cls_Units.Length];
             for (int j = 0; j < ClsUnitManagercs.cls_Units.Length; j++)
             {
                 uC_PartNumberInfors[j] = new UC_PartNumberInfor(j, SecsionTest);
                 uC_PartNumberInfors[j].InitUI();
                 uC_PartNumberInfors[j].Dock = DockStyle.Fill;
-                array3[j].Controls.Add(uC_PartNumberInfors[j]);
+                pl_infor[j].Controls.Add(uC_PartNumberInfors[j]);
                 ClsUnitManagercs.cls_Units[j].cls_SequencyCommon.AutoMode = true;
                 ClsUnitManagercs.cls_Units[j].cls_SequencyCommon.OnRequestUpdateStage += delegate (Cls_SequencyCommon sender)
                 {
@@ -700,13 +728,34 @@ namespace DI_Water_Wash
         }
         private void GenerateProcess()
         {
-            DataGridView[] dgv = new DataGridView[3];
-            dgv[0] = dgv1;
-            dgv[1] = dgv2;
-            dgv[2] = dgv3;
-            for (int i = 0; i < dgv.Length; i++)
+
+            DataGridView[] dgv = new DataGridView[ClsUnitManagercs.cls_Units.Length];
+            pl_infor = new Panel[ClsUnitManagercs.cls_Units.Length];
+            pl_main = new Panel[ClsUnitManagercs.cls_Units.Length];
+            TableLayoutPanel tbl_MainPanel = new TableLayoutPanel();
+            tbl_MainPanel.Dock = DockStyle.Fill;
+            tbl_MainPanel.ColumnCount = ClsUnitManagercs.cls_Units.Length;
+            tbl_MainPanel.RowCount = 1;
+            tbl_MainPanel.ColumnStyles.Clear();
+            for (int i = 0; i < tbl_MainPanel.ColumnCount; i++)
             {
-                // Xóa tất cả cột và dòng cũ
+                tbl_MainPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / tbl_MainPanel.ColumnCount));
+            }
+            tableLayoutPanel10.Controls.Add(tbl_MainPanel, 0, 0);
+            for (int i = 0; i < ClsUnitManagercs.cls_Units.Length; i++)
+            {
+                string tabName = $"Fixture {i + 1}";
+                TabPage tabPage = new TabPage(tabName);
+                // Tạo TableLayoutPanel
+                TableLayoutPanel tableLayout = new TableLayoutPanel();
+                tableLayout.Dock = DockStyle.Fill;
+                tableLayout.ColumnCount = 2;
+                tableLayout.RowCount = 1; // Có thể tăng sau nếu bạn muốn nhiều hàng
+                tableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 80F));
+                tableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+                tbl_MainPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+                tableLayout.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single; // Tùy chọn, để có viền giữa các ô
+                dgv[i] = new DataGridView();
                 dgv[i].Columns.Clear();
                 dgv[i].Rows.Clear();
                 dgv[i].ReadOnly = true;                      // Không cho phép sửa
@@ -715,8 +764,10 @@ namespace DI_Water_Wash
                 dgv[i].DefaultCellStyle.SelectionForeColor = dgv[i].DefaultCellStyle.ForeColor;
                 dgv[i].RowHeadersVisible = false;
                 dgv[i].MultiSelect = false;
-                dgv[i].Enabled = true;                       // Vẫn scroll được
-                // Tạo một cột duy nhất để hiển thị giá trị
+                dgv[i].Enabled = true;   
+                dgv[i].Dock = DockStyle.Fill; // Để nó chiếm toàn bộ ô
+                                              // Vẫn scroll được
+                                              // Tạo một cột duy nhất để hiển thị giá trị
                 DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn();
                 col.HeaderText = "Process";                  // Không hiện tiêu đề
                 col.Name = "Process";
@@ -727,6 +778,15 @@ namespace DI_Water_Wash
                 {
                     dgv[i].Rows.Add(ClsUnitManagercs.cls_Units[i].verifyFlags[index]);
                 }
+                tableLayout.Controls.Add(dgv[i], 1, 0);
+                pl_infor[i] = new Panel();
+                pl_infor[i].Dock = DockStyle.Fill;
+                pl_main[i] = new Panel();
+                pl_main[i].Dock = DockStyle.Fill;
+                tbl_MainPanel.Controls.Add(pl_main[i], i, 0);
+                tableLayout.Controls.Add(pl_infor[i], 0, 0);
+                tabPage.Controls.Add(tableLayout);
+                tabControl3.TabPages.Add(tabPage);
             }
         }
         private void Form1_Shown(object sender, EventArgs e)
@@ -1121,13 +1181,13 @@ namespace DI_Water_Wash
             switch (nestMenu)
             {
                 case NestMenu.Nest1:
-                    ClsUnitManagercs.cls_Units[0].cls_SequencyTest.bGetFlowRate = !ClsUnitManagercs.cls_Units[0].cls_SequencyTest.bGetFlowRate;
+                    ClsUnitManagercs.cls_Units[0].cls_SequencyTest.bGetAnalogValue = !ClsUnitManagercs.cls_Units[0].cls_SequencyTest.bGetAnalogValue;
                     break;
                 case NestMenu.Nest2:
-                    ClsUnitManagercs.cls_Units[1].cls_SequencyTest.bGetFlowRate = !ClsUnitManagercs.cls_Units[1].cls_SequencyTest.bGetFlowRate;
+                    ClsUnitManagercs.cls_Units[1].cls_SequencyTest.bGetAnalogValue = !ClsUnitManagercs.cls_Units[1].cls_SequencyTest.bGetAnalogValue;
                     break;
                 case NestMenu.Nest3:
-                    ClsUnitManagercs.cls_Units[2].cls_SequencyTest.bGetFlowRate = !ClsUnitManagercs.cls_Units[2].cls_SequencyTest.bGetFlowRate;
+                    ClsUnitManagercs.cls_Units[2].cls_SequencyTest.bGetAnalogValue = !ClsUnitManagercs.cls_Units[2].cls_SequencyTest.bGetAnalogValue;
                     break;
             }
         }
@@ -1150,42 +1210,7 @@ namespace DI_Water_Wash
 
         private void txt_Fixture_KeyDown(object sender, KeyEventArgs e)
         {
-            switch (e.KeyCode)
-            {
-                case Keys.D1:
-                case Keys.NumPad1:
-                    if ((ClsUnitManagercs.cls_Units[0].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.WAIT ||
-                    ClsUnitManagercs.cls_Units[0].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.SN_INSERT)
-                    && ClsUnitManagercs.cls_Units[0].cls_SequencyTest.testSeq != Cls_SequencyTest.TestSeq.ERROR)
-                    {
-                        uC_MaintTests[0].SetSNForTest();
-                        ClsUnitManagercs.cls_Units[0].cls_SequencyTest.testSeq = Cls_SequencyTest.TestSeq.SN_INSERT;
-                    }
-                    txt_Fixture.Text = ""; // Xóa nội dung TextBox sau khi xử lý
-                    break;
-                case Keys.D2:
-                case Keys.NumPad2:
-                    if ((ClsUnitManagercs.cls_Units[1].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.WAIT ||
-                    ClsUnitManagercs.cls_Units[1].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.SN_INSERT)
-                    && ClsUnitManagercs.cls_Units[1].cls_SequencyTest.testSeq != Cls_SequencyTest.TestSeq.ERROR)
-                    {
-                        uC_MaintTests[1].SetSNForTest();
-                        ClsUnitManagercs.cls_Units[1].cls_SequencyTest.testSeq = Cls_SequencyTest.TestSeq.SN_INSERT;
-                    }
-                    txt_Fixture.Text = ""; // Xóa nội dung TextBox sau khi xử lý
-                    break;
-                case Keys.D3:
-                case Keys.NumPad3:
-                    if ((ClsUnitManagercs.cls_Units[2].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.WAIT ||
-                    ClsUnitManagercs.cls_Units[2].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.SN_INSERT)
-                    && ClsUnitManagercs.cls_Units[2].cls_SequencyTest.testSeq != Cls_SequencyTest.TestSeq.ERROR)
-                    {
-                        uC_MaintTests[2].SetSNForTest();
-                        ClsUnitManagercs.cls_Units[2].cls_SequencyTest.testSeq = Cls_SequencyTest.TestSeq.SN_INSERT;
-                    }
-                    txt_Fixture.Text = ""; // Xóa nội dung TextBox sau khi xử lý
-                    break;
-            }
+            
         }
         private int previousTestModeIndex = -1;
         private void cbb_TestMode_SelectedIndexChanged(object sender, EventArgs e)
@@ -1232,14 +1257,23 @@ namespace DI_Water_Wash
             {
                 e.Cancel = true; // Chặn form đóng ngay
                 _isClosingHandled = true;
-
-                // Optional: Hiện thông báo hoặc loading
-                this.Enabled = false; // Khoá UI nếu cần
-
-                await ASP_ControlPort.SetAllRelayOFF();
-
-                this.Enabled = true;
-                this.Close(); // Đóng form lại sau khi hoàn tất
+                using (FrmMessage message = new FrmMessage("Bạn có muốn đóng chương trình không???", Color.Red, Color.Black))
+                {
+                    message.ShowDialog();
+                    if(message.DialogResult == DialogResult.OK)
+                    {
+                        // Optional: Hiện thông báo hoặc loading
+                        this.Enabled = false; // Khoá UI nếu cần
+                        await ASP_ControlPort.SetAllRelayOFF();
+                        this.Enabled = true;
+                        this.Close(); // Đóng form lại sau khi hoàn tất
+                    }   
+                    else
+                    {
+                        _isClosingHandled = false; // Reset trạng thái nếu không đóng
+                        return; // Trả lại trạng thái form để không đóng
+                    }
+                }
             }
         }
         private bool _isClosingHandled = false;
@@ -1255,18 +1289,116 @@ namespace DI_Water_Wash
 
         private void timer2_Tick(object sender, EventArgs e)
         {
-            if(ClsUnitManagercs.cls_Units[0] == null ||
+            try
+            {
+                if (ClsUnitManagercs.cls_Units[0] == null ||
                 ClsUnitManagercs.cls_Units[1] == null ||
                 ClsUnitManagercs.cls_Units[2] == null)
-            {
-                return;
+                {
+                    return;
+                }
+                if (ClsUnitManagercs.cls_Units[0].cls_SequencyTest.testSeq != Cls_SequencyTest.TestSeq.SN_INSERT &&
+                    ClsUnitManagercs.cls_Units[1].cls_SequencyTest.testSeq != Cls_SequencyTest.TestSeq.SN_INSERT &&
+                    ClsUnitManagercs.cls_Units[2].cls_SequencyTest.testSeq != Cls_SequencyTest.TestSeq.SN_INSERT)
+                {
+                    txt_Fixture.Focus();
+                }
             }
-            if (ClsUnitManagercs.cls_Units[0].cls_SequencyTest.testSeq != Cls_SequencyTest.TestSeq.SN_INSERT&&
-                ClsUnitManagercs.cls_Units[1].cls_SequencyTest.testSeq != Cls_SequencyTest.TestSeq.SN_INSERT&&
-                ClsUnitManagercs.cls_Units[2].cls_SequencyTest.testSeq != Cls_SequencyTest.TestSeq.SN_INSERT)
+            catch
+            { }
+        }
+        private void txt_Fixture_TextChanged(object sender, EventArgs e)
+        {
+            string fixtureText = txt_Fixture.Text.Trim().ToUpper() ;
+            if (string.IsNullOrEmpty(fixtureText) && !fixtureText.StartsWith("STATION"))
             {
-                txt_Fixture.Focus();
+                return; // Không làm gì nếu TextBox rỗng
+            }   
+            string lastchar = fixtureText[fixtureText.Length-1].ToString();
+            switch (lastchar)
+            {
+                case "1":
+                    if ((ClsUnitManagercs.cls_Units[0].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.WAIT ||
+                    ClsUnitManagercs.cls_Units[0].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.SN_INSERT||
+                    ClsUnitManagercs.cls_Units[0].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.ERROR))
+                    {
+                        uC_MaintTests[0].SetSNForTest();
+                        ClsUnitManagercs.cls_Units[0].cls_SequencyTest.testSeq = Cls_SequencyTest.TestSeq.SN_INSERT;
+                    }
+                    txt_Fixture.Text = ""; // Xóa nội dung TextBox sau khi xử lý
+                    break;
+                case "2":
+                    if ((ClsUnitManagercs.cls_Units[1].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.WAIT ||
+                    ClsUnitManagercs.cls_Units[1].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.SN_INSERT||
+                    ClsUnitManagercs.cls_Units[1].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.ERROR))
+                    {
+                        uC_MaintTests[1].SetSNForTest();
+                        ClsUnitManagercs.cls_Units[1].cls_SequencyTest.testSeq = Cls_SequencyTest.TestSeq.SN_INSERT;
+                    }
+                    txt_Fixture.Text = ""; // Xóa nội dung TextBox sau khi xử lý
+                    break;
+                case "3":
+                    if ((ClsUnitManagercs.cls_Units[2].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.WAIT ||
+                    ClsUnitManagercs.cls_Units[2].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.SN_INSERT||
+                    ClsUnitManagercs.cls_Units[2].cls_SequencyTest.testSeq == Cls_SequencyTest.TestSeq.ERROR))
+                    {
+                        uC_MaintTests[2].SetSNForTest();
+                        ClsUnitManagercs.cls_Units[2].cls_SequencyTest.testSeq = Cls_SequencyTest.TestSeq.SN_INSERT;
+                    }
+                    txt_Fixture.Text = ""; // Xóa nội dung TextBox sau khi xử lý
+                    break;
             }
+        }
+
+        private void timer3_Tick(object sender, EventArgs e)
+        {
+            UpdateTodayHistory();
+        }
+        private void UpdateTodayHistory()
+        {
+            try
+            {
+                string StationID = ClsUnitManagercs.cls_Units[0].StaionID;
+                DateTime dt1 = DateTime.Today;           // hôm nay lúc 00:00:00
+                DateTime dt2 = DateTime.Now;             // thời gian hiện tại
+                string cmd = $@"SELECT [Station]
+                                   ,[FailCode]
+                                   ,[Date_Time]
+                                   FROM [Production_SZ].[dbo].[DI_Water_Wash_Log] 
+                                   WHERE Station ='{StationID}' 
+                                   AND Date_Time BETWEEN '{dt1}' AND '{dt2}'";
+                if (ProductionDB == null)
+                    return;
+                DataTable dt = ProductionDB.ExecuteQuery(cmd);
+                int passed = 0;
+                int failed = 0;
+                foreach (DataRow dr in dt.Rows)
+                {
+                    if (dr["FailCode"].ToString().ToUpper().Trim() == "PASS" || dr["FailCode"].ToString().ToUpper().Trim() == "OK")
+                    {
+                        passed++;
+                    }
+                    else
+                    {
+                        failed++;
+                    }
+                }
+                txt_Passed.Text = passed.ToString();
+                txt_Failed.Text = failed.ToString();
+                double total = passed + failed;
+                double passRate = total > 0 ? (passed / total) * 100 : 0;
+                txt_PassRate.Text = $"{passRate}"; // Hiển thị tỷ lệ pass với 2 chữ số thập phân
+                txt_Total.Text = total.ToString();
+            }
+            catch
+            {
+
+            }
+        }
+
+        private void btn_SaveAnalogInput_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

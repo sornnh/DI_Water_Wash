@@ -392,6 +392,7 @@
             this.txt_Min.Name = "txt_Min";
             this.txt_Min.Size = new System.Drawing.Size(157, 22);
             this.txt_Min.TabIndex = 3;
+            this.txt_Min.TextChanged += new System.EventHandler(this.txt_Min_TextChanged);
             // 
             // label20
             // 

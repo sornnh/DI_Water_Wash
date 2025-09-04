@@ -78,6 +78,10 @@
     <Compile Include="FrmLoading.Designer.cs">
       <DependentUpon>FrmLoading.cs</DependentUpon>
     </Compile>
+    <Compile Include="LocalLog\FlushingLog.cs" />
+    <Compile Include="LocalLog\LeakSensorLog.cs" />
+    <Compile Include="LocalLog\Logger.cs" />
+    <Compile Include="LocalLog\PressureDecayLog.cs" />
     <Compile Include="ParameterInitial\Frm_ChangePartNumber.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -104,6 +108,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RS485Modbus\ClsAnalogInputRS485.cs" />
     <Compile Include="RS485Modbus\ClsInverterModbus.cs" />
     <Compile Include="Sequence\Cls_SequencyCommon.cs" />
     <Compile Include="Sequence\Cls_SequencyTest.cs" />
@@ -125,6 +130,18 @@
     </Compile>
     <Compile Include="UC_SerialNumberHistory.Designer.cs">
       <DependentUpon>UC_SerialNumberHistory.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UISource\FrmMessageError.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UISource\FrmMessageError.Designer.cs">
+      <DependentUpon>FrmMessageError.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UISource\FrmMessage.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UISource\FrmMessage.Designer.cs">
+      <DependentUpon>FrmMessage.cs</DependentUpon>
     </Compile>
     <Compile Include="UISource\RJToggleButton.cs">
       <SubType>Component</SubType>
@@ -200,6 +217,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UC_SerialNumberHistory.resx">
       <DependentUpon>UC_SerialNumberHistory.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UISource\FrmMessageError.resx">
+      <DependentUpon>FrmMessageError.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UISource\FrmMessage.resx">
+      <DependentUpon>FrmMessage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Unit\UC_DIWaterWash.resx">
       <DependentUpon>UC_DIWaterWash.cs</DependentUpon>
