@@ -55,6 +55,10 @@ namespace DI_Water_Wash
         private double Air_PressureMin = 0.0;
         private double Air_PressureVoltgeMax = 0.0;
         private double Air_PressureVoltgeMin = 0.0;
+        private double Air_FlowMax = 0.0;
+        private double Air_FlowMin = 0.0;
+        private double Air_FlowVoltgeMax = 0.0;
+        private double Air_FlowVoltgeMin = 0.0;
         private double WaterPressureMax = 0.0;
         private double WaterPressureMin = 0.0;
         private double WaterPressureVoltgeMax = 0.0;
@@ -66,9 +70,11 @@ namespace DI_Water_Wash
         public double FlowRate { get; private set; }
         public double AirPressure { get; private set; }
         public double WaterPressure { get; private set; }
+        public double AirFlow { get; private set; }
         private Form _mainForm;
         public List<double> ListFlowRates { get; private set; } = new List<double>();
         public List<double> ListAirPressures { get; private set; } = new List<double>();
+        public List<double> ListAirFlow { get; private set; } = new List<double>();
         public List<double> ListWaterPressures { get; private set; } = new List<double>();
         //public delegate void DelShow_AddProcessLogTest_Request(DataTable sender);
         public event EventHandler<ProcessLogEventArgs> OnRequestAddProcessLogTest;
@@ -121,6 +127,7 @@ namespace DI_Water_Wash
         public int iADAFlowRate { get; private set; }
         public int iADVAirPressure { get; private set; }
         public int iADCWaterPressure { get; private set; }
+        public int iADCAirFlow { get; private set; }
         public int iRelayRed { get; private set; }
         public int iRelayGreen { get; private set; }
         public int iRelayBuzzer { get; private set; }
@@ -206,6 +213,7 @@ namespace DI_Water_Wash
                     iADAFlowRate = 1;
                     iADVAirPressure = 1;
                     iADCWaterPressure = 1;
+                    iADCAirFlow = 5;
                     slaveID = 1;
                     break;
                 case 1:
@@ -215,6 +223,7 @@ namespace DI_Water_Wash
                     iADAFlowRate = 2;
                     iADVAirPressure = 2;
                     iADCWaterPressure = 2;
+                    iADCAirFlow = 6;
                     slaveID = 2;
                     break;
                 case 2:
@@ -224,6 +233,7 @@ namespace DI_Water_Wash
                     iADAFlowRate = 3;
                     iADVAirPressure = 3;
                     iADCWaterPressure = 3;
+                    iADCAirFlow = 7;
                     slaveID = 3;
                     break;
                 case 3:
@@ -233,6 +243,7 @@ namespace DI_Water_Wash
                     iADAFlowRate = 4;
                     iADVAirPressure = 4;
                     iADCWaterPressure = 4;
+                    iADCAirFlow = 8;
                     slaveID = 4;
                     break;
             }
@@ -403,6 +414,23 @@ namespace DI_Water_Wash
                 log.Error((object)$"Exception while reading water pressure for ADC {iADCWaterPressure}: {ex.Message}");
             }
         }
+        public async void ReadAirFlow()
+        {
+            try
+            {
+                double airFlow = await cls_ASPcontrol.GetADCAsync(iADCAirFlow);
+                if (airFlow < 0.0)
+                {
+                    log.Error((object)$"Failed to read air flow for ADC {iADCAirFlow}.");
+                }
+                AirFlow = GetAirFlow(airFlow);
+                UpdateAnalogValue();
+            }
+            catch (Exception ex)
+            {
+                log.Error((object)$"Exception while reading air flow for ADC {iADCAirFlow}: {ex.Message}");
+            }
+        }
         private double GetFlowrate(double mA)
         {
             double flowRate = 0;
@@ -432,6 +460,16 @@ namespace DI_Water_Wash
                 WaterPressure = ((V - WaterPressureVoltgeMin) / (WaterPressureVoltgeMax - WaterPressureVoltgeMin)) * (WaterPressureMax - WaterPressureMin) + WaterPressureMin;
             }
             return WaterPressure;
+        }
+        private double GetAirFlow(double V)
+        {
+            double _airflow = 0;
+            if (V > Air_FlowVoltgeMax) return _airflow;
+            else
+            {
+                _airflow = ((V - Air_FlowVoltgeMin) / (Air_FlowVoltgeMax - Air_FlowVoltgeMin)) * (Air_FlowMax - Air_FlowMin) + Air_FlowMin;
+            }
+            return _airflow;
         }
         public async void SwitchRelay3Way_Air_Water(bool bOnOff)
         {
@@ -1216,6 +1254,7 @@ namespace DI_Water_Wash
                         }
                         Thread.Sleep(1000);
                         ListAirPressures.Add(AirPressure);
+                        ListAirFlow.Add(AirFlow);
                     }
                     sw_drying.Stop();
                     _testSeq = TestSeq.TURN_REVERSE_DRYING;
@@ -1256,6 +1295,8 @@ namespace DI_Water_Wash
                                 return;
                             }
                             Thread.Sleep(1000);
+                            ListAirPressures.Add(AirPressure);
+                            ListAirFlow.Add(AirFlow);
                         }
                         sw_reverse_drying.Stop();
                     }
@@ -1326,6 +1367,7 @@ namespace DI_Water_Wash
                     double WaterpressureMax = ClsUnitManagercs.cls_Units[iIndex].dDI_Max_WaterPressure;
                     double WaterpressureMin = ClsUnitManagercs.cls_Units[iIndex].dDI_Min_WaterPressure;
                     var checkWaterpressure = CheckOutSpec(ListWaterPressures, WaterpressureMin, WaterpressureMax, 5);
+                    
                     if (!checkWaterpressure.IsPass)
                     {
                         TestResult = "FAIL";

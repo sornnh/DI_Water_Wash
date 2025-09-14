@@ -30,8 +30,8 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.TestLog = new System.Windows.Forms.TabPage();
@@ -789,11 +789,11 @@
             // 
             // chart_Flow
             // 
-            chartArea1.Name = "ChartArea1";
-            this.chart_Flow.ChartAreas.Add(chartArea1);
+            chartArea2.Name = "ChartArea1";
+            this.chart_Flow.ChartAreas.Add(chartArea2);
             this.chart_Flow.Dock = System.Windows.Forms.DockStyle.Fill;
-            legend1.Name = "Legend1";
-            this.chart_Flow.Legends.Add(legend1);
+            legend2.Name = "Legend1";
+            this.chart_Flow.Legends.Add(legend2);
             this.chart_Flow.Location = new System.Drawing.Point(5, 22);
             this.chart_Flow.Margin = new System.Windows.Forms.Padding(4);
             this.chart_Flow.Name = "chart_Flow";

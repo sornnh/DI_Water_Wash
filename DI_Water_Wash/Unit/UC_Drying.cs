@@ -33,7 +33,10 @@ namespace DI_Water_Wash
             txt_Vac_Baking_Temp.Text = ClsUnitManagercs.cls_Units[UnitIndex].iVac_Baking_Temp.ToString();
             txt_Vac_Max_Humidity.Text = ClsUnitManagercs.cls_Units[UnitIndex].iVac_Max_Humidity.ToString();
             txt_Baking_Time.Text = ClsUnitManagercs.cls_Units[UnitIndex].iBaking_Time.ToString();
-
+            txt_Air_Flow_Max.Text = ClsUnitManagercs.cls_Units[UnitIndex].dAir_Flow_Rate_Max.ToString();
+            txt_Air_Flow_Min.Text = ClsUnitManagercs.cls_Units[UnitIndex].dAir_Flow_Rate_Min.ToString();
+            txt_Air_Pressure_Max.Text = ClsUnitManagercs.cls_Units[UnitIndex].dAir_Pressure_Max.ToString();
+            txt_Air_Pressure_Min.Text = ClsUnitManagercs.cls_Units[UnitIndex].dAir_Pressure_Min.ToString();
             if (ClsUnitManagercs.cls_Units[UnitIndex].bCheck_Humidity)
                 cBox_Check_Dry_Humidity.Checked = true;
             if(ClsUnitManagercs.cls_Units[UnitIndex].bReverse_Hot_Air_Flushing_Flow)

@@ -62,7 +62,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 23.5F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 23.5F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 23.5F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(1008, 624);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1456, 615);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // tableLayoutPanel2
@@ -82,7 +82,7 @@
             this.tableLayoutPanel2.RowCount = 1;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 31F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(1000, 31);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(1448, 30);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // label1
@@ -91,7 +91,7 @@
             this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label1.Location = new System.Drawing.Point(3, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(244, 31);
+            this.label1.Size = new System.Drawing.Size(356, 30);
             this.label1.TabIndex = 0;
             this.label1.Text = "PN:";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -100,9 +100,9 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label2.Location = new System.Drawing.Point(503, 0);
+            this.label2.Location = new System.Drawing.Point(727, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(244, 31);
+            this.label2.Size = new System.Drawing.Size(356, 30);
             this.label2.TabIndex = 0;
             this.label2.Text = "Description:";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -113,9 +113,9 @@
             this.txtPN.Dock = System.Windows.Forms.DockStyle.Fill;
             this.txtPN.Enabled = false;
             this.txtPN.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtPN.Location = new System.Drawing.Point(253, 3);
+            this.txtPN.Location = new System.Drawing.Point(365, 3);
             this.txtPN.Name = "txtPN";
-            this.txtPN.Size = new System.Drawing.Size(244, 22);
+            this.txtPN.Size = new System.Drawing.Size(356, 22);
             this.txtPN.TabIndex = 1;
             // 
             // txtDescription
@@ -123,37 +123,41 @@
             this.txtDescription.Dock = System.Windows.Forms.DockStyle.Fill;
             this.txtDescription.Enabled = false;
             this.txtDescription.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtDescription.Location = new System.Drawing.Point(753, 3);
+            this.txtDescription.Location = new System.Drawing.Point(1089, 3);
             this.txtDescription.Name = "txtDescription";
-            this.txtDescription.Size = new System.Drawing.Size(244, 22);
+            this.txtDescription.Size = new System.Drawing.Size(356, 22);
             this.txtDescription.TabIndex = 1;
             // 
             // pl_UC1
             // 
-            this.pl_UC1.Location = new System.Drawing.Point(4, 42);
+            this.pl_UC1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pl_UC1.Location = new System.Drawing.Point(4, 41);
             this.pl_UC1.Name = "pl_UC1";
-            this.pl_UC1.Size = new System.Drawing.Size(1000, 139);
+            this.pl_UC1.Size = new System.Drawing.Size(1448, 137);
             this.pl_UC1.TabIndex = 1;
             // 
             // panel1
             // 
-            this.panel1.Location = new System.Drawing.Point(4, 188);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel1.Location = new System.Drawing.Point(4, 185);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1000, 139);
+            this.panel1.Size = new System.Drawing.Size(1448, 137);
             this.panel1.TabIndex = 1;
             // 
             // panel2
             // 
-            this.panel2.Location = new System.Drawing.Point(4, 334);
+            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel2.Location = new System.Drawing.Point(4, 329);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(1000, 139);
+            this.panel2.Size = new System.Drawing.Size(1448, 137);
             this.panel2.TabIndex = 1;
             // 
             // panel3
             // 
-            this.panel3.Location = new System.Drawing.Point(4, 480);
+            this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel3.Location = new System.Drawing.Point(4, 473);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(1000, 139);
+            this.panel3.Size = new System.Drawing.Size(1448, 138);
             this.panel3.TabIndex = 1;
             // 
             // UC_PartNumberInfor
@@ -163,7 +167,7 @@
             this.BackColor = System.Drawing.SystemColors.ActiveBorder;
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "UC_PartNumberInfor";
-            this.Size = new System.Drawing.Size(1008, 624);
+            this.Size = new System.Drawing.Size(1456, 615);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();

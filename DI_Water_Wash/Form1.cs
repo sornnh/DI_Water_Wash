@@ -668,7 +668,6 @@ namespace DI_Water_Wash
         {
             DateTime dtNow = DateTime.Now;
             this.lb_Date.Text = dtNow.ToString("yyyy-MM-dd HH:mm:ss");
-
         }
         private void UpdateRelayStatus(bool[] relays)
         {

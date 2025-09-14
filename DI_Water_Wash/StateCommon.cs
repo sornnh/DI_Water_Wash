@@ -313,6 +313,10 @@ public class StateCommon
                 SummaryTableName = "";
                 TableName = "LCS_BoxID_SN_XRef";
                 break;
+            default:
+                SummaryTableName = "";
+                TableName = "Production_Flow_All_Months_Log";
+                break;
         }
     }
 

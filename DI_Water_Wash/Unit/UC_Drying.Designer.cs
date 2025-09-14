@@ -65,8 +65,23 @@
             this.txt_Max_Humidity = new System.Windows.Forms.TextBox();
             this.label17 = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label23 = new System.Windows.Forms.Label();
+            this.label24 = new System.Windows.Forms.Label();
+            this.label25 = new System.Windows.Forms.Label();
+            this.label26 = new System.Windows.Forms.Label();
+            this.txt_Air_Pressure_Min = new System.Windows.Forms.TextBox();
+            this.txt_Air_Pressure_Max = new System.Windows.Forms.TextBox();
+            this.txt_Air_Flow_Max = new System.Windows.Forms.TextBox();
+            this.txt_Air_Flow_Min = new System.Windows.Forms.TextBox();
+            this.label27 = new System.Windows.Forms.Label();
+            this.label28 = new System.Windows.Forms.Label();
+            this.label29 = new System.Windows.Forms.Label();
+            this.label30 = new System.Windows.Forms.Label();
+            this.label31 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -83,7 +98,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(278, 4);
+            this.label6.Location = new System.Drawing.Point(278, 7);
             this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(160, 17);
@@ -93,7 +108,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(520, 4);
+            this.label5.Location = new System.Drawing.Point(520, 7);
             this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(40, 17);
@@ -103,7 +118,7 @@
             // txt_Number_of_Drying_cycles
             // 
             this.txt_Number_of_Drying_cycles.Enabled = false;
-            this.txt_Number_of_Drying_cycles.Location = new System.Drawing.Point(442, 1);
+            this.txt_Number_of_Drying_cycles.Location = new System.Drawing.Point(442, 4);
             this.txt_Number_of_Drying_cycles.Margin = new System.Windows.Forms.Padding(4);
             this.txt_Number_of_Drying_cycles.Name = "txt_Number_of_Drying_cycles";
             this.txt_Number_of_Drying_cycles.Size = new System.Drawing.Size(70, 22);
@@ -265,7 +280,7 @@
             this.groupBox3.Controls.Add(this.label19);
             this.groupBox3.Controls.Add(this.txt_Vacuum_Pressure);
             this.groupBox3.Controls.Add(this.label13);
-            this.groupBox3.Location = new System.Drawing.Point(540, 25);
+            this.groupBox3.Location = new System.Drawing.Point(977, 25);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(457, 103);
             this.groupBox3.TabIndex = 21;
@@ -390,7 +405,7 @@
             // 
             this.cBox_Check_Dry_Humidity.AutoSize = true;
             this.cBox_Check_Dry_Humidity.Enabled = false;
-            this.cBox_Check_Dry_Humidity.Location = new System.Drawing.Point(625, 3);
+            this.cBox_Check_Dry_Humidity.Location = new System.Drawing.Point(625, 6);
             this.cBox_Check_Dry_Humidity.Name = "cBox_Check_Dry_Humidity";
             this.cBox_Check_Dry_Humidity.Size = new System.Drawing.Size(122, 21);
             this.cBox_Check_Dry_Humidity.TabIndex = 10;
@@ -400,7 +415,7 @@
             // txt_Max_Humidity
             // 
             this.txt_Max_Humidity.Enabled = false;
-            this.txt_Max_Humidity.Location = new System.Drawing.Point(849, 2);
+            this.txt_Max_Humidity.Location = new System.Drawing.Point(849, 5);
             this.txt_Max_Humidity.Name = "txt_Max_Humidity";
             this.txt_Max_Humidity.Size = new System.Drawing.Size(61, 22);
             this.txt_Max_Humidity.TabIndex = 7;
@@ -408,7 +423,7 @@
             // label17
             // 
             this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(753, 4);
+            this.label17.Location = new System.Drawing.Point(753, 7);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(90, 17);
             this.label17.TabIndex = 9;
@@ -417,11 +432,147 @@
             // label16
             // 
             this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(916, 7);
+            this.label16.Location = new System.Drawing.Point(916, 10);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(17, 17);
             this.label16.TabIndex = 8;
             this.label16.Text = "%";
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.label31);
+            this.groupBox2.Controls.Add(this.label30);
+            this.groupBox2.Controls.Add(this.label23);
+            this.groupBox2.Controls.Add(this.label29);
+            this.groupBox2.Controls.Add(this.label24);
+            this.groupBox2.Controls.Add(this.label28);
+            this.groupBox2.Controls.Add(this.label25);
+            this.groupBox2.Controls.Add(this.label27);
+            this.groupBox2.Controls.Add(this.label26);
+            this.groupBox2.Controls.Add(this.txt_Air_Flow_Min);
+            this.groupBox2.Controls.Add(this.txt_Air_Flow_Max);
+            this.groupBox2.Controls.Add(this.txt_Air_Pressure_Min);
+            this.groupBox2.Controls.Add(this.txt_Air_Pressure_Max);
+            this.groupBox2.Location = new System.Drawing.Point(545, 25);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(421, 103);
+            this.groupBox2.TabIndex = 20;
+            this.groupBox2.TabStop = false;
+            // 
+            // label23
+            // 
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(6, 74);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(108, 17);
+            this.label23.TabIndex = 12;
+            this.label23.Text = "Air_Pressure_Min:";
+            // 
+            // label24
+            // 
+            this.label24.AutoSize = true;
+            this.label24.Location = new System.Drawing.Point(6, 48);
+            this.label24.Name = "label24";
+            this.label24.Size = new System.Drawing.Size(112, 17);
+            this.label24.TabIndex = 12;
+            this.label24.Text = "Air_Pressure_Max:";
+            // 
+            // label25
+            // 
+            this.label25.AutoSize = true;
+            this.label25.Location = new System.Drawing.Point(189, 74);
+            this.label25.Name = "label25";
+            this.label25.Size = new System.Drawing.Size(34, 17);
+            this.label25.TabIndex = 11;
+            this.label25.Text = "MPa";
+            // 
+            // label26
+            // 
+            this.label26.AutoSize = true;
+            this.label26.Location = new System.Drawing.Point(189, 48);
+            this.label26.Name = "label26";
+            this.label26.Size = new System.Drawing.Size(34, 17);
+            this.label26.TabIndex = 11;
+            this.label26.Text = "MPa";
+            // 
+            // txt_Air_Pressure_Min
+            // 
+            this.txt_Air_Pressure_Min.Enabled = false;
+            this.txt_Air_Pressure_Min.Location = new System.Drawing.Point(117, 70);
+            this.txt_Air_Pressure_Min.Name = "txt_Air_Pressure_Min";
+            this.txt_Air_Pressure_Min.Size = new System.Drawing.Size(70, 22);
+            this.txt_Air_Pressure_Min.TabIndex = 10;
+            // 
+            // txt_Air_Pressure_Max
+            // 
+            this.txt_Air_Pressure_Max.Enabled = false;
+            this.txt_Air_Pressure_Max.Location = new System.Drawing.Point(117, 44);
+            this.txt_Air_Pressure_Max.Name = "txt_Air_Pressure_Max";
+            this.txt_Air_Pressure_Max.Size = new System.Drawing.Size(70, 22);
+            this.txt_Air_Pressure_Max.TabIndex = 10;
+            // 
+            // txt_Air_Flow_Max
+            // 
+            this.txt_Air_Flow_Max.Enabled = false;
+            this.txt_Air_Flow_Max.Location = new System.Drawing.Point(316, 44);
+            this.txt_Air_Flow_Max.Name = "txt_Air_Flow_Max";
+            this.txt_Air_Flow_Max.Size = new System.Drawing.Size(70, 22);
+            this.txt_Air_Flow_Max.TabIndex = 10;
+            // 
+            // txt_Air_Flow_Min
+            // 
+            this.txt_Air_Flow_Min.Enabled = false;
+            this.txt_Air_Flow_Min.Location = new System.Drawing.Point(316, 70);
+            this.txt_Air_Flow_Min.Name = "txt_Air_Flow_Min";
+            this.txt_Air_Flow_Min.Size = new System.Drawing.Size(70, 22);
+            this.txt_Air_Flow_Min.TabIndex = 10;
+            // 
+            // label27
+            // 
+            this.label27.AutoSize = true;
+            this.label27.Location = new System.Drawing.Point(387, 48);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(32, 17);
+            this.label27.TabIndex = 11;
+            this.label27.Text = "LPM";
+            // 
+            // label28
+            // 
+            this.label28.AutoSize = true;
+            this.label28.Location = new System.Drawing.Point(387, 74);
+            this.label28.Name = "label28";
+            this.label28.Size = new System.Drawing.Size(32, 17);
+            this.label28.TabIndex = 11;
+            this.label28.Text = "LPM";
+            // 
+            // label29
+            // 
+            this.label29.AutoSize = true;
+            this.label29.Location = new System.Drawing.Point(225, 48);
+            this.label29.Name = "label29";
+            this.label29.Size = new System.Drawing.Size(91, 17);
+            this.label29.TabIndex = 12;
+            this.label29.Text = "Air_Flow_Max:";
+            // 
+            // label30
+            // 
+            this.label30.AutoSize = true;
+            this.label30.Location = new System.Drawing.Point(225, 74);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(87, 17);
+            this.label30.TabIndex = 12;
+            this.label30.Text = "Air_Flow_Min:";
+            // 
+            // label31
+            // 
+            this.label31.AutoSize = true;
+            this.label31.BackColor = System.Drawing.Color.DarkSalmon;
+            this.label31.Location = new System.Drawing.Point(7, 14);
+            this.label31.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(53, 17);
+            this.label31.TabIndex = 2;
+            this.label31.Text = "HOT AIR";
             // 
             // UC_Drying
             // 
@@ -432,6 +583,7 @@
             this.Controls.Add(this.cBox_Check_Dry_Humidity);
             this.Controls.Add(this.label17);
             this.Controls.Add(this.groupBox3);
+            this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.cBox_Reverse_Hot_Flushing_Flow);
             this.Controls.Add(this.label7);
@@ -447,11 +599,13 @@
             this.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "UC_Drying";
-            this.Size = new System.Drawing.Size(1000, 139);
+            this.Size = new System.Drawing.Size(1448, 137);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -496,5 +650,19 @@
         private System.Windows.Forms.Label label21;
         private System.Windows.Forms.TextBox txt_Vac_Max_Humidity;
         private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.Label label24;
+        private System.Windows.Forms.Label label25;
+        private System.Windows.Forms.Label label26;
+        private System.Windows.Forms.TextBox txt_Air_Pressure_Min;
+        private System.Windows.Forms.TextBox txt_Air_Pressure_Max;
+        private System.Windows.Forms.Label label31;
+        private System.Windows.Forms.Label label30;
+        private System.Windows.Forms.Label label29;
+        private System.Windows.Forms.Label label28;
+        private System.Windows.Forms.Label label27;
+        private System.Windows.Forms.TextBox txt_Air_Flow_Min;
+        private System.Windows.Forms.TextBox txt_Air_Flow_Max;
     }
 }
