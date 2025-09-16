@@ -568,7 +568,14 @@ namespace DI_Water_Wash
                 string TableName = "";
                 string SummaryTableName = "";
                 StateCommon.GetTableName(proccheck[i], out TableName, out SummaryTableName);
-                string query = $"SELECT [Serial],[Assy_PN],[Date_Time],[Station],[FailCode] " +
+                string query;
+                if (TableName.Contains("Production_Flow_"))
+                {
+                    query = $"SELECT [Serial],[Assy_PN],[Date_Time],[Station],[FailCode] " +
+                    $"FROM [Production_SZ].[dbo].[{TableName}] where [Serial] ='{_SN}' and [Process_Step] = '{proccheck[i]}' order by Date_Time" ;
+                }
+                else
+                    query = $"SELECT [Serial],[Assy_PN],[Date_Time],[Station],[FailCode] " +
                     $"FROM [Production_SZ].[dbo].[{TableName}] where [Serial] ='{_SN}' order by Date_Time";
                 System.Data.DataTable dt = ProductionDB.ExecuteQuery(query);
                 if (dt != null && dt.Rows.Count > 0)
@@ -600,9 +607,37 @@ namespace DI_Water_Wash
             foreach (string p in processList)
             {
                 string tableName = "", summaryTable = "";
-                StateCommon.GetTableName(p, out tableName, out summaryTable);
-
-                string query = $"SELECT [FailCode] FROM [Production_SZ].[dbo].[{tableName}] WHERE [Serial] = '{sSN}'";
+                int StepCheck = 0;
+                string processGet = p;
+                for (int i = 0; i < 10; i++)
+                {
+                    if (p.EndsWith($"-{i.ToString()}"))
+                    {
+                        StepCheck = i;
+                        processGet = p.Replace($"-{i.ToString()}", "");
+                        break;
+                    }
+                }
+                StateCommon.GetTableName(processGet, out tableName, out summaryTable);
+                string query;
+                if (tableName.Contains("Production_Flow_"))
+                {
+                    if (StepCheck == 0)
+                    {
+                        query = $"SELECT [FailCode],[Date_Time] FROM [Production_SZ].[dbo].[{tableName}] WHERE [Serial] = '{sSN}' and [Process_Step] = '{p}'";
+                    }
+                    else
+                    {
+                        query = $"SELECT [FailCode],[Date_Time] FROM [Production_SZ].[dbo].[{tableName}] WHERE [Serial] = '{sSN}' and [Process_Step] = '{p}' and [Step_No] ='{StepCheck}'";
+                    }
+                }
+                else
+                {
+                    if (StepCheck == 0)
+                        query = $"SELECT [FailCode],[Date_Time] FROM [Production_SZ].[dbo].[{tableName}] WHERE [Serial] = '{sSN}'";
+                    else
+                        query = $"SELECT [FailCode],[Date_Time] FROM [Production_SZ].[dbo].[{tableName}] WHERE [Serial] = '{sSN}' and [Step_No] ='{StepCheck}'";
+                }
                 DataTable dt = ProductionDB.ExecuteQuery(query);
 
                 bool isPass = false;

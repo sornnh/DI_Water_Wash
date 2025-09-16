@@ -266,5 +266,24 @@
     <Content Include="icon_b_500x500 %281%29.ico" />
     <Content Include="icon_b_500x500.ico" />
   </ItemGroup>
+  <!-- ✨ Auto generate Assembly Version -->
+  <Target Name="AutoVersion" BeforeTargets="BeforeBuild">
+    <PropertyGroup>
+      <GeneratedVersion>$([System.DateTime]::Now.ToString("yy.MM.dd.HH"))</GeneratedVersion>
+    </PropertyGroup>
+
+    <Message Text="==> Auto Assembly Version: $(GeneratedVersion)" Importance="high" />
+
+    <WriteLinesToFile
+      File="Properties\AssemblyInfo.Version.cs"
+      Overwrite="true"
+      Lines="[assembly: System.Reflection.AssemblyVersion(&quot;$(GeneratedVersion)&quot;)]
+      [assembly: System.Reflection.AssemblyFileVersion(&quot;$(GeneratedVersion)&quot;)]" />
+
+    <ItemGroup>
+      <Compile Include="Properties\AssemblyInfo.Version.cs" />
+    </ItemGroup>
+  </Target>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  
 </Project>
